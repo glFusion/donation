@@ -79,6 +79,21 @@ function USES_donation_class_donation()
 
 
 /**
+*   Get additional Javascript into the site header
+*
+*   @return array   List of paths to Javascript files
+*/
+function plugin_getheaderjs_donation()
+{
+    $js_dir = DON_PI_PATH . '/js';
+    $files = array(
+        "$js_dir/toggleEnabled.js",
+    );
+    return $files;
+}
+
+
+/**
 *   Get the plugin and custom CSS files
 */
 function plugin_getheadercss_donation()
@@ -361,7 +376,7 @@ function phpblock_donation_donations()
         );
 
         USES_donation_class_campaign();
-        $C = new Campaign($row['camp_id']);
+        $C = new \Donation\Campaign($row['camp_id']);
         $T->set_var('donate_btn', $C->GetButton());
 
         if ($i > 0)

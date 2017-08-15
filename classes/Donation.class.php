@@ -267,6 +267,12 @@ class Donation
     }
 
 
+    /**
+    *   Get the total amount received for a campaign.
+    *
+    *   @param  string  $camp_id    Campaign ID
+    *   @return float               Total received
+    */
     public static function totalReceived($camp_id)
     {
         global $_TABLES;
@@ -275,10 +281,6 @@ class Donation
         $received = DB_getItem($_TABLES['don_donations'],
                 'SUM(amount)', "camp_id = '$camp_id'");
         return $received;
-        /*$sql = "SELECT SUM(amount) AS received
-                FROM {$_TABLES['don_donations']}
-                WHERE camp_id = '$camp_id'";
-        $res = DB_query($sql);*/
     }
 
 }   // class Donation

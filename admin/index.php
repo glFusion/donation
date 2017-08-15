@@ -17,10 +17,6 @@ require_once('../../../lib-common.php');
 USES_lib_admin();
 USES_donation_class_campaign();
 
-// Add the JS for admin functions
-$outputHandle = outputHandler::getInstance();
-$outputHandle->addScriptFile(DON_ADMIN_URL . '/js/toggleEnabled.js');
-
 /**
 *   Basic admin menu for Donation administration
 *
