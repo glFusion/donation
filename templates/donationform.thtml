@@ -1,7 +1,5 @@
 {# begin {templatelocation} #}
-<link rel="stylesheet" type="text/css" href="{pi_url}/css/style.css" />
 <form action="{action_url}" method="post" class="campaignform">
-<input type=hidden name="mode" value="savedonation">
 <input type=hidden name="don_id" value="{don_id}">
 
 <fieldset>

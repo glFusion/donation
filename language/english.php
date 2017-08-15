@@ -42,6 +42,7 @@ $LANG_DON = array(
 'don_list_header' => 'Edit or Delete donation records',
 'received'      => 'Received',
 'date'          => 'Date',
+'date_selector' => 'Click for a date selector',
 'contributor'   => 'Contributor',
 'amount'        => 'Amount',
 'sug_amount'    => 'Suggested Amount',
@@ -66,6 +67,11 @@ $LANG_DON = array(
 'edit_item'     => 'Edit Item',
 'msg_item_updated' => 'Item has been updated.',
 'msg_item_nochange' => 'Item has not been changed.',
+'hlp_campaign'  => 'Select the campagn from the list',
+'hlp_contributor'   => 'Select a site user, or enter the contributor&apos;s name',
+'hlp_amount'    => 'Enter the amount of the donation',
+'hlp_transid'   => 'Enter a transaction ID, if applicable',
+'hlp_comment'   => 'Enter a general comment here',
 );
 
 // Messages for the plugin upgrade

@@ -1,0 +1,80 @@
+{# begin {templatelocation} #}
+<form action="{action_url}" method="post" class="uk-form-horizontal campaignform" id="submit">
+  <input type=hidden name="don_id" value="{don_id}">
+
+  <fieldset>
+    <legend>{$LANG_DON['donation_info']}</legend>
+
+    <div class="uk-form-row">
+      <label class="uk-form-label" for="f_don_dt">{$LANG_DON['date']}</label>
+      <div class="uk-form-controls">
+        <input required type=text name="dt" value="{dt}" id="f_don_dt" />
+        <i class="uk-icon uk-icon-calendar tooltip" id="dt_trigger" title="{$LANG_DON['date_selector']}"></i>
+      </div>
+    </div>
+
+    <div class="uk-form-row">
+      <label class="uk-form-label for="camp_id">{$LANG_DON['campaign']}</label>
+      <div class="uk-form-controls">
+        <select id="camp_id" name="camp_id">{campaign_select}</select>
+        <span class="uk-icon-question-circle tooltip"
+            title="{$LANG_DON['hlp_campaign']}"></span>
+      </div>
+    </div>
+
+    <div class="uk-form-row">
+      <label class="uk-form-label" for="uid">{$LANG_DON['contributor']}</label>
+      <div class="uk-form-controls">
+        <select id="uid" name="uid">{contributor_select}</select>&nbsp;&nbsp;
+        <input type="text" name="contrib_name" id="f_contrib_name" value="{contrib_name}" />
+        <span class="uk-icon-question-circle tooltip"
+            title="{$LANG_DON['hlp_contributor']}"></span>
+      </div>
+    </div>
+
+    <div class="uk-form-row">
+      <label class="uk-form-label" for="f_amount">{$LANG_DON['amount']}</label>
+      <div class="uk-form-controls">
+        <input name="amount" value="{amount}" type="text" id="f_amount" />
+        <span class="uk-icon-question-circle tooltip"
+            title="{$LANG_DON['hlp_amount']}"></span>
+      </div>
+    </div>
+
+    <div class="uk-form-row">
+      <label class="uk-form-label" for="txn_id">{$LANG_DON['txn_id']}</label>
+      <div class="uk-form-controls">
+        <input name="txn_id" value="{txn_id}" type="text" id="f_txn_id" />
+        <span class="uk-icon-question-circle tooltip"
+            title="{$LANG_DON['hlp_transid']}"></span>
+      </div>
+    </div>
+
+    <div class="uk-form-row">
+      <label class="uk-form-label" for="comment">{$LANG_DON['comment']}</label>
+      <div class="uk-form-controls">
+        <textarea name="comment" id="f_comment">{comment}</textarea>
+        <span class="uk-icon-question-circle tooltip"
+            title="{$LANG_DON['hlp_comment']}"></span>
+      </div>
+    </div>
+  </fieldset>
+
+  <button type="submit" class="uk-button uk-button-success" name="savedonation">{$LANG_DON['submit']}</button>
+  <button type="reset" class="uk-button uk-button-primary">{$LANG_DON['clearform']}</button>
+{!if can_delete}
+  <button type="submit" class="uk-button uk-button-danger" name="deletedonation"
+  onclick="return confirm('{$LANG_DON['q_del_item']}');">{$LANG_DON['delete']}</button>
+{!endif}
+</form>
+
+<script type="text/javascript">
+    Calendar.setup({
+        inputField     :    "f_don_dt",
+        ifFormat       :    "%Y-%m-%d",
+        showsTime      :    false,
+        timeFormat     :    "24",
+        button          :   "dt_trigger"
+    });
+</script>
+{# end {templatelocation} #}
