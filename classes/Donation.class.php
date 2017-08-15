@@ -182,8 +182,7 @@ class Donation
         ) );
 
         $T->parse ('output', 'editform');
-        $menu = DON_menu_adminDonations($this->camp_id);
-        return $menu . $T->finish($T->get_var('output'));
+        return $T->finish($T->get_var('output'));
     }
 
 
@@ -283,32 +282,5 @@ class Donation
     }
 
 }   // class Donation
-
-
-/**
-*   Create the admin menu for managing campaigns
-*/
-function DON_menu_adminDonations($camp_id='')
-{
-    global $_CONF, $LANG_DON, $LANG_ADMIN;
-
-    USES_lib_admin();
-
-    $admin_url = DON_ADMIN_URL . '/index.php';
-    $menu_arr = array();
-    $menu_arr[] = array('url' => "$admin_url?mode=campaigns",
-              'text' => $LANG_DON['campaigns']);
-    if ($camp_id != '') {
-        $menu_arr[] = array(
-            'url' => "$admin_url?mode=donations&camp_id=$camp_id",
-            'text' => $LANG_DON['donations']);
-    }
-    $menu_arr[] = array('url' => $admin_url,
-              'text' => $LANG_ADMIN['admin_home']);
-
-    return ADMIN_createMenu($menu_arr,
-                $LANG_DON['don_mgr'],
-                plugin_geticon_donation());
-}
 
 ?>

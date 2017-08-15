@@ -1,0 +1,20 @@
+{# begin {templatelocation} #}
+<table border=0>
+<tr>
+  <td>
+    <a href="{pi_url}/index.php">
+      <img src="{pi_icon}" border="0" align="top" 
+        style="background:transparent;margin-right:5px;" />
+    </a>
+  </td>
+  <td valign="top">
+    <span style="font-size:125%">
+      <b>{header}</b>
+    </span>
+    <br />
+    {$LANG_PHOTO['version']}&nbsp;&nbsp;{version}
+  </td>
+  <td valign="center">{helpurl}</td>
+</tr>
+</table>
+{# end {templatelocation} #}

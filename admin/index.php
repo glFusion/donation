@@ -6,7 +6,7 @@
 *   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
 *   @package    donation
 *   @version    0.0.1
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -24,26 +24,66 @@ $outputHandle->addScriptFile(DON_ADMIN_URL . '/js/toggleEnabled.js');
 /**
 *   Basic admin menu for Donation administration
 *
-*   @param  string  $instr  Specific text instructions to show
+*   @param  string  $view   Current View
 *   @return string          HTML for admin menu
 */
-function DON_adminMenu($instr='')
+function DON_adminMenu($view='')
 {
-    global $_CONF, $LANG_ADMIN, $LANG_DON;
+    global $_CONF, $LANG_ADMIN, $LANG_DON, $_CONF_DON;
 
-    $menu_arr = array (
-        array('url' => $_CONF['site_admin_url'],
-                'text' => $LANG_ADMIN['admin_home']),
-        array('url' => DON_ADMIN_URL . '/index.php',
-              'text' => $LANG_DON['campaigns']),
-        array('url' => DON_ADMIN_URL . '/index.php?editcampaign=x',
-              'text' => $LANG_DON['new_campaign']),
-        array('url' => DON_ADMIN_URL . '/index.php?editdonation=x',
-              'text' => $LANG_DON['new_donation']),
-        array('url' => DON_ADMIN_URL . '/index.php?resetbuttons=x',
-              'text' => $LANG_DON['reset_buttons']),
+    $retval = '';
+    switch ($view) {
+    case 'campaigns':
+    default:
+        $act_campaigns = true;
+        $act_newcamp = false;
+        $act_newdon = false;
+        break;
+
+    case 'editcampaign':
+        $act_campaigns = false;
+        $act_newcamp = true;
+        $act_newdon  = false;
+        break;
+
+    case 'editdonation':
+        $act_campaigns = false;
+        $act_newcamp = false;
+        $act_newdon = true;
+        break;
+    }
+
+    $menu_arr = array(
+        array(  'url' => $_CONF['site_admin_url'],
+                'text' => $LANG_ADMIN['admin_home'],
+        ),
+        array(  'url' => DON_ADMIN_URL . '/index.php',
+                'text' => $LANG_DON['campaigns'],
+                'active' => $act_campaigns,
+        ),
+        array(  'url' => DON_ADMIN_URL . '/index.php?editcampaign=x',
+                'text' => $LANG_DON['new_campaign'],
+                'active' => $act_newcamp,
+        ),
+        array(  'url' => DON_ADMIN_URL . '/index.php?editdonation=x',
+                'text' => $LANG_DON['new_donation'],
+                'active' => $act_newdon,
+        ),
+        /*array('url' => DON_ADMIN_URL . '/index.php?resetbuttons=x',
+              'text' => $LANG_DON['reset_buttons']),*/
     );
-    $retval = ADMIN_createMenu($menu_arr, $instr, 
+    $T = new \Template(DON_PI_PATH . '/templates');
+    $T->set_file('page', 'admin.thtml');
+    $T->set_var(array(
+        'header'    => $LANG_DON['don_mgr'],
+        'pi_url'    => DON_URL,
+        'pi_icon'   => plugin_geticon_donation(),
+        'plugin'    => $_CONF_DON['pi_name'],
+        'version'   => $_CONF_DON['pi_version'],
+    ) );
+    $T->parse('output','page');
+    $retval .= $T->finish($T->get_var('output'));
+    $retval .= ADMIN_createMenu($menu_arr, '',
             plugin_geticon_donation());
     return $retval;
 }
@@ -62,15 +102,15 @@ function DON_donationList($camp_id)
     $retval = '';
 
     $header_arr = array(      // display 'text' and use table field 'field'
-        array('field' => 'edit', 
+        array('field' => 'edit',
             'text' => $LANG_ADMIN['edit'], 'sort' => false, 'align' => 'center'),
-        array('field' => 'dt', 
+        array('field' => 'dt',
             'text' => $LANG_DON['date'], 'sort' => true),
-        array('field' => 'uid', 
+        array('field' => 'uid',
             'text' => $LANG_DON['contributor'], 'sort' => true),
-        array('field' => 'amount', 
+        array('field' => 'amount',
             'text' => $LANG_DON['amount'], 'sort' => true),
-        array('field' => 'txn_id', 
+        array('field' => 'txn_id',
             'text' => $LANG_DON['txn_id'], 'sort' => true),
         array('field' => 'delete',
             'text' => $LANG_DON['delete'], 'align' => 'center'),
@@ -85,31 +125,26 @@ function DON_donationList($camp_id)
     if (!empty($camp_dt)) {
         $title .= " ($camp_dt)";
     }
-    $retval .= COM_startBlock($title, '', 
-            COM_getBlockTemplate('_admin_block', 'header'));
-
-    $retval .= DON_adminMenu($LANG_DON['don_list_header']);
 
     $text_arr = array(
         'has_extras' => true,
-        'form_url' => DON_ADMIN_URL . 
+        'form_url' => DON_ADMIN_URL .
                 '/index.php?donations=x&camp_id='.$camp_id,
     );
 
     $options = array('chkdelete' => 'true', 'chkfield' => 'don_id');
 
     $query_arr = array('table' => 'don_donations',
-        'sql' => "SELECT * 
+        'sql' => "SELECT *
                     FROM {$_TABLES['don_donations']}",
-                    
+                   
         'query_fields' => array(),
         'default_filter' => "WHERE camp_id ='".DB_escapeString($camp_id)."'",
     );
 
     $retval .= ADMIN_list('donation', 'DON_donation_getListField', $header_arr,
-                    $text_arr, $query_arr, $defsort_arr, '', '', 
+                    $text_arr, $query_arr, $defsort_arr, '', '',
                     $options, $form_arr);
-    $retval .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
     return $retval;
 }
 
@@ -133,7 +168,7 @@ function DON_donation_getListField($fieldname, $fieldvalue, $A, $icon_arr)
     case 'edit':
         $retval .= COM_createLink('<i class="' . DON_getIcon('edit') . ' tooltip" title="' .
                     $LANG_DON['edit_item'] . '"></i>',
-                DON_ADMIN_URL . 
+                DON_ADMIN_URL .
                 '/index.php?editdonation=x&amp;camp_id=' . $A['camp_id']
         );
         break;
@@ -161,7 +196,7 @@ function DON_donation_getListField($fieldname, $fieldvalue, $A, $icon_arr)
     case 'delete':
         $retval = COM_createLink('<i class="' . DON_getIcon('trash', 'danger') .
                 ' tooltip" title="' . $LANG_DON['delete'] . '"></i>',
-                DON_ADMIN_URL . 
+                DON_ADMIN_URL .
                 "/index.php?deletedonation=x&amp;don_id={$A['don_id']}",
                 array(
                     'onclick' => 'return confirm(\'' . $LANG_DON['q_del_item'] . '\');',
@@ -191,19 +226,19 @@ function DON_campaignList()
     $retval = '';
 
     $header_arr = array(      # display 'text' and use table field 'field'
-        array('field' => 'edit', 
+        array('field' => 'edit',
             'text' => $LANG_ADMIN['edit'], 'sort' => false, 'align', 'center'),
-        array('field' => 'enabled', 
+        array('field' => 'enabled',
             'text' => $LANG_DON['enabled'], 'sort' => false, 'align', 'center'),
-        array('field' => 'name', 
+        array('field' => 'name',
             'text' => $LANG_DON['camp_name'], 'sort' => true),
-        array('field' => 'startdt', 
+        array('field' => 'startdt',
             'text' => $LANG_DON['startdate'], 'sort' => true),
-        array('field' => 'enddt', 
+        array('field' => 'enddt',
             'text' => $LANG_DON['enddate'], 'sort' => true),
-        array('field' => 'goal', 
+        array('field' => 'goal',
             'text' => $LANG_DON['goal'], 'sort' => true),
-        array('field' => 'received', 
+        array('field' => 'received',
             'text' => $LANG_DON['received'], 'sort' => true),
         array('text' => $LANG_ADMIN['delete'],
             'field' => 'delete', 'sort' => false,
@@ -211,10 +246,6 @@ function DON_campaignList()
    );
 
     $defsort_arr = array('field' => 'startdt', 'direction' => 'desc');
-
-    $retval .= COM_startBlock($LANG_DON['admin_hdr'], '', COM_getBlockTemplate('_admin_block', 'header'));
-
-    $retval .= DON_adminMenu($LANG_DON['admin_msg1']);
 
     $text_arr = array(
         'has_extras' => true,
@@ -233,10 +264,8 @@ function DON_campaignList()
     );
 
     $retval .= ADMIN_list('donation', 'DON_campaign_getListField', $header_arr,
-                    $text_arr, $query_arr, $defsort_arr, '', '', 
+                    $text_arr, $query_arr, $defsort_arr, '', '',
                     $options, $form_arr);
-    $retval .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
-
     return $retval;
 }
 
@@ -260,7 +289,7 @@ function DON_campaign_getListField($fieldname, $fieldvalue, $A, $icon_arr)
     case 'edit':
         $retval .= COM_createLink('<i class="' . DON_getIcon('edit') . ' tooltip" title="' .
                     $LANG_DON['edit_item'] . '"></i>',
-                DON_ADMIN_URL . 
+                DON_ADMIN_URL .
                 '/index.php?editcampaign=x&amp;camp_id=' . $A['camp_id']
         );
         break;
@@ -269,7 +298,7 @@ function DON_campaign_getListField($fieldname, $fieldvalue, $A, $icon_arr)
         if (!Donation\Campaign::isUsed($A['camp_id'])) {
             $retval = COM_createLink('<i class="' . DON_getIcon('trash', 'danger') .
                 ' tooltip" title="' . $LANG_DON['delete'] . '"></i>',
-                DON_ADMIN_URL . 
+                DON_ADMIN_URL .
                 "/index.php?deletecampaign=x&amp;camp_id={$A['camp_id']}",
                 array(
                     'onclick' => 'return confirm(\'' . $LANG_DON['q_del_item'] . '\');',
@@ -286,7 +315,7 @@ function DON_campaign_getListField($fieldname, $fieldvalue, $A, $icon_arr)
                 $switch = '';
                 $enabled = 0;
         }
-        $retval .= "<input type=\"checkbox\" $switch value=\"1\" name=\"ena_check\" 
+        $retval .= "<input type=\"checkbox\" $switch value=\"1\" name=\"ena_check\"
                 id=\"togenabled{$A['id']}\" class=\"tooltip\" title=\"{$LANG_DON['ena_or_disa']}\"
                 onclick='DON_toggle(this,\"{$A['camp_id']}\",\"campaign\");' />" . LB;
         break;
@@ -302,8 +331,8 @@ function DON_campaign_getListField($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'name':
-        $retval = COM_createLink($fieldvalue, 
-                DON_ADMIN_URL . 
+        $retval = COM_createLink($fieldvalue,
+                DON_ADMIN_URL .
                 '/index.php?donations=x&camp_id=' . $A['camp_id']);
         break;
 
@@ -335,7 +364,7 @@ if (!in_array('donation', $_PLUGINS)) {
 
 // Only let admin users access this page
 if (!SEC_inGroup($_CONF_DON['pi_name'] . ' Admin')) {
-    COM_errorLog("Attempted unauthorized access the Donation Admin page." . 
+    COM_errorLog("Attempted unauthorized access the Donation Admin page." .
         " User id: {$_USER['uid']}, Username: {$_USER['username']}, " .
         " IP: $REMOTE_ADDR", 1);
     $display = COM_siteHeader();
@@ -374,7 +403,7 @@ foreach($expected as $provided) {
 }
 
 // Get the campaign and donation IDs, if any
-$camp_id = isset($_REQUEST['camp_id']) ? 
+$camp_id = isset($_REQUEST['camp_id']) ?
                 COM_sanitizeID($_REQUEST['camp_id'], false) : '';
 $don_id = isset($_REQUEST['don_id']) ?
                 (int)$_REQUEST['don_id'] : 0;
@@ -447,11 +476,13 @@ case 'donations':
 
 case 'campaigns':
 default:
+    $view = 'campaigns';
     $content .= DON_campaignList();
     break;
 }
 
 $display = COM_siteHeader();
+$display .= DON_adminMenu($view);
 $display .= $content;
 $display .= COM_siteFooter();
 

@@ -264,8 +264,7 @@ class Campaign
             'amount'        => $this->amount,
         ) );
         $T->parse ('output', 'editform');
-        $menu = DON_adminMenu();
-        return $menu . $T->finish($T->get_var('output'));
+        return $T->finish($T->get_var('output'));
     }
 
 
