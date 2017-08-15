@@ -93,6 +93,12 @@ case 'detail':
     $content .= $result;
     break;
 
+case 'thanks':
+    $message = $LANG_DON['thanks'];
+    $content .= COM_showMessageText($message, $LANG_DON['thanks_title'], true, 'success');
+    $view = 'productlist';
+    break;
+
 default:
     $content .= DONATION_CampaignList();
     break;

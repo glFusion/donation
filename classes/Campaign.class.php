@@ -351,7 +351,7 @@ class Campaign
                 'item_number' => 'donation:' . $this->camp_id,
                 'item_name' => $this->name,
                 'quantity' => 1,
-                'return' => DON_URL . '/index.php',
+                'return' => DON_URL . '/index.php?mode=thanks&id=' . urlencode($this->name),
                 'btn_type' => 'donation',
             );
             if ($_CONF_DON['pp_use_donation']) {
