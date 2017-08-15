@@ -1,0 +1,31 @@
+{# begin {templatelocation} #}
+<form style="display:inline;" action="{paypal_url}/cgi-bin/webscr" method="post">
+{!if encrypted_val}
+
+  <input type="hidden" name="cmd" value="_s-xclick" />
+  <input type="hidden" name="encrypted" value="{encrypted_val}">
+
+{!else}
+
+  <input type="hidden" name="cmd" value="_donations" />
+  <input type="hidden" name="business" value="{business}" />
+  <input type="hidden" name="item_name" value="{item_name}" />
+  <input type="hidden" name="item_number" value="{item_number}" />
+  <input type="hidden" name="currency_code" value="{currency_code}" />
+
+  {!if amount}
+  <input type="hidden" name="amount" value="{amount}" />
+  {!endif}
+
+{!endif}
+
+<input type="hidden" name="custom" value='{custom}' />
+<input type="hidden" name="no_shipping" value="1" />
+<!--<input type="hidden" name="quantity" value="1" />-->
+<input type="hidden" name="return" value="{return}" />
+<input type="hidden" name="rm" value="2" />
+<input type="image" src="{pi_url}/images/donate.gif" 
+        name="submit" alt="{$LANG_PP['donate']}" 
+        title="{$LANG_PP['donate']}" />
+ </form>
+{# end {templatelocation} #}

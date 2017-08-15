@@ -1,0 +1,8 @@
+{$LANG_DON['email_msg']}
+
+{$LANG_DON['campaign']}: {campaign}
+
+{$LANG_DON['amount']}: {amount}
+
+{$LANG_DON['contributor']}: {contributor}
+

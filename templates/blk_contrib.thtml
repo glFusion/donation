@@ -1,0 +1,30 @@
+{# begin {templatelocation} #}
+{hr}
+<span style="font-weight:bold;">
+  <a href="{pi_url}/index.php?mode=detail&amp;id={camp_id}">{title}</a>
+</span><br />
+{!if goal}
+<div style="height:15px;
+  width:104px;
+  background:#fff;
+  border:1px solid #CCCCCC;
+  margin:0;
+  padding:0;
+  float:left;
+  overflow:auto;"
+  title="{collected} {$LANG_DON['received']}"
+  class="gl_mootip">
+  <div style="height:15px;
+  padding:0;
+  background:lightgreen;
+  width:{pct}%;
+  color:blue;
+  font-size:smaller;">&nbsp;{pct}%
+  </div>
+</div>
+{!endif}
+<div style="clear:both;">
+{description}<br />
+<div class="aligncenter">{donate_btn}</div>
+</div>
+{# end {templatelocation} #}

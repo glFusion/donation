@@ -1,0 +1,24 @@
+{# begin {templatelocation} #}
+<h1>{$LANG_DON['open_campaigns']}</h1>
+{$LANG_DON['open_campaigns_desc']}<p />
+<hr width="85%" />
+<!-- BEGIN CampaignBlk -->
+<div class="prodlistitem" style="padding:10px;clear:both;">
+  <div style="float:left;">
+    <div>
+      <h2><a href="{pi_url}/index.php?mode=detail&amp;id={camp_id}">{name}</a></h2>
+    </div>
+    <div>{description}<p /></div>
+  </div>
+  <div style="float:right; width:250px; text-align:left;">
+    {donate_btn}
+  {!if have_pct_received}
+    <div>{amt_received} ({pct_received}%) / {goal} {$LANG_DON['received']}.</div>
+  {!endif}
+  </div>
+</div>
+<div style="clear:both;">
+  <hr width="85%" />
+</div>
+<!-- END CampaignBlk -->
+{# end {templatelocation} #}

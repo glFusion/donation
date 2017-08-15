@@ -1,0 +1,133 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1" />
+  <link href="../../../docs/docstyle.css" type="text/css" rel="stylesheet" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Donation Plugin - glFusion CMS</title>
+</head>
+
+<body style="direction: ltr;">
+<div id="gl_container_fluid">
+  <div id="gl_header"><span style="color: rgb(255, 255, 255); float: left; padding-left: 10px; padding-top: 5px; vertical-align: middle;">glFusion Documentation Project
+  </span><a style="float: right; padding-right: 10px; padding-top: 5px; vertical-align: middle;" href="http://www.glfusion.org/wiki/doku.php">glFusion Wiki</a>
+</div>
+<div id="gl_wrapper">
+<div class="body-container">
+<h1><a name="advt_plugin" id="advt_plugin">Donation Plugin</a></h1>
+
+<div class="level1">
+
+<table class="inline">
+  <tbody>
+    <tr>
+      <th class="col0 leftalign" colspan="2">Campaign Edit Form</th>
+    </tr>
+
+    <tr class="row0">
+      <th class="col0 leftalign">Option </th>
+      <th class="col1 leftalign">Description </th>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top">
+        <a name="desc_campaign_id"></a>Campaign ID
+      </td>
+      <td class="col1 leftalign">
+        Enter the ID for this campaign. This must be unique and can be used in autotags to include donation buttons in articles.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top">
+        <a name="desc_campaign_name"></a>Campaign Name
+      </td>
+      <td class="col1 leftalign">
+        Enter a name for this campaign.  This will be shown as the campaign title in listings and blocks.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top">
+        <a name="desc_startdate"></a>Starting Date
+      </td>
+      <td class="col1 leftalign">
+        Enter the starting date for this campaign, formatted as YYYY-MM-DD.  You can click on the calendar icon to use a date picker.<p />
+        Donations will not be solicited for this campaign before this date.  Leave this field blank to start immediately.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top">
+        <a name="desc_enddate"></a>Ending Date
+      </td>
+      <td class="col1 leftalign">
+        Enter the ending date for this campaign, formatted as YYYY-MM-DD.  You can click on the calendar icon to use a date picker.<p />
+        Donations will not be solicited for this campaign after this date.  Leave this field blank to have this campaign run indefinitely.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top">
+        <a name="desc_description"></a>Description
+      </td>
+      <td class="col1 leftalign">
+        Enter a description for this campaign.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top">
+        <a name="desc_shortdesc"></a>Short Description
+      </td>
+      <td class="col1 leftalign">
+        Enter a short description for this campaign. This will be shown in the donation block and in the main campaign donation page, before the &quot;Description&quot; below.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top">
+        <a name="desc_goal"></a>Goal
+      </td>
+      <td class="col1 leftalign">
+        Enter the total goal for this campaign.  This is used to create the bar graph in the campaign block.  If there is no stated goal, leave this field blank and no bar graph will be created.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top">
+        <a name="desc_hardgoal"></a>Stop after goal is reached?
+      </td>
+      <td class="col1 leftalign">
+        If this box is checked, donations will not be solicited for this campaign once the goal amount is reached.  If unchecked, contributions will be selected indefinitely (or until the stated ending date).
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top">
+        <a name="desc_blk_show_pct"></a>Show progress bar in blocks?
+      </td>
+      <td class="col1 leftalign">
+        Check this box to have a bar included in the contribution block indicating the percentage of the goal that has been received.  This will only be shown if the goal is greater than zero.<p />
+        Note that if the PayPal plugin integration is not used, then the progress bar will not be updated unless the administrator manually enters the donations as they are received.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top">
+        <a name="desc_enabled"></a>Enabled?
+      </td>
+      <td class="col1 leftalign">
+        Uncheck this box to disable the campaign.  Disabled campaigns will not be shown in the public-facing lists or blocks.
+      </td>
+    </tr>
+
+  </tbody>
+</table>
+<p></p>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

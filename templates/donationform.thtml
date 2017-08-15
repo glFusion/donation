@@ -1,0 +1,90 @@
+{# begin {templatelocation} #}
+<link rel="stylesheet" type="text/css" href="{pi_url}/css/style.css" />
+<form action="{action_url}" method="post" class="campaignform">
+<input type=hidden name="mode" value="savedonation">
+<input type=hidden name="don_id" value="{don_id}">
+
+<fieldset>
+<legend>{$LANG_DON['donation_info']}</legend>
+
+<p>
+  <label for="dt" style="width:16em;">{$LANG_DON['date']}
+    <a href="#" onclick="popupWindow('{doc_url}#desc_dt', 'Help', 640, 480, 1)" class="toolbar">
+    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+  </label>
+  <input class="fValidate['required']" 
+    type=text name="dt" value="{dt}" id="f_don_dt">
+  <img src="{site_url}/images/datepicker.jpg" 
+    id="dt_trigger"
+    style="cursor: pointer;" 
+    title="{$LANG_DON['date_selector']}"
+    />
+</p>
+
+<p>
+  <label for="camp_id" style="width:16em;">{$LANG_DON['campaign']}
+    <a href="#" onclick="popupWindow('{doc_url}#desc_campaign', 'Help', 640, 480, 1)" class="toolbar">
+    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+  </label>
+    <select name="camp_id">
+      {campaign_select}
+    </select>
+</p>
+
+<p>
+  <label for="uid" style="width:16em;">{$LANG_DON['contributor']}
+    <a href="#" onclick="popupWindow('{doc_url}#desc_contributor', 'Help', 640, 480, 1)" class="toolbar">
+    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+  </label>
+    <select name="uid">
+      {contributor_select}
+    </select>&nbsp;&nbsp;
+    <input type="text" name="contrib_name" id="f_contrib_name" 
+        value="{contrib_name}">
+</p>
+
+<p>
+  <label for="amount" style="width:16em;">{$LANG_DON['amount']}:
+    <a href="#" onclick="popupWindow('{doc_url}#desc_amount', 'Help', 640, 480, 1)" class="toolbar">
+    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+  </label>
+  <input name="amount" value="{amount}" type="text" id="f_amount">
+</p>
+
+<p>
+  <label for="txn_id" style="width:16em;">{$LANG_DON['txn_id']}:
+    <a href="#" onclick="popupWindow('{doc_url}#desc_txn_id', 'Help', 640, 480, 1)" class="toolbar">
+    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+  </label>
+  <input name="txn_id" value="{txn_id}" type="text" id="f_txn_id">
+</p>
+
+<p>
+  <label for="comment" style="width:16em;">{$LANG_DON['comment']}:
+    <a href="#" onclick="popupWindow('{doc_url}#desc_comment', 'Help', 640, 480, 1)" class="toolbar">
+    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+  </label>
+  <textarea name="comment" id="f_comment">{comment}</textarea>
+</p>
+
+</fieldset>
+
+<input type="submit" class="lgButton green" name="savedonation" value="{$LANG_DON['submit']}" />
+<input type="reset" class="lgButton blue" value="{$LANG_DON['clearform']}" />
+{!if can_delete}
+<input type="submit" class="lgButton red" name="deletedonation" value="{$LANG_DON['delete']}"
+  onclick="return confirm('{$LANG_DON['q_del_item']}');" />
+{!endif}
+
+</form>
+
+<script type="text/javascript">
+    Calendar.setup({
+        inputField     :    "f_don_dt",
+        ifFormat       :    "%Y-%m-%d",
+        showsTime      :    false,
+        timeFormat     :    "24",
+        button          :   "dt_trigger"
+    });
+</script>
+{# end {templatelocation} #}

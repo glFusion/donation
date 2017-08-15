@@ -1,0 +1,8 @@
+<div class="profile-header">
+  {$LANG_DON['block_title']}
+</div>
+<ul>
+<!-- BEGIN donation_row -->
+  <li>{name}:&nbsp;&nbsp;{amount}</li>
+<!-- END donation_row -->
+</ul>

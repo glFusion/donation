@@ -1,0 +1,25 @@
+{# begin {templatelocation} #}
+<div style="float:left;">
+    <h1>{camp_name}</h1>
+</div>
+<div style="float:right;">
+  <p>&nbsp;</p>
+  {buttons}
+</div>
+
+<div style="clear:both;">
+    <p>{camp_shortdesc}</p>
+    <p>{camp_description}</p>
+</div>
+<div>
+  {!if start_dt}
+  {$LANG_DON['startdate']}: {start_dt}<br />
+  {!endif}
+  {!if end_dt}
+  {$LANG_DON['enddate']}: {end_dt}<br />
+  {!endif}
+</div> 
+<div style="text-align:center;">
+<hr width="80%">
+</div>
+{# end {templatelocation} #}
