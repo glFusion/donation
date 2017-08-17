@@ -7,7 +7,7 @@ window.addEvent('domready',function() {
     var myValidator = new fValidator("submit");
 });
 </script>
-<form action="{action_url}" method="post" class="uk-form-horizontal campaignform" id="submit">
+<form action="{action_url}" method="post" class="uk-form-horizontal" id="submit">
   <input type=hidden name="old_camp_id" value="{camp_id}">
 
   <fieldset>
