@@ -151,10 +151,14 @@ function service_handlePurchase_donation($args, &$output, &$svc_msg)
     );
 
     // User ID is returned in the 'custom' field, so make sure it's numeric.
-    if (is_numeric($paypal_data['custom']['uid']))
+    // If not, try to get it from the payer's email address. This will yield
+    // zero if not found.
+    if (is_numeric($paypal_data['custom']['uid'])) {
         $uid = (int)$paypal_data['custom']['uid'];
-    else
-        $uid = DB_getItem($_TABLES['users'], 'email', $paypal_data['payer_email']);
+    } else {
+        $uid = (int)DB_getItem($_TABLES['users'], 'email', $paypal_data['payer_email']);
+        if ($uid < 1) $uid = 1;     // set to anonymous if not found
+    }
 
     $memo = DB_escapeString($paypal_data['memo']);
     $pp_contrib = $paypal_data['first_name'] . ' ' .
@@ -177,7 +181,6 @@ function service_handlePurchase_donation($args, &$output, &$svc_msg)
             SET received=received + $amount
             WHERE camp_id = '{$id[1]}'";
     DB_query($sql, 1);
-
     return PLG_RET_OK;
 }
 
