@@ -260,7 +260,9 @@ function plugin_geticon_donation()
 
 
 /**
-*   Enable or disable this plugin's blocks when the plugin is changed.
+*   Disable this plugin's blocks when the plugin is changed.
+*   If the plugin is being enabled, there's no way to know if the blocks
+*   were disabled on purpose, so none of them will be re-enabled.
 *
 *   @param  boolean $enabled    Plugin's "enabled" state
 */
@@ -268,13 +270,13 @@ function plugin_enablestatechange_donation($enabled)
 {
     global $_TABLES;
 
-    $enabled = $enabled == true ? 1 : 0;
     $blockfns = array('phpblock_donation_');
-
-    foreach ($blockfns as $blockfn) {
-        DB_query("UPDATE {$_TABLES['blocks']}
+    if (!$enabled) {
+        foreach ($blockfns as $blockfn) {
+            DB_query("UPDATE {$_TABLES['blocks']}
                 SET is_enabled=$enabled
                 WHERE phpblockfn LIKE '{$blockfn}%'");
+        }
     }
 }
 
