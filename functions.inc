@@ -268,15 +268,43 @@ function plugin_geticon_donation()
 */
 function plugin_enablestatechange_donation($enabled)
 {
-    global $_TABLES;
+    global $_TABLES, $_PLUGINS;
 
-    $blockfns = array('phpblock_donation_');
+    $enabled = $enabled ? 1 : 0;
+
+    // If trying to enable the plugin but lgLib is not available,
+    // take no action and return
+    if ($enabled && !in_array('lglib', $_PLUGINS)) {
+        // Re-disable the plugin
+        DB_change($_TABLES['plugins'], 'pi_enabled', 0, 'pi_name', 'donation');
+        $enabled = 0;
+    }
+
     if (!$enabled) {
+        $blockfns = array('phpblock_donation_');
         foreach ($blockfns as $blockfn) {
             DB_query("UPDATE {$_TABLES['blocks']}
                 SET is_enabled=$enabled
                 WHERE phpblockfn LIKE '{$blockfn}%'");
         }
+    }
+}
+
+
+/**
+*   Receives notification of anothe plugin's deletion
+*
+*   @param  mixed   $id     Item ID
+*   @param  string  $type   Plugin Name
+*/
+function plugin_itemdeleted_donation($id, $type)
+{
+    global $_TABLES;
+
+    // If the lgLib plugin is disabled or removed, disable thie plugin
+    if ($type == 'lglib' && $id == '*') {
+        plugin_enablestatechange_donation(false);
+        DB_change($_TABLES['plugins'], 'pi_enabled', 0, 'pi_name', 'donation');
     }
 }
 
@@ -411,15 +439,18 @@ function plugin_profilevariablesdisplay_donation($uid, &$T)
             GROUP BY d.camp_id";
     $res = DB_query($sql);
     if (DB_numRows($res) > 0) {
-        $LT = new \Template(DON_PI_PATH . '/templates/');
+        $LT = new \Template(__DIR__ . '/templates/');
         $LT->set_file(array(
             'block' => 'profileblock.thtml',
         ));
         $LT->set_block('block', 'donation_row', 'drow');
 
         while ($A = DB_fetchArray($res, false)) {
-            $LT->set_var('name', $A['name']);
-            $LT->set_var('amount', $A['total']);
+            $LT->set_var(array(
+                'name'      => $A['name'],
+                'amount'    => $A['total'],
+                'is_uikit'  => $_CONF_DON['_is_uikit'],
+            ) );
             $LT->parse('drow', 'donation_row', true);
         }
 
