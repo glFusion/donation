@@ -15,7 +15,6 @@
 require_once('../../../lib-common.php');
 
 USES_lib_admin();
-USES_donation_class_campaign();
 
 /**
 *   Basic admin menu for Donation administration
@@ -407,7 +406,6 @@ $content = '';      // initialize variable for page content
 
 switch ($action) {
 case 'savecampaign':
-    USES_donation_class_campaign();
     $old_camp_id = isset($_POST['old_camp_id']) ? $_POST['old_camp_id'] : '';
     $C = new Donation\Campaign($old_camp_id);
     $C->Save($_POST);
@@ -415,20 +413,17 @@ case 'savecampaign':
     break;
 
 case 'deletecampaign':
-    USES_donation_class_campaign();
     Donation\Campaign::Delete($camp_id);
     $view = 'campaigns';
     break;
 
 case 'savedonation':
-    USES_donation_class_donation();
     $D = new Donation\Donation($don_id);
     $D->Save($_POST);
     $view = 'donations';
     break;
 
 case 'deletedonation':
-    USES_donation_class_donation();
     $D = new Donation\Donation($don_id);
     $camp_id = $D->camp_id;
     Donation\Donation::Delete($don_id);
@@ -436,7 +431,6 @@ case 'deletedonation':
     break;
 
 case 'resetbuttons':
-    USES_donation_class_campaign();
     $sql = "SELECT camp_id FROM {$_TABLES['don_campaigns']}";
     $res = DB_query($sql);
     $P = new Donation\Campaign();
@@ -455,13 +449,11 @@ default:
 // Display the correct page content
 switch ($view) {
 case 'editcampaign':
-    USES_donation_class_campaign();
     $C = new Donation\Campaign($camp_id);
     $content .= $C->Edit();
     break;
 
 case 'editdonation':
-    USES_donation_class_donation();
     $D = new Donation\Donation($don_id);
     $content .= $D->Edit();
     break;

@@ -63,7 +63,6 @@ switch ($page) {
 case 'detail':
     $result = '<span class="alert">' . $LANG_DON['invalid_id_req'] . '</span>';
     if (!empty($id)) {
-        USES_donation_class_campaign();
         $C = new Donation\Campaign($id);
         if ($C->isEnabled()) {
             $T = new \Template(DON_PI_PATH . '/templates');
@@ -136,7 +135,6 @@ function DONATION_CampaignList()
     if (!$res || DB_numRows($res) < 1)
         return '<span class="info">'.$LANG_DON['no_open_campaigns'].'</span>';
 
-    USES_donation_class_campaign();
     $C = new Donation\Campaign();
     $T = new \Template(DON_PI_PATH . '/templates');
     $T->set_file('camplist', 'campaign_list.thtml');

@@ -83,7 +83,6 @@ function service_getproducts_donation($cat='')
         return PLG_RET_ERROR;
 
     $output = array();
-    USES_donation_class_campaign();
     $P = new DonationCampaign();
     while ($A = DB_fetchArray($result)) {
         $P->Read($A['camp_id']);

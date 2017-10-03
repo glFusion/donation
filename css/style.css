@@ -25,3 +25,20 @@ display: block
     color: #0077dd;
 }
 
+.don-blk-progress-outer {
+    height: 15px;
+    width: 104px;
+    background: #fff;
+    border: 1px solid #CCCCCC;
+    margin: 0;
+    padding: 0;
+    float: left;
+    overflow: auto;
+}
+.don-blk-progress-inner {
+    height: 15px;
+    padding: 0;
+    background: lightgreen;
+    color: blue;
+    font-size: smaller;
+}

@@ -71,11 +71,16 @@ if (is_file("$langpath/custom/$langfile")) {
 $_CONF_DON['_is_uikit'] = $_SYSTEM['framework'] == 'uikit' ? true : false;
 $_CONF_DON['_iconset'] = $_CONF_DON['_is_uikit'] ? 'uk-icon' : 'fa fa';
 
-function USES_donation_class_campaign()
-{   require_once __DIR__ . '/classes/Campaign.class.php';   }
-
-function USES_donation_class_donation()
-{   require_once __DIR__ . '/classes/Donation.class.php';   }
+spl_autoload_register(function ($class)
+{
+    if (strpos($class, 'Donation\\') === 0) {
+        $class = str_replace('Donation\\', '', $class);
+        $path = __DIR__ . '/classes/' . $class . '.class.php';
+        if (file_exists($path)) {
+            include $path;
+        }
+    }
+});
 
 
 /**
@@ -381,6 +386,7 @@ function phpblock_donation_donations()
             'description' => $row['shortdesc'],
             'camp_id'   => $row['camp_id'],
             'pi_url'    => DON_URL,
+            'is_uikit'  => $_CONF_DON['_is_uikit'],
         ) );
         if ($row['goal'] > 0 && $row['blk_show_pct'] == 1) {
             if ($row['received'] < $row['goal']) {
@@ -405,7 +411,6 @@ function phpblock_donation_donations()
                 'return' => DON_URL . '/index.php',
         );
 
-        USES_donation_class_campaign();
         $C = new \Donation\Campaign($row['camp_id']);
         $T->set_var('donate_btn', $C->GetButton());
 

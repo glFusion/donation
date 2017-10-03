@@ -25,7 +25,6 @@ switch ($_POST['action']) {
 case 'toggleEnabled':
     switch ($_POST['type']) {
     case 'campaign':
-        USES_donation_class_campaign();
         $newval = Donation\Campaign::ToggleEnabled($_POST['oldval'], $_POST['id']);
         if ($newval != $_POST['oldval']) {
             $message = sprintf($LANG_DON['msg_item_updated'],
