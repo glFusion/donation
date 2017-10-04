@@ -1,11 +1,11 @@
 <?php
 /**
-*   Administrative entry point for the DailyQuote plugin.
+*   Administrative entry point for the Donation plugin.
 *
 *   @author     Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
 *   @package    donation
-*   @version    0.0.1
+*   @version    0.0.2
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -111,14 +111,10 @@ function DON_donationList($camp_id)
             'text' => $LANG_DON['delete'], 'align' => 'center'),
     );
 
-    $defsort_arr = array('field' => 'dt', 'direction' => 'desc');
-
-    list($camp_name, $camp_dt) = DB_fetchArray(DB_query(
-        "SELECT name, startdt FROM {$_TABLES['don_campaigns']}
-        WHERE camp_id='$camp_id'"));
-    $title = $LANG_DON['admin_hdr'] . " :: $camp_name";
-    if (!empty($camp_dt)) {
-        $title .= " ($camp_dt)";
+    $C = new \Donation\Campaign($camp_id);
+    $title = $LANG_DON['campaign'] . " :: $C->name";
+    if (!empty($C->startdt)) {
+        $title .= ' (' . $C->startdt . ')';
     }
 
     $text_arr = array(
@@ -126,17 +122,16 @@ function DON_donationList($camp_id)
         'form_url' => DON_ADMIN_URL .
                 '/index.php?donations=x&camp_id='.$camp_id,
     );
-
     $options = array('chkdelete' => 'true', 'chkfield' => 'don_id');
-
+    $defsort_arr = array('field' => 'dt', 'direction' => 'desc');
     $query_arr = array('table' => 'don_donations',
         'sql' => "SELECT *
                     FROM {$_TABLES['don_donations']}",
-                   
         'query_fields' => array(),
         'default_filter' => "WHERE camp_id ='".DB_escapeString($camp_id)."'",
     );
 
+    $retval .= '<h3>' . $title . '</h3>';
     $retval .= ADMIN_list('donation', 'DON_donation_getListField', $header_arr,
                     $text_arr, $query_arr, $defsort_arr, '', '',
                     $options, $form_arr);
@@ -346,35 +341,17 @@ function DON_campaign_getListField($fieldname, $fieldvalue, $A, $icon_arr)
 */
 // If plugin is installed but not enabled, display an error and exit gracefully
 if (!in_array('donation', $_PLUGINS)) {
-    $display = COM_siteHeader();
-    $display .= "<span class=\"alert\">";
-    $display .= COM_startBlock ('Alert');
-    $display .= 'This function is not available.';
-    $display .= COM_endBlock();
-    $display .= "</span>";
-    $display .= COM_siteFooter(true);
-    echo $display;
+    COM_404();
     exit;
 }
 
 // Only let admin users access this page
-if (!SEC_inGroup($_CONF_DON['pi_name'] . ' Admin')) {
+if (!SEC_hasRights('donation.admin')) {
     COM_errorLog("Attempted unauthorized access the Donation Admin page." .
         " User id: {$_USER['uid']}, Username: {$_USER['username']}, " .
         " IP: $REMOTE_ADDR", 1);
-    $display = COM_siteHeader();
-    $display .= COM_startBlock($LANG_DON['access_denied']);
-    $display .= $LANG_DON['access_denied_msg'];
-    $display .= COM_endBlock();
-    $display .= COM_siteFooter(true);
-    echo $display;
+    COM_404();
     exit;
-}
-
-// Clean $_POST and $_GET, in case magic_quotes_gpc is set
-if (GVERSION < '1.3.0') {
-    $_POST = LGLIB_stripslashes($_POST);
-    $_GET = LGLIB_stripslashes($_GET);
 }
 
 $action = '';
@@ -425,6 +402,7 @@ case 'savedonation':
 
 case 'deletedonation':
     $D = new Donation\Donation($don_id);
+    // Set camp_id to stay on the donations page for the campaign
     $camp_id = $D->camp_id;
     Donation\Donation::Delete($don_id);
     $view = 'donations';
@@ -473,7 +451,6 @@ $display = COM_siteHeader();
 $display .= DON_adminMenu($view);
 $display .= $content;
 $display .= COM_siteFooter();
-
 echo $display;
 
 ?>
