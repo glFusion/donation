@@ -130,7 +130,7 @@ function DON_donationList($camp_id)
         'query_fields' => array(),
         'default_filter' => "WHERE camp_id ='".DB_escapeString($camp_id)."'",
     );
-
+    $form_arr = array();
     $retval .= '<h3>' . $title . '</h3>';
     $retval .= ADMIN_list('donation', 'DON_donation_getListField', $header_arr,
                     $text_arr, $query_arr, $defsort_arr, '', '',
@@ -252,7 +252,8 @@ function DON_campaignList()
         'query_fields' => array('name', 'description'),
         'default_filter' => 'WHERE 1=1'
     );
-
+    $options = array();
+    $form_arr = array();
     $retval .= ADMIN_list('donation', 'DON_campaign_getListField', $header_arr,
                     $text_arr, $query_arr, $defsort_arr, '', '',
                     $options, $form_arr);
@@ -306,7 +307,7 @@ function DON_campaign_getListField($fieldname, $fieldvalue, $A, $icon_arr)
                 $enabled = 0;
         }
         $retval .= "<input type=\"checkbox\" $switch value=\"1\" name=\"ena_check\"
-                id=\"togenabled{$A['id']}\" class=\"tooltip\" title=\"{$LANG_DON['ena_or_disa']}\"
+                id=\"togenabled{$A['camp_id']}\" class=\"tooltip\" title=\"{$LANG_DON['ena_or_disa']}\"
                 onclick='DON_toggle(this,\"{$A['camp_id']}\",\"campaign\");' />" . LB;
         break;
 

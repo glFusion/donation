@@ -5,7 +5,7 @@
 *   @author     Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
 *   @package    donation
-*   @version    0.0.1
+*   @version    0.1.1
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -172,9 +172,8 @@ class Donation
             'dt'            => $this->dt,
             'comment'       => $this->comment,
             'amount'        => $this->amount,
-            'comment'       => $this->comment,
             'campaign_select' =>
-                        Campaign::Dropdown($this->camp_id),
+                        Campaign::DropDown($this->camp_id),
             'txn_id'        => $this->txn_id,
             'doc_url'       => LGLIB_getDocURL('donationform.html',
                                 $_CONF_DON['pi_name'],

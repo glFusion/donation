@@ -5,7 +5,7 @@
 *   @author     Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
 *   @package    donation
-*   @version    0.0.2
+*   @version    0.1.1
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -145,10 +145,10 @@ class Campaign
         $this->shortdesc = $A['shortdesc'];
         $this->description = $A['description'];
         $this->goal = $A['goal'];
-        $this->enabled = $A['enabled'];
-        $this->hardgoal = $A['hardgoal'];
+        $this->enabled = isset($A['enabled']) ? $A['enabled'] : 0;
+        $this->hardgoal = isset($A['hardgoal']) ? $A['hardgoal'] : 0;
         $this->blk_show_pct = $A['blk_show_pct'];
-        $this->pp_buttons = $A['pp_buttons'];
+        //$this->pp_buttons = $A['pp_buttons'];
         $this->amount = $A['amount'];
     }
 
@@ -297,8 +297,8 @@ class Campaign
         }
 
         //$btn = $this->MakeButton();
-        $buttons = array('donation' => $btn);
-        $this->pp_buttons = serialize($buttons);
+        //$buttons = array('donation' => $btn);
+        //$this->pp_buttons = serialize($buttons);
 
         if ($this->isNew) {
             if (DB_count($_TABLES['don_campaigns'], 'camp_id',
@@ -326,8 +326,8 @@ class Campaign
                 hardgoal = {$this->hardgoal},
                 amount = {$this->amount},
                 blk_show_pct = {$this->blk_show_pct},
-                enabled = {$this->enabled},
-                pp_buttons = '" . DB_escapeString($this->pp_buttons) . "' " .
+                enabled = {$this->enabled} " .
+                //pp_buttons = '" . DB_escapeString($this->pp_buttons) . "' " .
                 $sql3;
         //echo $sql;die;
         DB_query($sql);
@@ -377,7 +377,7 @@ class Campaign
     *   @param  string  $sel    Campaign ID to show as selected
     *   @return string          HTML for option statements
     */
-    public function DropDown($sel='', $access=3)
+    public static function DropDown($sel='', $access=3)
     {
         global $_TABLES;
 

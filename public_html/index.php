@@ -154,7 +154,6 @@ function DONATION_CampaignList()
             $pct_recvd = 100;
         }
 
-        $retval .= $A['camp_id'] . " " . $A['name'] . "<br />\n";
         $T->set_var(array(
             'camp_id'       => $A['camp_id'],
             'name'          => $A['name'],
@@ -171,11 +170,8 @@ function DONATION_CampaignList()
         ) );
         $T->parse('CBlk', 'CampaignBlk', true);
     }
-
     $T->parse('output','camplist');
     return $T->finish($T->get_var('output'));
- 
 }
-
 
 ?>
