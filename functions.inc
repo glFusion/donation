@@ -43,7 +43,7 @@ define('DON_SELECTED', 'selected="selected"');
 $_CONF_DON['now'] = date('Y-m-d H:i:s');
 
 // Determine if the paypal plugin is installed and integration is enabled
-if ( is_array($_PLUGINS) && in_array('paypal', $_PLUGINS) ) {
+if ( isset($_PLUGINS) && is_array($_PLUGINS) && in_array('paypal', $_PLUGINS) ) {
     define('DONATION_PAYPAL_ENABLED', true);
 } else {
     // No paypal integration enabled
