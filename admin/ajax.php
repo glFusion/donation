@@ -19,7 +19,7 @@ if (!SEC_hasRights('donation.admin')) {
     COM_accessLog("User {$_USER['username']} tried to illegally access the donation AJAX functions.");
     exit;
 }
-COM_errorLog(print_r($_POST,true));
+//COM_errorLog(print_r($_POST,true));
 
 switch ($_POST['action']) {
 case 'toggleEnabled':

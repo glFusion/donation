@@ -20,8 +20,11 @@ function DON_toggle(cbox, id, type) {
                 $.UIkit.notify("<i class='uk-icon-check'></i>&nbsp;" + result.statusMessage, {timeout: 1000,pos:'top-center'});
             }
             catch(err) {
-                alert(result.statusMessage);
+                console.log(result.statusMessage);
             }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.log(textStatus, errorThrown);
         }
     });
     return false;

@@ -21,6 +21,7 @@ $LANG_DON = array(
 'camp_mgr'      => 'Donation Campaigns',
 'don_mgr'       => 'Donation Manager',
 'enabled'       => 'Enabled',
+'disabled'      => 'Disabled',
 'ena_or_disa'   => 'Enable or Disable',
 'shortdesc'     => 'Short Description',
 'description'   => 'Description',
