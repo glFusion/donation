@@ -4,7 +4,7 @@
 </span>
 {!if goal}
 {!if is_uikit}
-<div class="uk-progress">
+<div class="uk-progress tooltip" title="{pct_received}">
   <div class="uk-progress-bar" style="width:{pct}%">{pct}%</div>
 </div>
 {!else}

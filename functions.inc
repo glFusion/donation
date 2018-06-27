@@ -398,6 +398,7 @@ function phpblock_donation_donations()
                 'goal'  => sprintf('%6.2f', (float)$row['goal']),
                 'pct'   => $pct_received,
                 'collected' => sprintf("%.2f / %.2f", $row['received'], $row['goal']),
+                'pct_received' => sprintf($LANG_DON['pct_received'], $row['received'], $row['goal']),
             ) );
         } else {
             $T->clear_var('goal');

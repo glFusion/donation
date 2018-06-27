@@ -75,6 +75,7 @@ $LANG_DON = array(
 'hlp_amount'    => 'Enter the amount of the donation',
 'hlp_transid'   => 'Enter a transaction ID, if applicable',
 'hlp_comment'   => 'Enter a general comment here',
+'pct_received'  => '%.02f Received of %.02f',
 );
 
 // Messages for the plugin upgrade
