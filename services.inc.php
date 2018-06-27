@@ -46,6 +46,7 @@ function service_productinfo_donation($args, &$output, &$svc_msg)
             $output['short_description'] = $descrip;
             $output['name'] = $LANG_DON['donation'] . ': ' . $info['name'];
             $output['description'] = $descrip;
+            $output['override_price'] = 1;
         }
     }
 
@@ -159,9 +160,17 @@ function service_handlePurchase_donation($args, &$output, &$svc_msg)
         if ($uid < 1) $uid = 1;     // set to anonymous if not found
     }
 
-    $memo = DB_escapeString($paypal_data['memo']);
-    $pp_contrib = $paypal_data['first_name'] . ' ' .
+    $memo = isset($paypal_data['memo']) ? $paypal_data['memo'] : '';
+    $memo = DB_escapeString($memo);
+    if (isset($paypal_data['payer_name'])) {
+        $pp_contrib = $paypal_data['payer_name'];
+    } elseif (isset($paypal_data['first_name']) &&
+                isset($paypal_data['last_name']) ) {
+        $pp_contrib = $paypal_data['first_name'] . ' ' .
             $paypal_data['last_name'];
+    } else {
+        $pp_contrib = 'Unknown';
+    }
 
     $sql = "INSERT INTO {$_TABLES['don_donations']} (
                 uid, contrib_name, dt, camp_id, amount, txn_id, comment
@@ -178,7 +187,7 @@ function service_handlePurchase_donation($args, &$output, &$svc_msg)
 
     $sql = "UPDATE {$_TABLES['don_campaigns']}
             SET received=received + $amount
-            WHERE camp_id = '{$id[1]}'";
+            WHERE camp_id = '{$item_id[1]}'";
     DB_query($sql, 1);
     return PLG_RET_OK;
 }
