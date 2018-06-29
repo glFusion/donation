@@ -34,7 +34,6 @@ $_SQL['don_campaigns'] = "CREATE TABLE {$_TABLES['don_campaigns']} (
   `amount` float(8,2) NOT NULL default '0.00',
   `goal` float(8,2) unsigned NOT NULL default '0.00',
   `hardgoal` tinyint(1) unsigned NOT NULL default '0',
-  `received` float(8,2) NOT NULL default '0.00',
   `blk_show_pct` tinyint(1) NOT NULL default '1',
   `pp_buttons` text,
   PRIMARY KEY  (`camp_id`)
@@ -45,7 +44,8 @@ $_UPGRADE_SQL = array(
     "ALTER TABLE {$_TABLES['don_campaigns']}
         ADD amount float(8,2) NOT NULL default '0.00' AFTER enabled,
         ADD description text AFTER name,
-        ADD shortdesc varchar(255) default NULL after name",
+        ADD shortdesc varchar(255) default NULL after name,
+        DROP received",
     ),
 );
 
