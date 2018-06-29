@@ -25,32 +25,30 @@ function service_productinfo_donation($args, &$output, &$svc_msg)
     global $_TABLES, $LANG_PHOTO, $LANG_DON;
 
     // $args should be an array of item info
-    if (!is_array($args)) return PLG_RET_ERROR;
+    if (!is_array($args) || !isset($args['item_id']) || !is_array($args['item_id'])) return PLG_RET_ERROR;
+
+    $camp_id = $args['item_id'][0];
 
     // Create a return array with values to be populated later.
     // The actual paypal product ID is photocomp:type:id
-    $output = array('product_id' => implode(':', $args),
+    $output = array('product_id' => 'donation:' . $camp_id,
             'name' => 'Unknown',
             'short_description' => 'Unknown Donation Item',
             'price' => '0.00',
     );
 
-    if (isset($args[1]) && !empty($args[1])) {
-        $args[1] = COM_sanitizeID($args[1]);
-        $info = DB_fetchArray(DB_query(
-                "SELECT camp_id, name, description
-                FROM {$_TABLES['don_campaigns']}
-                WHERE camp_id='{$args[1]}'"), false);
-        if (!empty($info)) {
-            $descrip = $LANG_DON['donation'] . ': ' . $info['description'];
-            $output['short_description'] = $descrip;
-            $output['name'] = $LANG_DON['donation'] . ': ' . $info['name'];
-            $output['description'] = $descrip;
-            $output['override_price'] = 1;
-        }
+    $C = Donation\Campaign::getInstance($camp_id);
+    if (!$C->isNew) {
+        $dscp = $LANG_DON['donation'] . ': ' . $C->description;
+        $output['short_description'] = $dscp;
+        $output['name'] = $LANG_DON['donation'] . ': ' . $C->name;
+        $output['description'] = $dscp;
+        $output['override_price'] = 1;
+        return PLG_RET_OK;
+    } else {
+        // Invalid campaign ID requested
+        return PLG_RET_ERROR;
     }
-
-    return PLG_RET_OK;
 }
 
 
@@ -74,8 +72,7 @@ function service_getproducts_donation($cat='')
         return $products;
     }
 
-    $sql = "SELECT c.camp_id
-            FROM {$_TABLES['don_campaigns']} c
+    $sql = "SELECT * FROM {$_TABLES['don_campaigns']} c
             WHERE c.enabled = 1
             AND (c.enddt > '{$_CONF_DON['now']}' OR c.enddt IS NULL)
             AND (c.startdt < '{$_CONF_DON['now']}' OR c.startdt IS NULL)";
@@ -84,9 +81,8 @@ function service_getproducts_donation($cat='')
         return PLG_RET_ERROR;
 
     $output = array();
-    $P = new DonationCampaign();
     while ($A = DB_fetchArray($result)) {
-        $P->Read($A['camp_id']);
+        $P = Donation\Campaign::getInstance($A);
         $output[] = array(
             'id' => 'donation:' . $P->camp_id,
             'name' => $P->name,

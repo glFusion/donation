@@ -35,12 +35,16 @@ class Campaign
         global $_USER, $_TABLES, $_CONF_DON;
 
         $this->isNew = true;    // Assume new entry until we read one
-        $this->camp_id = COM_sanitizeID($id, false);
-        if ($this->camp_id != '') {
-            $this->Read($this->camp_id);
+        if (is_array($id)) {
+            $this->setVars($id);
         } else {
-            // Set default values
-            $this->enabled = 1;
+            $this->camp_id = COM_sanitizeID($id, false);
+            if ($this->camp_id != '') {
+                $this->Read($this->camp_id);
+            } else {
+                // Set default values
+                $this->enabled = 1;
+            }
         }
     }
 
@@ -61,6 +65,19 @@ class Campaign
             $this->setVars($A);
             $this->isNew = false;
         }
+    }
+
+
+    /**
+    *   Get a campaign instance
+    *   Temp function just instantiates a new instance. Caching will come.
+    *
+    *   @param  mixed   $campaign   Campaign ID or record
+    *   @return object              Campaign object
+    */
+    public static function getInstance($campaign)
+    {
+        return new self($campaign);
     }
 
 

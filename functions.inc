@@ -3,7 +3,7 @@
 *   Common functions for the Donation plugin
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
 *   @package    donation
 *   @version    0.0.2
 *   @license    http://opensource.org/licenses/gpl-2.0.php
@@ -412,7 +412,7 @@ function phpblock_donation_donations()
                 'return' => DON_URL . '/index.php',
         );
 
-        $C = new \Donation\Campaign($row['camp_id']);
+        $C = Donation\Campaign::getInstance($row);
         $T->set_var('donate_btn', $C->GetButton());
 
         if ($i > 0)

@@ -111,7 +111,7 @@ function DON_donationList($camp_id)
             'text' => $LANG_DON['delete'], 'align' => 'center'),
     );
 
-    $C = new \Donation\Campaign($camp_id);
+    $C = Donation\Campaign::getInstance($camp_id);
     $title = $LANG_DON['campaign'] . " :: $C->name";
     if (!empty($C->startdt)) {
         $title .= ' (' . $C->startdt . ')';
@@ -385,7 +385,7 @@ $content = '';      // initialize variable for page content
 switch ($action) {
 case 'savecampaign':
     $old_camp_id = isset($_POST['old_camp_id']) ? $_POST['old_camp_id'] : '';
-    $C = new Donation\Campaign($old_camp_id);
+    $C = Donation\Campaign::getInstance($old_camp_id);
     $C->Save($_POST);
     $view = 'campaigns';
     break;
@@ -410,11 +410,10 @@ case 'deletedonation':
     break;
 
 case 'resetbuttons':
-    $sql = "SELECT camp_id FROM {$_TABLES['don_campaigns']}";
+    $sql = "SELECT * FROM {$_TABLES['don_campaigns']}";
     $res = DB_query($sql);
-    $P = new Donation\Campaign();
     while ($A = DB_fetchArray($res, false)) {
-        $P->Read($A['camp_id']);
+        $P = Donation\Campaign::getInstance($A);
         $P->Save();
     }
     $view = 'campaigne';
@@ -428,7 +427,7 @@ default:
 // Display the correct page content
 switch ($view) {
 case 'editcampaign':
-    $C = new Donation\Campaign($camp_id);
+    $C = Donation\Campaign::getInstance($camp_id);
     $content .= $C->Edit();
     break;
 

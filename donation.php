@@ -2,7 +2,7 @@
 /**
 *   Table names and other global configuraiton values.
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
 *   @package    donation
 *   @version    0.0.2
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
