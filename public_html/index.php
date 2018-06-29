@@ -63,7 +63,7 @@ switch ($page) {
 case 'detail':
     $result = '<span class="alert">' . $LANG_DON['invalid_id_req'] . '</span>';
     if (!empty($id)) {
-        $C = new Donation\Campaign($id);
+        $C = Donation\Campaign::getInstance($id);
         if ($C->isEnabled()) {
             $T = new \Template(DON_PI_PATH . '/templates');
             $T->set_file('page', 'campaign_detail.thtml');
@@ -135,14 +135,10 @@ function DONATION_CampaignList()
     if (!$res || DB_numRows($res) < 1)
         return '<span class="info">'.$LANG_DON['no_open_campaigns'].'</span>';
 
-    $C = new Donation\Campaign();
-    $T = new \Template(DON_PI_PATH . '/templates');
-    $T->set_file('camplist', 'campaign_list.thtml');
-
+    $T = DON_getTemplate('campaign_list', 'camplist');
     $T->set_block('camplist', 'CampaignBlk', 'CBlk');
     while ($A = DB_fetchArray($res, false)) {
-
-        $C->SetVars($A);
+        $C = Donation\Campaign::getInstance($A);
         $received = (float)$A['received'];
         $goal = (float)$A['goal'];
         $have_pct_recvd = true;
@@ -154,17 +150,23 @@ function DONATION_CampaignList()
             $pct_recvd = 100;
         }
 
+        $status = LGLIB_invokeService('paypal', 'formatAmount', $A['received'], $received, $svc_msg);
+        if ($status !== PLG_RET_OK) {
+            $received = $A['received'];
+        }
+        $status = LGLIB_invokeService('paypal', 'formatAmount', $A['goal'], $goal, $svc_msg);
+        if ($status !== PLG_RET_OK) {
+            $received = $A['goal'];
+        }
+        $received_txt = sprintf($LANG_DON['amt_received'], $received, $goal, $pct_recvd);
         $T->set_var(array(
             'camp_id'       => $A['camp_id'],
             'name'          => $A['name'],
             'startdt'       => $A['startdt'],
             'enddt'         => $A['enddt'],
             'description'   => $A['description'],
-            'goal'          => COM_numberFormat($A['goal'], 2),
-            'received'      => COM_numberFormat($A['received'], 2),
-            'pct_received'  => sprintf('%5.2f', $pct_recvd),
+            'received_txt'  => $received_txt,
             'have_pct_received' => $have_pct_recvd,
-            'amt_received'  => $received,
             'donate_btn'    => $C->GetButton(),
             'pi_url'        => DON_URL,
         ) );

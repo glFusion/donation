@@ -76,6 +76,7 @@ $LANG_DON = array(
 'hlp_transid'   => 'Enter a transaction ID, if applicable',
 'hlp_comment'   => 'Enter a general comment here',
 'pct_received'  => '%.02f Received of %.02f',
+'amt_received'  => '%1$s (%3$.02f%%) of %2$s Received',
 );
 
 // Messages for the plugin upgrade

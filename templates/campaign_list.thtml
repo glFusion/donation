@@ -1,7 +1,7 @@
 {# begin {templatelocation} #}
 <h1>{$LANG_DON['open_campaigns']}</h1>
 {$LANG_DON['open_campaigns_desc']}<p />
-<hr width="85%" />
+<hr>
 <!-- BEGIN CampaignBlk -->
 <div class="prodlistitem" style="padding:10px;clear:both;">
   <div style="float:left;">
@@ -10,15 +10,15 @@
     </div>
     <div>{description}<p /></div>
   </div>
-  <div style="float:right; width:250px; text-align:left;">
+  <div style="float:right; width:250px; text-align:right;">
     {donate_btn}
   {!if have_pct_received}
-    <div>{amt_received} ({pct_received}%) / {goal} {$LANG_DON['received']}.</div>
+    <div style="white-space:nowrap;">{received_txt}</div>
   {!endif}
   </div>
 </div>
 <div style="clear:both;">
-  <hr width="85%" />
+  <hr />
 </div>
 <!-- END CampaignBlk -->
 {# end {templatelocation} #}
