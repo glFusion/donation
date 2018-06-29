@@ -132,7 +132,7 @@ function DON_donationList($camp_id)
     );
     $form_arr = array();
     $retval .= '<h3>' . $title . '</h3>';
-    $retval .= ADMIN_list('donation', 'DON_donation_getListField', $header_arr,
+    $retval .= ADMIN_list('donation_donationlist', 'DON_donation_getListField', $header_arr,
                     $text_arr, $query_arr, $defsort_arr, '', '',
                     $options, $form_arr);
     return $retval;
@@ -254,7 +254,7 @@ function DON_campaignList()
     );
     $options = array();
     $form_arr = array();
-    $retval .= ADMIN_list('donation', 'DON_campaign_getListField', $header_arr,
+    $retval .= ADMIN_list('donation_campaignlist', 'DON_campaign_getListField', $header_arr,
                     $text_arr, $query_arr, $defsort_arr, '', '',
                     $options, $form_arr);
     return $retval;
