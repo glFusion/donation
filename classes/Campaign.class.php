@@ -380,7 +380,7 @@ class Campaign
             }
             $status = LGLIB_invokeService('paypal', 'genButton', $vars,
                 $output, $svc_msg);
-            if ($status == PLG_RET_OK) {
+            if ($status == PLG_RET_OK && !empty($output)) {
                 $button = $output[0];
             }
         }
