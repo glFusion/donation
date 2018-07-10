@@ -22,7 +22,7 @@
 */
 function service_productinfo_donation($args, &$output, &$svc_msg)
 {
-    global $_TABLES, $LANG_PHOTO, $LANG_DON;
+    global $_TABLES, $LANG_PHOTO, $LANG_DON, $_CONF_DON;
 
     // $args should be an array of item info
     if (!is_array($args) || !isset($args['item_id']) || !is_array($args['item_id'])) return PLG_RET_ERROR;
@@ -44,6 +44,10 @@ function service_productinfo_donation($args, &$output, &$svc_msg)
         $output['name'] = $LANG_DON['donation'] . ': ' . $C->name;
         $output['description'] = $dscp;
         $output['override_price'] = 1;
+        $output['btn_text'] = $LANG_DON['donate'];
+        if ($_CONF_DON['pp_use_donation']) {
+            $output['btn_type'] = 'donation';
+        }
         return PLG_RET_OK;
     } else {
         // Invalid campaign ID requested
