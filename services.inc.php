@@ -40,8 +40,8 @@ function service_productinfo_donation($args, &$output, &$svc_msg)
     $C = Donation\Campaign::getInstance($camp_id);
     if (!$C->isNew) {
         $dscp = $LANG_DON['donation'] . ': ' . $C->description;
-        $output['short_description'] = $dscp;
         $output['name'] = $LANG_DON['donation'] . ': ' . $C->name;
+        $output['short_description'] = $output['name'];
         $output['description'] = $dscp;
         $output['override_price'] = 1;
         $output['btn_text'] = $LANG_DON['donate'];
