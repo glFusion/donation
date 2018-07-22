@@ -80,7 +80,7 @@ case 'detail':
                 'camp_name'         => $name,
                 'camp_shortdesc'    => $shortdesc,
                 'camp_description'  => $descrip,
-                'buttons'           => $C->GetButton(),
+                'buttons'           => $C->getButton(),
                 'start_dt'          => $C->startdt,
                 'end_dt'            => $C->enddt,
             ) );
@@ -167,7 +167,7 @@ function DONATION_CampaignList()
             'description'   => $A['description'],
             'received_txt'  => $received_txt,
             'have_pct_received' => $have_pct_recvd,
-            'donate_btn'    => $C->GetButton(),
+            'donate_btn'    => $C->getButton(),
             'pi_url'        => DON_URL,
         ) );
         $T->parse('CBlk', 'CampaignBlk', true);

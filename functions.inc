@@ -413,7 +413,7 @@ function phpblock_donation_donations()
         );
 
         $C = Donation\Campaign::getInstance($row);
-        $T->set_var('donate_btn', $C->GetButton());
+        $T->set_var('donate_btn', $C->getButton());
 
         if ($i > 0)
             $T->set_var('hr', '<hr />');

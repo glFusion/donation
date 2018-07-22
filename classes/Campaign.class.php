@@ -357,7 +357,7 @@ class Campaign
     *
     *   @return string      HTML for a PayPal donation button
     */
-    public function GetButton()
+    public function getButton()
     {
         global $_TABLES, $_CONF, $_CONF_DON, $_USER;
 
