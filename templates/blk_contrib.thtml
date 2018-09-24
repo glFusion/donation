@@ -15,5 +15,4 @@
 {!endif}
 {description}
 <div class="aligncenter uk-margin-small-top">{donate_btn}</div>
-</div>
 {# end {templatelocation} #}
