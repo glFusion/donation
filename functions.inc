@@ -506,7 +506,7 @@ function plugin_dopluginsearch_donation(
             AND (c.enddt > '{$_CONF_DON['now']}' OR c.enddt IS NULL)
             ";
 
-    $search = new \SearchCriteria($_CONF_DON['pi_name'], $LANG_DON['blocktitle']);
+    $search = new \SearchCriteria($_CONF_DON['pi_name'], $LANG_DON['donations']);
     $columns = array('c.name', 'c.description',
                     );
     list($sql, $ftsql) = $search->buildSearchSQL($keyType, $query, $columns, $sql);
