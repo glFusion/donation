@@ -78,6 +78,8 @@ $LANG_DON = array(
 'pct_received'  => '%.02f Received of %.02f',
 'amt_received'  => '%1$s (%3$.02f%%) of %2$s Received',
 'donate' => 'Donate',
+'datepicker' => 'Click for Date Selector',
+'timepicker' => 'Click for Time Selector',
 );
 
 // Messages for the plugin upgrade

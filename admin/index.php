@@ -113,8 +113,8 @@ function DON_donationList($camp_id)
 
     $C = Donation\Campaign::getInstance($camp_id);
     $title = $LANG_DON['campaign'] . " :: $C->name";
-    if (!empty($C->startdt)) {
-        $title .= ' (' . $C->startdt . ')';
+    if (!empty($C->start)) {
+        $title .= ' (' . $C->start->toMySQL(true) . ')';
     }
 
     $text_arr = array(
@@ -222,9 +222,9 @@ function DON_campaignList()
             'text' => $LANG_DON['enabled'], 'sort' => false, 'align', 'center'),
         array('field' => 'name',
             'text' => $LANG_DON['camp_name'], 'sort' => true),
-        array('field' => 'startdt',
+        array('field' => 'start_ts',
             'text' => $LANG_DON['startdate'], 'sort' => true),
-        array('field' => 'enddt',
+        array('field' => 'end_ts',
             'text' => $LANG_DON['enddate'], 'sort' => true),
         array('field' => 'goal',
             'text' => $LANG_DON['goal'], 'sort' => true),
@@ -235,7 +235,7 @@ function DON_campaignList()
             'align' => 'center'),
    );
 
-    $defsort_arr = array('field' => 'startdt', 'direction' => 'desc');
+    $defsort_arr = array('field' => 'start_ts', 'direction' => 'desc');
 
     $text_arr = array(
         'has_extras' => true,
@@ -252,6 +252,7 @@ function DON_campaignList()
         'query_fields' => array('name', 'description'),
         'default_filter' => 'WHERE 1=1'
     );
+    //echo $query_arr['sql'];die;
     $options = array();
     $form_arr = array();
     $retval .= ADMIN_list('donation_campaignlist', 'DON_campaign_getListField', $header_arr,
@@ -274,7 +275,10 @@ function DON_campaign_getListField($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $LANG_ACCESS, $LANG_DON, $_CONF_DON;
 
+    static $Dt = NULL;
     $retval = '';
+
+    if ($Dt === NUL) $Dt = new \Date('now', $_CONF['timezone'];
 
     switch($fieldname) {
     case 'edit':
@@ -316,9 +320,10 @@ function DON_campaign_getListField($fieldname, $fieldvalue, $A, $icon_arr)
         $retval = '<span class="text-align:right;">' .
                 sprintf("%6.2f", $fieldvalue) . '</span>';
         break;
-    case 'startdt':
-    case 'enddt':
-        $retval = $fieldvalue;
+    case 'start_ts':
+    case 'end_ts':
+        $Dt->setTimestamp($fieldvalue);
+        $retval = $Dt->toMySQL(true);
         break;
 
     case 'name':

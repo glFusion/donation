@@ -81,8 +81,8 @@ case 'detail':
                 'camp_shortdesc'    => $shortdesc,
                 'camp_description'  => $descrip,
                 'buttons'           => $C->getButton(),
-                'start_dt'          => $C->startdt,
-                'end_dt'            => $C->enddt,
+                'start_dt'          => $C->start->toMySQL(true),
+                'end_dt'            => $C->end->toMySQL(true),
             ) );
             $T->parse('output', 'page');
             $pageTitle = $LANG_DON['campaign'] . '::' . $C->name;
@@ -126,9 +126,8 @@ function DONATION_CampaignList()
             LEFT JOIN {$_TABLES['don_donations']} d
                 ON d.camp_id=c.camp_id
             WHERE c.enabled = 1
-            AND (c.startdt < '{$_CONF_DON['now']}' OR c.startdt IS NULL)
-            AND (c.enddt > '{$_CONF_DON['now']}' OR c.enddt IS NULL)
-            AND (c.hardgoal = 0 OR received < c.goal)
+            AND c.start_ts < UNIX_TIMESTAMP()
+            AND c.end_ts > UNIX_TIMESTAMP()
             GROUP BY c.camp_id";
     //echo $sql;die;
     $res = DB_query($sql);
@@ -139,8 +138,11 @@ function DONATION_CampaignList()
     $T->set_block('camplist', 'CampaignBlk', 'CBlk');
     while ($A = DB_fetchArray($res, false)) {
         $C = Donation\Campaign::getInstance($A);
+        // Skip campaigns that have reached their hard goal cutoff
         $received = (float)$A['received'];
         $goal = (float)$A['goal'];
+        if ($C->hardgoal && $received >= $goal) continue;
+
         $have_pct_recvd = true;
         if ($goal == 0) {
             $have_pct_recvd = false;
@@ -159,11 +161,13 @@ function DONATION_CampaignList()
             $received = $A['goal'];
         }
         $received_txt = sprintf($LANG_DON['amt_received'], $received, $goal, $pct_recvd);
+        $startdt  = new \Date($A['startdt'], $_CONF['timezone']);
+        $enddt    = new \Date($A['enddt'], $_CONF['timezone']);
         $T->set_var(array(
             'camp_id'       => $A['camp_id'],
             'name'          => $A['name'],
-            'startdt'       => $A['startdt'],
-            'enddt'         => $A['enddt'],
+            'startdt'       => $startdt->toMySQL(true),
+            'enddt'         => $enddt->toMySQL(true),
             'description'   => $A['description'],
             'received_txt'  => $received_txt,
             'have_pct_received' => $have_pct_recvd,

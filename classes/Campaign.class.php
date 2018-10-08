@@ -18,6 +18,13 @@ namespace Donation;
 */
 class Campaign
 {
+    const MIN_DATETIME  = '1970-01-01 00:00:00';
+    const MAX_DATETIME  = '2037-12-31 23:59:59';
+    const MIN_DATE      = '1970-01-01';
+    const MAX_DATE      = '2037-12-31';
+    const MIN_TIME      = '00:00:00';
+    const MAX_TIME      = '23:59:59';
+
     private $properties = array();
     private $isNew;
     private $btn_types = array('donation');
@@ -44,6 +51,8 @@ class Campaign
             } else {
                 // Set default values
                 $this->enabled = 1;
+                $this->start = '';
+                $this->end = '';
             }
         }
     }
@@ -89,10 +98,26 @@ class Campaign
     */
     public function __set($key, $value)
     {
+        global $_CONF;
+
         switch ($key) {
         case 'camp_id':
         case 'old_camp_id':
             $this->properties[$key] = COM_sanitizeID($value, false);
+            break;
+
+        case 'start':
+            if (empty($value)) {
+                $value = self::MIN_DATETIME;
+            }
+            $this->properties[$key] = new \Date($value, $_CONF['timezone']);
+            break;
+
+        case 'end':
+            if (empty($value)) {
+                $value = self::MAX_DATETIME;
+            }
+            $this->properties[$key] = new \Date($value, $_CONF['timezone']);
             break;
 
         case 'pp_buttons':
@@ -103,8 +128,8 @@ class Campaign
         case 'name':
         case 'shortdesc':
         case 'description':
-        case 'startdt':
-        case 'enddt':
+        //case 'startdt':
+        //case 'enddt':
             $this->properties[$key] = trim($value);
             break;
 
@@ -150,14 +175,16 @@ class Campaign
     *   Set all the variables in this object from values provided.
     *   @param  array   $A  Array of values, either from $_POST or database
     */
-    public function setVars($A)
+    public function setVars($A, $fromDB=true)
     {
+        global $_CONF;
+
         if (!is_array($A))
             return;
 
         $this->camp_id = $A['camp_id'];
-        $this->startdt = $A['startdt'];
-        $this->enddt = $A['enddt'];
+        //$this->startdt = $A['startdt'];
+        //$this->enddt = $A['enddt'];
         $this->name = $A['name'];
         $this->shortdesc = $A['shortdesc'];
         $this->description = $A['description'];
@@ -167,6 +194,18 @@ class Campaign
         $this->blk_show_pct = $A['blk_show_pct'];
         //$this->pp_buttons = $A['pp_buttons'];
         $this->amount = $A['amount'];
+
+        if ($fromDB) {
+            $this->start = $A['start_ts'];
+            $this->end   = $A['end_ts'];
+        } else {
+            if (empty($A['end_date'])) $A['end_date'] = self::MAX_DATE;
+            if (empty($A['end_time'])) $A['end_time'] = self::MAX_TIME;
+            if (empty($A['start_date'])) $A['start_date'] = self::MIN_DATE;
+            if (empty($A['start_time'])) $A['start_time'] = self::MIN_TIME;
+            $this->start = $A['start_date'] . ' ' . $A['start_time'];
+            $this->end = $A['end_date'] . ' ' . $A['end_time'];
+        }
     }
 
 
@@ -261,6 +300,21 @@ class Campaign
             break;
         }
 
+        if ($this->end->toMySQL(true) == self::MAX_DATETIME) {
+            $end_dt = '';
+            $end_tm = '';
+        } else {
+            $end_dt = $this->end->format('Y-m-d', true);
+            $end_tm = $this->end->format('H:i', true);
+        }
+        if ($this->start->toMySQL(true) == self::MIN_DATETIME) {
+            $st_dt = '';
+            $st_tm = '';
+        } else {
+            $st_dt = $this->start->format('Y-m-d', true);
+            $st_tm = $this->start->format('H:i', true);
+        }
+
         $T->set_var(array(
             'help_url'      => DON_URL . '/docs/campaignform_help.html',
             'action_url'    => DON_ADMIN_URL . '/index.php',
@@ -269,8 +323,12 @@ class Campaign
             'name'          => $this->name,
             'shortdesc'     => $this->shortdesc,
             'description'   => $this->description,
-            'startdt'       => $this->startdt,
-            'enddt'         => $this->enddt,
+            'start_date'    => $st_dt,
+            'end_date'      => $end_dt,
+            'start_time'    => $st_tm,
+            'end_time'      => $end_tm,
+            //'startdt'       => $this->startdt,
+            //'enddt'         => $this->enddt,
             'chk_enabled'   => $this->enabled == 1 ? DON_CHECKED : '',
             'chk_hardgoal'  => $this->hardgoal == 1 ? DON_CHECKED : '',
             'chk_blk_show_pct'  => $this->blk_show_pct == 1 ? DON_CHECKED : '',
@@ -293,29 +351,13 @@ class Campaign
     {
         global $_TABLES, $LANG_DON;
 
-        if (is_array($A))
-            $this->setVars($A);
+        if (is_array($A)) {
+            $this->setVars($A, false);
+        }
         $this->old_camp_id = $A['old_camp_id'];
-
-        $start = $this->startdt;
-        if (empty($start))
-            $start = 'NULL';
-        else
-            $start = "'" . DB_escapeString($start) . "'";
-
-        $finish = $this->enddt;
-        if (empty($finish))
-            $finish = 'NULL';
-        else
-            $finish = "'" . DB_escapeString($finish) . "'";
-
         if ($this->camp_id == '') {
             $this->camp_id = COM_makeSid();
         }
-
-        //$btn = $this->MakeButton();
-        //$buttons = array('donation' => $btn);
-        //$this->pp_buttons = serialize($buttons);
 
         if ($this->isNew) {
             if (DB_count($_TABLES['don_campaigns'], 'camp_id',
@@ -328,7 +370,6 @@ class Campaign
         } else {
             $sql1 = "UPDATE {$_TABLES['don_campaigns']} SET";
             if ($this->camp_id != '' && $this->old_camp_id != $this->camp_id) {
-                //$this->camp_id = $A['camp_id'];
                 $sql1 .= " camp_id = '" . DB_escapeString($this->camp_id) . "',";
             }
             $sql3 = "WHERE camp_id='" . DB_escapeString($this->old_camp_id) . "'";
@@ -337,14 +378,13 @@ class Campaign
                 " name = '" . DB_escapeString($this->name) . "',
                 shortdesc = '" . DB_escapeString($this->shortdesc) . "',
                 description = '" . DB_escapeString($this->description) . "',
-                startdt = $start,
-                enddt = $finish,
+                start_ts = " . $this->start->toUnix() . ",
+                end_ts = " . $this->end->toUnix() . ",
                 goal = {$this->goal},
                 hardgoal = {$this->hardgoal},
                 amount = {$this->amount},
                 blk_show_pct = {$this->blk_show_pct},
                 enabled = {$this->enabled} " .
-                //pp_buttons = '" . DB_escapeString($this->pp_buttons) . "' " .
                 $sql3;
         //echo $sql;die;
         DB_query($sql);

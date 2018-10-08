@@ -40,7 +40,7 @@ define('DON_URL',  $_CONF['site_url'].'/'.$_CONF_DON['pi_name']);
 define('DON_CHECKED', 'checked="checked"');
 define('DON_SELECTED', 'selected="selected"');
 
-$_CONF_DON['now'] = date('Y-m-d H:i:s');
+$_CONF_DON['now'] = new \Date('now', $_CONF['timezone']);
 
 // Determine if the paypal plugin is installed and integration is enabled
 if ( isset($_PLUGINS) && is_array($_PLUGINS) && in_array('paypal', $_PLUGINS) ) {
@@ -139,8 +139,8 @@ function plugin_showstats_donation($showsitestats)
             LEFT JOIN `{$_TABLES['don_donations']}` d
             ON d.camp_id=c.camp_id
             WHERE c.enabled = 1
-                AND (c.startdt < '{$_CONF_DON['now']}' OR c.startdt IS NULL)
-                AND (c.enddt > '{$_CONF_DON['now']}' OR c.enddt IS NULL)
+                AND c.start_ts < UNIX_TIMESTAMP()
+                AND c.end_ts > UNIX_TIMESTAMP()
                 AND (c.hardgoal = 0 OR received < c.goal)
             GROUP BY c.camp_id";
     //COM_errorLog("Sending $sql to DB_query");
@@ -498,12 +498,12 @@ function plugin_dopluginsearch_donation(
 
     $sql = "SELECT
                 c.camp_id, c.name as title, c.description as description,
-                c.startdt as date,
+                c.start_ts as date,
                 CONCAT('/{$_CONF_DON['pi_name']}/index.php?mode=detail&id=',c.camp_id,'&query=$htmlquery') as url
             FROM {$_TABLES['don_campaigns']} c
             WHERE c.enabled = 1
-            AND (c.startdt < '{$_CONF_DON['now']}' OR c.startdt IS NULL)
-            AND (c.enddt > '{$_CONF_DON['now']}' OR c.enddt IS NULL)
+            AND c.start_ts < UNIX_TIMESTAMP()
+            AND c.end_ts > UNIX_TIMESTAMP()
             ";
 
     $search = new \SearchCriteria($_CONF_DON['pi_name'], $LANG_DON['donations']);
