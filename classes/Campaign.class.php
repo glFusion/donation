@@ -403,7 +403,7 @@ class Campaign
 
         $button = '';
 
-        if (DONATION_PAYPAL_ENABLED) {
+        if (DON_shop_enabled()) {
             $vars = array(
                 'item_number' => 'donation:' . $this->camp_id,
                 'item_name' => $this->name,

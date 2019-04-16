@@ -42,21 +42,13 @@ define('DON_SELECTED', 'selected="selected"');
 
 $_CONF_DON['now'] = new \Date('now', $_CONF['timezone']);
 
-// Determine if the paypal plugin is installed and integration is enabled
-if ( isset($_PLUGINS) && is_array($_PLUGINS) && in_array('paypal', $_PLUGINS) ) {
-    define('DONATION_PAYPAL_ENABLED', true);
-} else {
-    // No paypal integration enabled
-    define('DONATION_PAYPAL_ENABLED', false);
-}
-
 // Include inter-plugin services
-require_once DON_PI_PATH . '/services.inc.php';
+require_once __DIR__ . '/services.inc.php';
 
 /**
 * Language file Include
 */
-$langpath = DON_PI_PATH . '/language';
+$langpath = __DIR__  . '/language';
 $langfile = "{$_CONF['language']}.php";
 if (!file_exists("$langpath/$langfile")) {
     $langfile = 'english.php';
@@ -366,8 +358,8 @@ function phpblock_donation_donations()
             LEFT JOIN {$_TABLES['don_donations']} d
                 ON c.camp_id=d.camp_id
             WHERE c.enabled = 1
-                AND (c.enddt > '{$_CONF_DON['now']}' OR c.enddt IS NULL)
-                AND (c.goal = 0 OR c.hardgoal = 0 OR c.received < goal)
+                AND c.end_ts > UNIX_TIMESTAMP()
+                AND (c.goal = 0 OR c.hardgoal = 0 OR c.amount < goal)
             GROUP BY c.camp_id";
     //echo $sql;die;
     $r = DB_query($sql, 1);
@@ -586,6 +578,22 @@ function DON_getIcon($name, $style='info')
     if ($style != '')
         $style = ' don-icon-' . $style;
     return $_CONF_DON['_iconset'] . '-' . $name . $style;
+}
+
+
+/**
+ * Determine if the shop plugin is installed and integration is enabled.
+ *
+ * @return  boolean     True if Paypal is available, False if not.
+ */
+function DON_shop_enabled()
+{
+    static $enabled = NULL;
+    if ($enabled === NULL) {
+        $enabled = function_exists('plugin_chkVersion_shop') ||
+            function_exists('plugin_chkVersion_paypal');
+    }
+    return $enabled;
 }
 
 ?>
