@@ -78,8 +78,8 @@ function service_getproducts_donation($cat='')
 
     $sql = "SELECT * FROM {$_TABLES['don_campaigns']} c
             WHERE c.enabled = 1
-            AND (c.enddt > '{$_CONF_DON['now']}' OR c.enddt IS NULL)
-            AND (c.startdt < '{$_CONF_DON['now']}' OR c.startdt IS NULL)";
+            AND c.end_ts > UNIX_TIMESTAMP()
+            AND c.start_ts < UNIX_TIMESTAMP()";
     $result = DB_query($sql);
     if (!$result)
         return PLG_RET_ERROR;
@@ -114,12 +114,13 @@ function service_handlePurchase_donation($args, &$output, &$svc_msg)
     global $_CONF, $_CONF_DON, $_TABLES, $LANG_DON;
 
     $item = $args['item'];
-    $paypal_data = $args['ipn_data'];
+    $ipn_data = $args['ipn_data'];
     $item_id = explode(':', $item['item_id']);
 
     // Must have an item ID following the plugin name
-    if (!is_array($item_id) || !isset($item_id[1]))
+    if (!is_array($item_id) || !isset($item_id[1])) {
         return PLG_RET_ERROR;
+    }
 
     $item_id[1] = COM_sanitizeID($item_id[1], false);
     $sql = "SELECT * FROM {$_TABLES['don_campaigns']}
@@ -137,7 +138,7 @@ function service_handlePurchase_donation($args, &$output, &$svc_msg)
 
     // Donations typically have no fixed price, so take the
     // payment amount sent by Paypal
-    $amount = (float)$paypal_data['pmt_gross'];
+    $amount = (float)$ipn_data['payment_gross'];
 
     // Initialize the return array
     $output = array('product_id' => implode(':', $item),
@@ -153,21 +154,23 @@ function service_handlePurchase_donation($args, &$output, &$svc_msg)
     // User ID is returned in the 'custom' field, so make sure it's numeric.
     // If not, try to get it from the payer's email address. This will yield
     // zero if not found.
-    if (is_numeric($paypal_data['custom']['uid'])) {
-        $uid = (int)$paypal_data['custom']['uid'];
+    if (is_numeric($ipn_data['custom']['uid'])) {
+        $uid = (int)$ipn_data['custom']['uid'];
     } else {
-        $uid = (int)DB_getItem($_TABLES['users'], 'email', $paypal_data['payer_email']);
+        $uid = (int)DB_getItem(
+            $_TABLES['users'],
+            'uid',
+            "email = '{$ipn_data['payer_email']}'"
+        );
         if ($uid < 1) $uid = 1;     // set to anonymous if not found
     }
 
-    $memo = isset($paypal_data['memo']) ? $paypal_data['memo'] : '';
+    $memo = isset($ipn_data['memo']) ? $ipn_data['memo'] : '';
     $memo = DB_escapeString($memo);
-    if (isset($paypal_data['payer_name'])) {
-        $pp_contrib = $paypal_data['payer_name'];
-    } elseif (isset($paypal_data['first_name']) &&
-                isset($paypal_data['last_name']) ) {
-        $pp_contrib = $paypal_data['first_name'] . ' ' .
-            $paypal_data['last_name'];
+    if (isset($ipn_data['payer_name'])) {
+        $pp_contrib = $ipn_data['payer_name'];
+    } elseif (isset($ipn_data['first_name']) && isset($ipn_data['last_name']) ) {
+        $pp_contrib = $ipn_data['first_name'] . ' ' . $ipn_data['last_name'];
     } else {
         $pp_contrib = 'Unknown';
     }
@@ -177,10 +180,10 @@ function service_handlePurchase_donation($args, &$output, &$svc_msg)
             ) VALUES (
                 '$uid',
                 '" . DB_escapeString($pp_contrib) . "',
-                '{$_CONF_DON['now']}',
+                '{$_CONF['now']}',
                 '{$item_id[1]}',
                 '{$amount}',
-                '" . DB_escapeString($paypal_data['txn_id']) . "',
+                '" . DB_escapeString($ipn_data['txn_id']) . "',
                 '$memo'
             )";
     DB_query($sql, 1);     // Execute event record update
