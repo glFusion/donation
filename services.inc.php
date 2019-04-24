@@ -31,10 +31,11 @@ function service_productinfo_donation($args, &$output, &$svc_msg)
 
     // Create a return array with values to be populated later.
     // The actual paypal product ID is photocomp:type:id
-    $output = array('product_id' => 'donation:' . $camp_id,
-            'name' => 'Unknown',
-            'short_description' => 'Unknown Donation Item',
-            'price' => '0.00',
+    $output = array(
+        'product_id' => 'donation:' . $camp_id,
+        'name' => 'Unknown',
+        'short_description' => 'Unknown Donation Item',
+        'price' => '0.00',
     );
 
     $C = Donation\Campaign::getInstance($camp_id);
