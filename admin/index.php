@@ -278,7 +278,7 @@ function DON_campaign_getListField($fieldname, $fieldvalue, $A, $icon_arr)
     static $Dt = NULL;
     $retval = '';
 
-    if ($Dt === NUL) $Dt = new \Date('now', $_CONF['timezone'];
+    if ($Dt === NULL) $Dt = new \Date('now', $_CONF['timezone']);
 
     switch($fieldname) {
     case 'edit':
