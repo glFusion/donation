@@ -93,6 +93,7 @@ $LANG_configsections['donation'] = array(
 
 $LANG_confignames['donation'] = array(
     'pp_use_donation'   => 'Use Donation Paypal Button Type',
+    'num_in_blk'        => 'Number of campaigns in block (0=unlimited)',
 );
 
 $LANG_configsubgroups['donation'] = array(

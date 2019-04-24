@@ -361,11 +361,15 @@ function phpblock_donation_donations()
                 AND c.end_ts > UNIX_TIMESTAMP()
                 AND (c.goal = 0 OR c.hardgoal = 0 OR c.amount < goal)
             GROUP BY c.camp_id";
+    if ($_CONF_DON['num_in_blk'] > 0) {
+        $sql .= ' LIMIT ' . (int)$_CONF_DON['num_in_blk'];
+    }
     //echo $sql;die;
     $r = DB_query($sql, 1);
     $n = DB_numRows($r);
-    if ($n < 1)
+    if ($n < 1) {
         return '';
+    }
 
     $T = new \Template(DON_PI_PATH . '/templates');
 

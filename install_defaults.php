@@ -59,6 +59,17 @@ $donationConfigData = array(
         'set' => true,
         'group' => 'donation',
     ),
+    array(
+        'name' => 'num_in_blk',
+        'default_value' => 1,
+        'type' => 'text',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 0,
+        'sort' => 20,
+        'set' => true,
+        'group' => 'donation',
+    ),
 );
 
 
