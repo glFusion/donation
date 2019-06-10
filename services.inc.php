@@ -1,36 +1,42 @@
 <?php
 /**
-*   Paypal integration functions for the Donation plugin.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
-*   @package    donation
-*   @version    0.0.2
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Shop integration functions for the Donation plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
+ * @package     donation
+ * @version     v0.0.2
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 
 /**
-*   Get information about a specific item.
-*
-*   @param  array   $args       Item Info (pi_name, item_type, item_id)
-*   @param  array   &$output    Array of output data
-*   @param  string  &$svc_msg   Unused
-*   @return integer     Return value
-*/
+ * Get information about a specific item.
+ *
+ * @param   array   $args       Item Info (pi_name, item_type, item_id)
+ * @param   array   &$output    Array of output data
+ * @param   string  &$svc_msg   Unused
+ * @return  integer     Return value
+ */
 function service_productinfo_donation($args, &$output, &$svc_msg)
 {
     global $_TABLES, $LANG_PHOTO, $LANG_DON, $_CONF_DON;
 
     // $args should be an array of item info
-    if (!is_array($args) || !isset($args['item_id']) || !is_array($args['item_id'])) return PLG_RET_ERROR;
+    if (
+        !is_array($args) ||
+        !isset($args['item_id']) ||
+        !is_array($args['item_id'])
+    ) {
+        return PLG_RET_ERROR;
+    }
 
     $camp_id = $args['item_id'][0];
 
     // Create a return array with values to be populated later.
-    // The actual paypal product ID is photocomp:type:id
+    // The actual shop product ID is photocomp:type:id
     $output = array(
         'product_id' => 'donation:' . $camp_id,
         'name' => 'Unknown',
@@ -58,11 +64,11 @@ function service_productinfo_donation($args, &$output, &$svc_msg)
 
 
 /**
-*   Get the products under a given category.
-*
-*   @param  string  $cat    Name of category (unused)
-*   @return array           Array of product info, empty string if none
-*/
+ * Get the products under a given category.
+ *
+ * @param   string  $cat    Name of category (unused)
+ * @return  array           Array of product info, empty string if none
+ */
 function service_getproducts_donation($cat='')
 {
     global $_TABLES, $_USER, $_CONF_DON;
@@ -71,7 +77,7 @@ function service_getproducts_donation($cat='')
     $products = '';
 
     $_CONF_DON['show_in_pp_cat'] = 1;
-    // If we're not configured to show campaigns in the Paypal catalog,
+    // If we're not configured to show campaigns in the Shop catalog,
     // just return
     if ($_CONF_DON['show_in_pp_cat'] != 1) {
         return $products;
@@ -103,13 +109,13 @@ function service_getproducts_donation($cat='')
 
 
 /**
-*   Handle the purchase of a product via IPN message.
-*
-*   @param  array   $args       Item Info (pi_name, item_type, item_id)
-*   @param  array   &$output    Array of output data
-*   @param  string  &$svc_msg   Unused
-*   @return integer     Return value
-*/
+ * Handle the purchase of a product via IPN message.
+ *
+ * @param   array   $args       Item Info (pi_name, item_type, item_id)
+ * @param   array   &$output    Array of output data
+ * @param   string  &$svc_msg   Unused
+ * @return  integer     Return value
+ */
 function service_handlePurchase_donation($args, &$output, &$svc_msg)
 {
     global $_CONF, $_CONF_DON, $_TABLES, $LANG_DON;
@@ -138,7 +144,7 @@ function service_handlePurchase_donation($args, &$output, &$svc_msg)
     }
 
     // Donations typically have no fixed price, so take the
-    // payment amount sent by Paypal
+    // payment amount sent by Shop
     $amount = (float)$ipn_data['payment_gross'];
 
     // Initialize the return array

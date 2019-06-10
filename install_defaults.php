@@ -1,28 +1,28 @@
 <?php
 /**
-*   Installation defaults for the Donation plugin.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
-*   @package    donation
-*   @version    0.0.3
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
-*   GNU Public License v2 or later
-*   @filesource
-*/
+ * Installation defaults for the Donation plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2019 Lee Garner <lee@leegarner.com>
+ * @package     donation
+ * @version     v0.0.3
+ * @license     http://opensource.org/licenses/gpl-2.0.php 
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 if (!defined('GVERSION')) {
     die('This file can not be used on its own!');
 }
 
 /**
- *  Default settings for the Donation plugin.
+ * Default settings for the Donation plugin.
  *
- *  Initial Installation Defaults used when loading the online configuration
- *  records. These settings are only used during the initial installation
- *  and not referenced any more once the plugin is installed
+ * Initial Installation Defaults used when loading the online configuration
+ * records. These settings are only used during the initial installation
+ * and not referenced any more once the plugin is installed
  *
- *  @global array $donationConfigData;
+ * @global  array   $donationConfigData;
  */
 global $donationConfigData;
 $donationConfigData = array(
@@ -74,12 +74,11 @@ $donationConfigData = array(
 
 
 /**
- *  Initialize Donation plugin configuration
+ * Initialize Donation plugin configuration.
+ * Creates the database entries for the configuation if they don't exist.
  *
- *  Creates the database entries for the configuation if they don't exist.
- *
- *  @param  integer $group_id   Group ID to use as the plugin's admin group
- *  @return boolean             true: success; false: an error occurred
+ * @param   integer $group_id   Group ID to use as the plugin's admin group
+ * @return  boolean             true: success; false: an error occurred
  */
 function plugin_initconfig_donation($group_id = 0)
 {
@@ -97,7 +96,7 @@ function plugin_initconfig_donation($group_id = 0)
 
 
 /**
- * Sync the configuration in the DB to the above configs
+ * Sync the configuration in the DB to the above configs.
  */
 function plugin_updateconfig_donation()
 {

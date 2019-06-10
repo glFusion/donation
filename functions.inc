@@ -1,15 +1,15 @@
 <?php
 /**
-*   Common functions for the Donation plugin
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
-*   @package    donation
-*   @version    0.0.2
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Common functions for the Donation plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
+ * @package     donation
+ * @version     v0.0.2
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 if (!defined('GVERSION')) {
     die('This file can not be used on its own.');
@@ -46,8 +46,8 @@ $_CONF_DON['now'] = new \Date('now', $_CONF['timezone']);
 require_once __DIR__ . '/services.inc.php';
 
 /**
-* Language file Include
-*/
+ * Language file Include
+ */
 $langpath = __DIR__  . '/language';
 $langfile = "{$_CONF['language']}.php";
 if (!file_exists("$langpath/$langfile")) {
@@ -76,10 +76,10 @@ spl_autoload_register(function ($class)
 
 
 /**
-*   Get additional Javascript into the site header
-*
-*   @return array   List of paths to Javascript files
-*/
+ * Get additional Javascript into the site header.
+ *
+ * @return  array   List of paths to Javascript files
+ */
 function plugin_getheaderjs_donation()
 {
     $js_dir = DON_PI_PATH . '/js';
@@ -91,8 +91,8 @@ function plugin_getheaderjs_donation()
 
 
 /**
-*   Get the plugin and custom CSS files
-*/
+ * Get the plugin and custom CSS files.
+ */
 function plugin_getheadercss_donation()
 {
     $styles = array();
@@ -112,14 +112,14 @@ function plugin_getheadercss_donation()
 
 
 /**
-*   Shows the statistics for the plugin on stats.php.
-*   If $showsitestats is 1 then we are to only print the overall stats in
-*   the 'site statistics' box otherwise we show the detailed stats for the
-*   plugin.
-*
-*   @param  integer $showsitestate  Flag to let us know which stats to get
-*   @return string                  HTML to insert in stats page
-*/
+ * Shows the statistics for the plugin on stats.php.
+ * If $showsitestats is 1 then we are to only print the overall stats in
+ * the 'site statistics' box otherwise we show the detailed stats for the
+ * plugin.
+ *
+ * @param   integer $showsitestate  Flag to let us know which stats to get
+ * @return  string                  HTML to insert in stats page
+ */
 function plugin_showstats_donation($showsitestats)
 {
     global $_CONF, $_USER, $_TABLES, $LANG_DON, $_CONF_DON;
@@ -168,11 +168,11 @@ function plugin_showstats_donation($showsitestats)
 
 
 /**
-*   This will put an option for the plugin in the command and control
-*   block on moderation.php
-*
-*   @return   array   Array containing (pi_name, pi_admin_url, pi_icon_url)
-*/
+ * This will put an option for the plugin in the command and control
+ * block on moderation.php.
+ *
+ * @return  array   Array containing (pi_name, pi_admin_url, pi_icon_url)
+ */
 function plugin_cclabel_donation()
 {
     global $_CONF, $_CONF_DON;
@@ -190,10 +190,10 @@ function plugin_cclabel_donation()
 
 
 /**
-*   Returns the administrative menu option for this plugin.
-*
-*   @return mixed   Array (pi_name, pi_admin_url, # of items) or ''
-*/
+ * Returns the administrative menu option for this plugin.
+ *
+ * @return  mixed   Array (pi_name, pi_admin_url, # of items) or ''
+ */
 function plugin_getadminoption_donation()
 {
     global $_CONF, $_TABLES, $LANG_DON, $_CONF_DON;
@@ -210,10 +210,10 @@ function plugin_getadminoption_donation()
 
 
 /**
-*   Return the current version of code.
-*
-*   @return string      Current plugin version
-*/
+ * Return the current version of code.
+ *
+ * @return  string      Current plugin version
+ */
 function plugin_chkVersion_donation()
 {
     global $_CONF_DON;
@@ -223,10 +223,10 @@ function plugin_chkVersion_donation()
 
 
 /**
-*   Automatically uninstall the plugin.
-*
-*   @return array   Array of plugin elements to remove
-*/
+ * Automatically uninstall the plugin.
+ *
+ * @return  array   Array of plugin elements to remove
+ */
 function plugin_autouninstall_donation()
 {
     global $_CONF_DON;
@@ -244,10 +244,10 @@ function plugin_autouninstall_donation()
 
 
 /**
-*   Returns the URL of the plugin's icon
-*
-*   @return string  URL of the icon
-*/
+ * Returns the URL of the plugin's icon.
+ *
+ * @return  string  URL of the icon
+ */
 function plugin_geticon_donation()
 {
     global $_CONF;
@@ -257,12 +257,12 @@ function plugin_geticon_donation()
 
 
 /**
-*   Disable this plugin's blocks when the plugin is changed.
-*   If the plugin is being enabled, there's no way to know if the blocks
-*   were disabled on purpose, so none of them will be re-enabled.
-*
-*   @param  boolean $enabled    Plugin's "enabled" state
-*/
+ * Disable this plugin's blocks when the plugin is changed.
+ * If the plugin is being enabled, there's no way to know if the blocks
+ * were disabled on purpose, so none of them will be re-enabled.
+ *
+ * @param   boolean $enabled    Plugin's "enabled" state
+ */
 function plugin_enablestatechange_donation($enabled)
 {
     global $_TABLES, $_PLUGINS;
@@ -289,11 +289,11 @@ function plugin_enablestatechange_donation($enabled)
 
 
 /**
-*   Receives notification of anothe plugin's deletion
-*
-*   @param  mixed   $id     Item ID
-*   @param  string  $type   Plugin Name
-*/
+ * Receives notification of anothe plugin's deletion.
+ *
+ * @param   mixed   $id     Item ID
+ * @param   string  $type   Plugin Name
+ */
 function plugin_itemdeleted_donation($id, $type)
 {
     global $_TABLES;
@@ -307,11 +307,11 @@ function plugin_itemdeleted_donation($id, $type)
 
 
 /**
-*   Get the URL to the configuration help file
-*
-*   @param  string  $doclang    Document language
-*   @return string              URL to document
-*/
+ * Get the URL to the configuration help file.
+ *
+ * @param   string  $doclang    Document language
+ * @return  string              URL to document
+ */
 function plugin_getconfigelementhelp_donation($option, $doclang='english')
 {
     global $_CONF, $_CONF_DON;
@@ -328,10 +328,10 @@ function plugin_getconfigelementhelp_donation($option, $doclang='english')
 
 
 /**
-*   Upgrade the plugin.
-*
-*   @return boolean True on success, code for error message otherwise
-*/
+ * Upgrade the plugin.
+ *
+ * @return  boolean True on success, code for error message otherwise
+ */
 function plugin_upgrade_donation()
 {
     require_once __DIR__ . '/upgrade.inc.php';
@@ -340,13 +340,13 @@ function plugin_upgrade_donation()
 
 
 /**
-*   Display information on one or more current campaigns.
-*   Includes a "Donate" button if the PayPal plugin is available.
-*   Includes the percentage of the goal reached if the campaign is so
-*   configured.
-*
-*   @return string      HTML for donation block.
-*/
+ * Display information on one or more current campaigns.
+ * Includes a "Donate" button if the Shop plugin is available.
+ * Includes the percentage of the goal reached if the campaign is so
+ * configured.
+ *
+ * @return  string      HTML for donation block.
+ */
 function phpblock_donation_donations()
 {
     global $_TABLES, $_CONF, $LANG_DON, $_CONF_DON;
@@ -423,12 +423,12 @@ function phpblock_donation_donations()
 
 
 /**
-*   Displays donations received in the user's profile.
-*
-*   @param integer  $uid    User ID whose profile is being displayed
-*   @param object   &$T     Pointer to template object
-*   @return string          HTML to include in profile page
-*/
+ * Displays donations received in the user's profile.
+ *
+ * @param   integer  $uid    User ID whose profile is being displayed
+ * @param   object   &$T     Pointer to template object
+ * @return  string          HTML to include in profile page
+ */
 function plugin_profilevariablesdisplay_donation($uid, &$T)
 {
     global $_CONF_DON, $LANG_DON, $_TABLES, $_CONF;
@@ -467,16 +467,16 @@ function plugin_profilevariablesdisplay_donation($uid, &$T)
 
 
 /**
-*   Create a plugin search object to search this plugin
-*
-*   @param  string  $query
-*   @param  string  $datestart  Starting date for search
-*   @param  string  $dateend    Ending date for search
-*   @param  string  $topic      Topic selected for search
-*   @param  string  $type       Type selected during search
-*   @param  string  $author     Limit results to this author (not used)
-*   @return object              Search object to be processed by Search class
-*/
+ * Create a plugin search object to search this plugin.
+ *
+ * @param   string  $query      User-supplied query string
+ * @param   string  $datestart  Starting date for search
+ * @param   string  $dateend    Ending date for search
+ * @param   string  $topic      Topic selected for search
+ * @param   string  $type       Type selected during search
+ * @param   string  $author     Limit results to this author (not used)
+ * @return  object              Search object to be processed by Search class
+ */
 function plugin_dopluginsearch_donation(
     $query, $datestart, $dateend, $topic, $keyType, $author
 )
@@ -512,11 +512,11 @@ function plugin_dopluginsearch_donation(
 
 
 /**
-*   Support merging local accounts into remote accounts
-*
-*   @param  integer $origUID    Original (remote) user ID
-*   @param  integer $destUID    Merged (local) user ID
-*/
+ * Support merging local accounts into remote accounts.
+ *
+ * @param   integer $origUID    Original (remote) user ID
+ * @param   integer $destUID    Merged (local) user ID
+ */
 function plugin_user_move_donation($origUID, $destUID)
 {
     global $_TABLES;
@@ -530,13 +530,13 @@ function plugin_user_move_donation($origUID, $destUID)
 
 
 /**
-*   Helper function to get a template object.
-*
-*   @param  string  $name   Base name of template file, e.g. "editor"
-*   @param  string  $id     ID of template, e.g. "editform"
-*   @param  string  $path   Optional path if not "templates/"
-*   @return string      Full filename, e.g. "editor.uikit.thtml"
-*/
+ * Helper function to get a template object.
+ *
+ * @param   string  $name   Base name of template file, e.g. "editor"
+ * @param   string  $id     ID of template, e.g. "editform"
+ * @param   string  $path   Optional path if not "templates/"
+ * @return  string      Full filename, e.g. "editor.uikit.thtml"
+ */
 function DON_getTemplate($name, $id='', $path='')
 {
     global $_CONF_DON;
@@ -569,12 +569,12 @@ function DON_getTemplate($name, $id='', $path='')
 
 
 /**
-*   Get an icon from the CSS icon set, either UIkit or FontAwesome
-*
-*   @param  string  $name   Base name of icon, e.g. "edit" for "uk-icon-edit"
-*   @param  string  $style  Style name from local CSS
-*   @return string      Class names for icon
-*/
+ * Get an icon from the CSS icon set, either UIkit or FontAwesome.
+ *
+ * @param   string  $name   Base name of icon, e.g. "edit" for "uk-icon-edit"
+ * @param   string  $style  Style name from local CSS
+ * @return  string      Class names for icon
+ */
 function DON_getIcon($name, $style='info')
 {
     global $_CONF_DON;
@@ -588,14 +588,14 @@ function DON_getIcon($name, $style='info')
 /**
  * Determine if the shop plugin is installed and integration is enabled.
  *
- * @return  boolean     True if Paypal is available, False if not.
+ * @return  boolean     True if Shop is available, False if not.
  */
 function DON_shop_enabled()
 {
     static $enabled = NULL;
     if ($enabled === NULL) {
         $enabled = function_exists('plugin_chkVersion_shop') ||
-            function_exists('plugin_chkVersion_paypal');
+            function_exists('plugin_chkVersion_shop');
     }
     return $enabled;
 }

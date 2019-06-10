@@ -1,20 +1,21 @@
 <?php
 /**
-*   Default English Language file for the Donation plugin.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
-*   @package    donation
-*   @version    0.0.1
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Default English Language file for the Donation plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2019 Lee Garner <lee@leegarner.com>
+ * @package     donation
+ * @version     v0.0.1
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 /**
-* The plugin's lang array
-* @global array $LANG_BANNER
-*/
+ * The plugin's lang array.
+ *
+ * @global array $LANG_DON
+ */
 $LANG_DON = array(
 'camp_id'       => 'Campaign ID',
 'camp_name'     => 'Campaign Name',
@@ -55,7 +56,7 @@ $LANG_DON = array(
 'new_donation'  => 'New Donation',
 'email_subject' => 'New Donation Received',
 'email_msg'     => 'A donation has been received.',
-'reset_buttons' => 'Reset Paypal Buttons',
+'reset_buttons' => 'Reset Shop Buttons',
 'block_title'   => 'Donations Made',
 'open_campaigns' => 'Campaigns Accepting Donations',
 'no_open_campaigns' => 'No campaigns are currently accpeting donations',
@@ -92,7 +93,7 @@ $LANG_configsections['donation'] = array(
 );
 
 $LANG_confignames['donation'] = array(
-    'pp_use_donation'   => 'Use Donation Paypal Button Type',
+    'pp_use_donation'   => 'Use Donation Shop Button Type',
     'num_in_blk'        => 'Number of campaigns in block (0=unlimited)',
 );
 
@@ -102,7 +103,7 @@ $LANG_configsubgroups['donation'] = array(
 
 $LANG_fs['donation'] = array(
     'fs_main' => 'Main Settings',
-    'fs_paypal' => 'Paypal Settings',
+    'fs_shop' => 'Shop Settings',
 );
 
 // Note: entries 0, 1, and 12 are the same as in $LANG_configselects['Core']

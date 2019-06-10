@@ -1,15 +1,15 @@
 <?php
 /**
-*   Public entry point for the Donation plugin.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
-*   @package    donation
-*   @version    0.0.1
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Public entry point for the Donation plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2019 Lee Garner <lee@leegarner.com>
+ * @package     donation
+ * @version     v0.0.1
+ * @license     http://opensource.org/licenses/gpl-2.0.php 
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 /** Import core glFusion libraries */
 require_once '../lib-common.php';
@@ -112,10 +112,10 @@ echo COM_siteFooter(true);
 
 
 /**
-*   Display a list of campaigns that are accepting donations.
-*
-*   @return string      HTML for campaign list
-*/
+ * Display a list of campaigns that are accepting donations.
+ *
+ * @return  string      HTML for campaign list
+ */
 function DONATION_CampaignList()
 {
     global $_TABLES, $_CONF_DON, $LANG_DON;
@@ -152,11 +152,21 @@ function DONATION_CampaignList()
             $pct_recvd = 100;
         }
 
-        $status = LGLIB_invokeService('paypal', 'formatAmount', $A['received'], $received, $svc_msg);
+        $status = LGLIB_invokeService(
+            'shop', 'formatAmount',
+            $A['received'],
+            $received,
+            $svc_msg
+        );
         if ($status !== PLG_RET_OK) {
             $received = $A['received'];
         }
-        $status = LGLIB_invokeService('paypal', 'formatAmount', $A['goal'], $goal, $svc_msg);
+        $status = LGLIB_invokeService(
+            'shop', 'formatAmount',
+            $A['goal'],
+            $goal,
+            $svc_msg
+        );
         if ($status !== PLG_RET_OK) {
             $received = $A['goal'];
         }

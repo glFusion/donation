@@ -1,15 +1,15 @@
 <?php
 /**
-*   Administrative entry point for the Donation plugin.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
-*   @package    donation
-*   @version    0.0.2
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Administrative entry point for the Donation plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2019 Lee Garner <lee@leegarner.com>
+ * @package     donation
+ * @version     v0.0.2
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 /** Import core glFusion functions */
 require_once('../../../lib-common.php');
@@ -17,11 +17,11 @@ require_once('../../../lib-common.php');
 USES_lib_admin();
 
 /**
-*   Basic admin menu for Donation administration
-*
-*   @param  string  $view   Current View
-*   @return string          HTML for admin menu
-*/
+ * Basic admin menu for Donation administration.
+ *
+ * @param   string  $view   Current View
+ * @return  string          HTML for admin menu
+ */
 function DON_adminMenu($view='')
 {
     global $_CONF, $LANG_ADMIN, $LANG_DON, $_CONF_DON;
@@ -85,10 +85,10 @@ function DON_adminMenu($view='')
 
 
 /**
-*   Create an admin list of donations for a campaign
-*
-*   @return string  HTML for list
-*/
+ * Create an admin list of donations for a campaign.
+ *
+ * @return  string  HTML for list
+ */
 function DON_donationList($camp_id)
 {
     global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_ACCESS;
@@ -140,14 +140,14 @@ function DON_donationList($camp_id)
 
 
 /**
-*   Get a single field for the Donation admin list.
-*
-*   @param  string  $fieldname  Name of field
-*   @param  mixed   $fieldvalud Value of field
-*   @param  array   $A          Array of all fields
-*   @param  array   $icon_arr   Array of system icons
-*   @return string              HTML content for field display
-*/
+ * Get a single field for the Donation admin list.
+ *
+ * @param   string  $fieldname  Name of field
+ * @param   mixed   $fieldvalud Value of field
+ * @param   array   $A          Array of all fields
+ * @param   array   $icon_arr   Array of system icons
+ * @return  string              HTML content for field display
+ */
 function DON_donation_getListField($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $LANG_ACCESS, $LANG_DON, $_CONF_DON;
@@ -173,9 +173,14 @@ function DON_donation_getListField($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'txn_id':
-        $status = LGLIB_invokeService('paypal', 'getUrl',
-                array('type'=>'ipn', 'id'=>$fieldvalue),
-                $output, $svc_msg);
+        $status = LGLIB_invokeService(
+            'shop', 'getUrl',
+            array(
+                'type'  => 'ipn',
+                'id'    => $fieldvalue,
+            ),
+            $output, $svc_msg
+        );
         if ($status == PLG_RET_OK) {
             $retval = COM_createLink($fieldvalue, $output);
         } else {
@@ -204,10 +209,10 @@ function DON_donation_getListField($fieldname, $fieldvalue, $A, $icon_arr)
 
 
 /**
-*   Create an admin list of campaigns.
-*
-*   @return string  HTML for list
-*/
+ * Create an admin list of campaigns.
+ *
+ * @return  string  HTML for list
+ */
 function DON_campaignList()
 {
     global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_ACCESS;
@@ -263,14 +268,14 @@ function DON_campaignList()
 
 
 /**
-*   Get a single field for the Campaign admin list.
-*
-*   @param  string  $fieldname  Name of field
-*   @param  mixed   $fieldvalud Value of field
-*   @param  array   $A          Array of all fields
-*   @param  array   $icon_arr   Array of system icons
-*   @return string              HTML content for field display
-*/
+ * Get a single field for the Campaign admin list.
+ *
+ * @param   string  $fieldname  Name of field
+ * @param   mixed   $fieldvalud Value of field
+ * @param   array   $A          Array of all fields
+ * @param   array   $icon_arr   Array of system icons
+ * @return  string              HTML content for field display
+ */
 function DON_campaign_getListField($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $LANG_ACCESS, $LANG_DON, $_CONF_DON;
@@ -343,8 +348,8 @@ function DON_campaign_getListField($fieldname, $fieldvalue, $A, $icon_arr)
 
 
 /**
-*   MAIN
-*/
+ * MAIN
+ */
 // If plugin is installed but not enabled, display an error and exit gracefully
 if (!in_array('donation', $_PLUGINS)) {
     COM_404();

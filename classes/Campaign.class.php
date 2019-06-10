@@ -1,28 +1,37 @@
 <?php
 /**
-*   Class to handle donation campaigns
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
-*   @package    donation
-*   @version    0.1.1
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Class to handle donation campaigns.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2019 Lee Garner <lee@leegarner.com>
+ * @package     donation
+ * @version     v0.1.1
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Donation;
 
 /**
-*   Class to manage donation campaigns
-*   @package donation
-*/
+ * Class to manage donation campaigns.
+ * @package donation
+ */
 class Campaign
 {
-    const MIN_DATETIME  = '1970-01-01 00:00:00';
-    const MAX_DATETIME  = '2037-12-31 23:59:59';
+    /** Minimum possible date for a campaign to start.
+     * @const string */
     const MIN_DATE      = '1970-01-01';
+
+    /** Maximum possible date for a campaign to end.
+     * @const string */
     const MAX_DATE      = '2037-12-31';
+
+    /** Minimum possible time.
+     * @const string */
     const MIN_TIME      = '00:00:00';
+
+    /** Maximum possible time.
+     * @const string */
     const MAX_TIME      = '23:59:59';
 
     private $properties = array();
@@ -31,12 +40,12 @@ class Campaign
 
 
     /**
-    *   Constructor.
-    *   Read campaign data from the database, or create a blank entry
-    *   with default values
-    *
-    *   @param  string  $id     Optional ID of existing campaign
-    */
+     * Constructor.
+     * Read campaign data from the database, or create a blank entry
+     * with default values
+     *
+     * @param   string  $id     Optional ID of existing campaign
+     */
     public function __construct($id='')
     {
         global $_USER, $_TABLES, $_CONF_DON;
@@ -59,9 +68,10 @@ class Campaign
 
 
     /**
-    *   Read a single campaign record into the object
-    *   @param  string  $id     ID of the campaign to retrieve
-    */
+     * Read a single campaign record into the object.
+     *
+     * @param   string  $id     ID of the campaign to retrieve
+     */
     public function Read($id)
     {
         global $_TABLES;
@@ -78,12 +88,12 @@ class Campaign
 
 
     /**
-    *   Get a campaign instance
-    *   Temp function just instantiates a new instance. Caching will come.
-    *
-    *   @param  mixed   $campaign   Campaign ID or record
-    *   @return object              Campaign object
-    */
+     * Get a campaign instance.
+     * Temp function just instantiates a new instance. Caching will come.
+     *
+     * @param   mixed   $campaign   Campaign ID or record
+     * @return  object              Campaign object
+     */
     public static function getInstance($campaign)
     {
         return new self($campaign);
@@ -91,11 +101,11 @@ class Campaign
 
 
     /**
-    *   Set a property's value.
-    *
-    *   @param  string  $var    Name of property to set.
-    *   @param  mixed   $value  New value for property.
-    */
+     * Set a property's value.
+     *
+     * @param   string  $var    Name of property to set.
+     * @param   mixed   $value  New value for property.
+     */
     public function __set($key, $value)
     {
         global $_CONF;
@@ -108,14 +118,14 @@ class Campaign
 
         case 'start':
             if (empty($value)) {
-                $value = self::MIN_DATETIME;
+                $value = self::MIN_DATE . ' ' . self::MIN_TIME;
             }
             $this->properties[$key] = new \Date($value, $_CONF['timezone']);
             break;
 
         case 'end':
             if (empty($value)) {
-                $value = self::MAX_DATETIME;
+                $value = self::MAX_DATE . ' ' . self::MAX_TIME;
             }
             $this->properties[$key] = new \Date($value, $_CONF['timezone']);
             break;
@@ -156,11 +166,11 @@ class Campaign
 
 
     /**
-    *   Get the value of a property.
-    *
-    *   @param  string  $var    Name of property to retrieve.
-    *   @return mixed           Value of property, NULL if undefined.
-    */
+     * Get the value of a property.
+     *
+     * @param   string  $var    Name of property to retrieve.
+     * @return  mixed           Value of property, NULL if undefined.
+     */
     public function __get($var)
     {
         if (array_key_exists($var, $this->properties)) {
@@ -172,9 +182,10 @@ class Campaign
 
 
     /**
-    *   Set all the variables in this object from values provided.
-    *   @param  array   $A  Array of values, either from $_POST or database
-    */
+     * Set all the variables in this object from values provided.
+     *
+     * @param   array   $A  Array of values, either from $_POST or database
+     */
     public function setVars($A, $fromDB=true)
     {
         global $_CONF;
@@ -210,12 +221,12 @@ class Campaign
 
 
     /**
-    *   Update the 'enabled' value for a campaign.
-    *
-    *   @param  integer $oldval     Original value
-    *   @param  string  $id         Campaign ID
-    *   @return integer             New value, old value on error
-    */
+     * Update the 'enabled' value for a campaign.
+     *
+     * @param   integer $oldval     Original value
+     * @param   string  $id         Campaign ID
+     * @return  integer             New value, old value on error
+     */
     public static function toggleEnabled($oldval, $id='')
     {
         global $_TABLES;
@@ -230,10 +241,11 @@ class Campaign
 
 
     /**
-    *   Delete a campaign.
-    *   Can be called as Campaign::Delete($id).
-    *   @param  string  $id ID of campaign to delete, this object if empty
-    */
+     * Delete a campaign.
+     * Can be called as Campaign::Delete($id).
+     *
+     * @param   string  $id ID of campaign to delete, this object if empty
+     */
     public function Delete($id='')
     {
         global $_TABLES;
@@ -253,11 +265,12 @@ class Campaign
 
 
     /**
-    *   Determine if this campaign has any donations belonging to it.
-    *   Can also be called as self::isUsed($id).
-    *   @param  string  $id ID of campaign to check, this object if empty.
-    *   @return boolean     True if this has baners, False if unused
-    */
+     * Determine if this campaign has any donations belonging to it.
+     * Can also be called as self::isUsed($id).
+     *
+     * @param   string  $id ID of campaign to check, this object if empty.
+     * @return  boolean     True if this has baners, False if unused
+     */
     public static function isUsed($id='')
     {
         global $_TABLES;
@@ -272,10 +285,10 @@ class Campaign
 
 
     /**
-    *   Create the editing form for this campaign.
-    *
-    *   @return string      HTML for edit form
-    */
+     * Create the editing form for this campaign.
+     *
+     * @return  string      HTML for edit form
+     */
     public function Edit()
     {
         global $_CONF, $_CONF_DON, $LANG24, $LANG_postmodes;
@@ -300,14 +313,14 @@ class Campaign
             break;
         }
 
-        if ($this->end->toMySQL(true) == self::MAX_DATETIME) {
+        if ($this->end->toMySQL(true) == self::MAX_DATE . ' ' . self::MAX_TIME) {
             $end_dt = '';
             $end_tm = '';
         } else {
             $end_dt = $this->end->format('Y-m-d', true);
             $end_tm = $this->end->format('H:i', true);
         }
-        if ($this->start->toMySQL(true) == self::MIN_DATETIME) {
+        if ($this->start->toMySQL(true) == self::MIN_DATE . ' ' . self::MIN_TIME) {
             $st_dt = '';
             $st_tm = '';
         } else {
@@ -344,9 +357,10 @@ class Campaign
 
 
     /**
-    *   Save this campaign
-    *   @param  array   $A  Array of values from $_POST (optional)
-    **/
+     * Save this campaign.
+     *
+     * @param   array   $A  Array of values from $_POST (optional)
+     */
     public function Save($A='')
     {
         global $_TABLES, $LANG_DON;
@@ -392,11 +406,11 @@ class Campaign
 
 
     /**
-    *   Create a PayPal button for donations.
-    *   Used if the PayPal plugin is not installed or available.
-    *
-    *   @return string      HTML for a PayPal donation button
-    */
+     * Create a Shop button for donations.
+     * Used if the Shop plugin is not installed or available.
+     *
+     * @return  string      HTML for a Shop donation button
+     */
     public function getButton()
     {
         global $_TABLES, $_CONF, $_CONF_DON, $_USER;
@@ -412,14 +426,19 @@ class Campaign
                 'btn_type' => 'donation',
             );
             if ($_CONF_DON['pp_use_donation']) {
-                // Set the PayPal command if configured.
+                // Set the Shop command if configured.
                 $vars['cmd'] = '_donations';
             }
             if ($this->amount > 0) {
                 $vars['amount'] = $this->amount;
             }
-            $status = LGLIB_invokeService('paypal', 'genButton', $vars,
-                $output, $svc_msg);
+            $status = LGLIB_invokeService(
+                'shop',
+                'genButton',
+                $vars,
+                $output,
+                $svc_msg
+            );
             if ($status == PLG_RET_OK && !empty($output)) {
                 $button = $output[0];
             }
@@ -429,11 +448,11 @@ class Campaign
 
 
     /**
-    *   Return the option elements for a campaign selection dropdown.
-    *
-    *   @param  string  $sel    Campaign ID to show as selected
-    *   @return string          HTML for option statements
-    */
+     * Return the option elements for a campaign selection dropdown.
+     *
+     * @param   string  $sel    Campaign ID to show as selected
+     * @return  string          HTML for option statements
+     */
     public static function DropDown($sel='', $access=3)
     {
         global $_TABLES;
@@ -462,10 +481,10 @@ class Campaign
 
 
     /**
-    *   Check if this campaign is enabled.
-    *
-    *   @return boolean     true if enabled, false if not.
-    */
+     * Check if this campaign is enabled.
+     *
+     * @return  boolean     true if enabled, false if not.
+     */
     public function isEnabled()
     {
         return $this->enabled == 1 ? true : false;
