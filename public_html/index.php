@@ -68,24 +68,24 @@ case 'detail':
             $T = new \Template(DON_PI_PATH . '/templates');
             $T->set_file('page', 'campaign_detail.thtml');
             if (!empty($query)) {
-                $name = COM_highlightQuery($C->name, $query);
-                $descrip = COM_highlightQuery($C->description, $query);
-                $shortdesc = COM_highlightQuery($C->shortdesc, $query);
+                $name = COM_highlightQuery($C->getName(), $query);
+                $descrip = COM_highlightQuery($C->getDscp(), $query);
+                $shortdesc = COM_highlightQuery($C->getShortDscp(), $query);
             } else {
-                $name = $C->name;
-                $descrip = $C->description;
-                $shortdesc = $C->shortdesc;
+                $name = $C->getName();
+                $descrip = $C->getDscp();
+                $shortdesc = $C->getShortDscp();
             }
             $T->set_var(array(
                 'camp_name'         => $name,
                 'camp_shortdesc'    => $shortdesc,
                 'camp_description'  => $descrip,
                 'buttons'           => $C->getButton(),
-                'start_dt'          => $C->start->toMySQL(true),
-                'end_dt'            => $C->end->toMySQL(true),
+                'start_dt'          => $C->getStart()->toMySQL(true),
+                'end_dt'            => $C->getEnd()->toMySQL(true),
             ) );
             $T->parse('output', 'page');
-            $pageTitle = $LANG_DON['campaign'] . '::' . $C->name;
+            $pageTitle = $LANG_DON['campaign'] . '::' . $C->getName();
             $result = $T->finish($T->get_var('output'));
         }
     }
@@ -134,14 +134,15 @@ function DONATION_CampaignList()
     if (!$res || DB_numRows($res) < 1)
         return '<span class="info">'.$LANG_DON['no_open_campaigns'].'</span>';
 
-    $T = DON_getTemplate('campaign_list', 'camplist');
+    $T = new Template(DON_PI_PATH . '/templates');
+    $T->set_file('camplist', 'campaign_list.thtml');
     $T->set_block('camplist', 'CampaignBlk', 'CBlk');
     while ($A = DB_fetchArray($res, false)) {
         $C = Donation\Campaign::getInstance($A);
         // Skip campaigns that have reached their hard goal cutoff
         $received = (float)$A['received'];
         $goal = (float)$A['goal'];
-        if ($C->hardgoal && $received >= $goal) continue;
+        if ($C->isHardGoal() && $received >= $goal) continue;
 
         $have_pct_recvd = true;
         if ($goal == 0) {
@@ -161,6 +162,7 @@ function DONATION_CampaignList()
         if ($status !== PLG_RET_OK) {
             $received = $A['received'];
         }
+
         $status = LGLIB_invokeService(
             'shop', 'formatAmount',
             $A['goal'],

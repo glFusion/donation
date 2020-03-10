@@ -1,36 +1,37 @@
 <?php
 /**
-*   Class to cache DB and web lookup results
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2018 Lee Garner <lee@leegarner.com>
-*   @package    donation
-*   @version    0.0.2
-*   @since      0.0.2
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Class to cache DB and web lookup results
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2018 Lee Garner <lee@leegarner.com>
+ * @package     donation
+ * @version     v0.0.2
+ * @since       v0.0.2
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Donation;
 
+
 /**
-*   Class for Donation Cache
-*   @package donation
-*/
+ * Class for Donation Cache.
+ * @package donation
+ */
 class Cache
 {
     CONST TAG = 'donation'; // fallback tag
     CONST MIN_GVERSION = '2.0.0';
 
     /**
-    *   Update the cache.
-    *   Adds an array of tags including the plugin name
-    *
-    *   @param  string  $key    Item key
-    *   @param  mixed   $data   Data, typically an array
-    *   @param  mixed   $tag    Tag, or array of tags.
-    *   @param  integer $cache_mins Cache minutes
-    */
+     * Update the cache.
+     * Adds an array of tags including the plugin name
+     *
+     * @param   string  $key    Item key
+     * @param   mixed   $data   Data, typically an array
+     * @param   mixed   $tag    Tag, or array of tags.
+     * @param   integer $cache_mins Cache minutes
+     */
     public static function set($key, $data, $tag='', $cache_mins=0)
     {
         if (version_compare(GVERSION, self::MIN_GVERSION, '<')) {
@@ -54,10 +55,10 @@ class Cache
 
 
     /**
-    *   Delete a single item from the cache by key
-    *
-    *   @param  string  $key    Base key, e.g. item ID
-    */
+     * Delete a single item from the cache by key.
+     *
+     * @param   string  $key    Base key, e.g. item ID
+     */
     public static function delete($key)
     {
         if (version_compare(GVERSION, self::MIN_GVERSION, '<')) {
@@ -69,11 +70,11 @@ class Cache
 
 
     /**
-    *   Completely clear the cache.
-    *   Called after upgrade.
-    *
-    *   @param  array   $tag    Optional array of tags, base tag used if undefined
-    */
+     * Completely clear the cache.
+     * Called after upgrade.
+     *
+     * @param   array   $tag    Optional array of tags, base tag used if undefined
+     */
     public static function clear($tag = array())
     {
         if (version_compare(GVERSION, self::MIN_GVERSION, '<')) {
@@ -89,12 +90,12 @@ class Cache
 
 
     /**
-    *   Create a unique cache key.
-    *   Intended for internal use, but public in case it is needed.
-    *
-    *   @param  string  $key    Base key, e.g. Item ID
-    *   @return string          Encoded key string to use as a cache ID
-    */
+     * Create a unique cache key.
+     * Intended for internal use, but public in case it is needed.
+     *
+     * @param   string  $key    Base key, e.g. Item ID
+     * @return  string          Encoded key string to use as a cache ID
+     */
     public static function makeKey($key)
     {
         //$key = \glFusion\Cache\Cache::getInstance()->createKey(self::TAG . '_' . $key);
@@ -104,11 +105,11 @@ class Cache
 
 
     /**
-    *   Get an item from cache.
-    *
-    *   @param  string  $key    Key to retrieve
-    *   @return mixed       Value of key, or NULL if not found
-    */
+     * Get an item from cache.
+     *
+     * @param   string  $key    Key to retrieve
+     * @return  mixed       Value of key, or NULL if not found
+     */
     public static function get($key)
     {
         if (version_compare(GVERSION, self::MIN_GVERSION, '<')) {
@@ -122,6 +123,6 @@ class Cache
         }
     }
 
-}   // class Donation\Cache
+}
 
 ?>

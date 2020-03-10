@@ -81,6 +81,7 @@ $LANG_DON = array(
 'donate' => 'Donate',
 'datepicker' => 'Click for Date Selector',
 'timepicker' => 'Click for Time Selector',
+'hlp_camp_del' => 'Only campaigns with no donations may be deleted',
 );
 
 // Messages for the plugin upgrade

@@ -60,9 +60,6 @@ if (is_file("$langpath/custom/$langfile")) {
     include_once "$langpath/custom/$langfile";
 }
 
-$_CONF_DON['_is_uikit'] = $_SYSTEM['framework'] == 'uikit' ? true : false;
-$_CONF_DON['_iconset'] = $_CONF_DON['_is_uikit'] ? 'uk-icon' : 'fa fa';
-
 spl_autoload_register(function ($class)
 {
     if (strpos($class, 'Donation\\') === 0) {
@@ -91,33 +88,12 @@ function plugin_getheaderjs_donation()
 
 
 /**
- * Get the plugin and custom CSS files.
- */
-function plugin_getheadercss_donation()
-{
-    $styles = array();
-    $files = array('style.css');
-
-    foreach ($files as $file) {
-        if (@file_exists($_CONF['path_layout'].'plugins/donation/', $file)) {
-            $styles[] = $_CONF['path_layout'].'plugins/donation/' . $file;
-        } elseif (@file_exists(DON_PI_PATH . '/css/custom' . $file)) {
-            $styles[] = DON_PI_PATH . '/css/custom/' . $file;
-        } else {
-            $styles[] = DON_PI_PATH . '/css/' . $file;
-        }
-    }
-    return $styles;
-}
-
-
-/**
  * Shows the statistics for the plugin on stats.php.
  * If $showsitestats is 1 then we are to only print the overall stats in
  * the 'site statistics' box otherwise we show the detailed stats for the
  * plugin.
  *
- * @param   integer $showsitestate  Flag to let us know which stats to get
+ * @param   integer $showsitestats  Flag to let us know which stats to get
  * @return  string                  HTML to insert in stats page
  */
 function plugin_showstats_donation($showsitestats)
@@ -309,6 +285,7 @@ function plugin_itemdeleted_donation($id, $type)
 /**
  * Get the URL to the configuration help file.
  *
+ * @param   string  $option     Config option to show
  * @param   string  $doclang    Document language
  * @return  string              URL to document
  */
@@ -382,7 +359,6 @@ function phpblock_donation_donations()
             'description' => $row['shortdesc'],
             'camp_id'   => $row['camp_id'],
             'pi_url'    => DON_URL,
-            'is_uikit'  => $_CONF_DON['_is_uikit'],
         ) );
         if ($row['goal'] > 0 && $row['blk_show_pct'] == 1) {
             if ($row['received'] < $row['goal']) {
@@ -451,7 +427,6 @@ function plugin_profilevariablesdisplay_donation($uid, &$T)
             $LT->set_var(array(
                 'name'      => $A['name'],
                 'amount'    => $A['total'],
-                'is_uikit'  => $_CONF_DON['_is_uikit'],
             ) );
             $LT->parse('drow', 'donation_row', true);
         }
@@ -473,7 +448,7 @@ function plugin_profilevariablesdisplay_donation($uid, &$T)
  * @param   string  $datestart  Starting date for search
  * @param   string  $dateend    Ending date for search
  * @param   string  $topic      Topic selected for search
- * @param   string  $type       Type selected during search
+ * @param   string  $keyType    Type selected during search
  * @param   string  $author     Limit results to this author (not used)
  * @return  object              Search object to be processed by Search class
  */
@@ -526,62 +501,6 @@ function plugin_user_move_donation($origUID, $destUID)
 
     DB_query("UPDATE {$_TABLES['donation_donations']}
             SET uid = $destUID WHERE uid = $origUID", 1);
-}
-
-
-/**
- * Helper function to get a template object.
- *
- * @param   string  $name   Base name of template file, e.g. "editor"
- * @param   string  $id     ID of template, e.g. "editform"
- * @param   string  $path   Optional path if not "templates/"
- * @return  string      Full filename, e.g. "editor.uikit.thtml"
- */
-function DON_getTemplate($name, $id='', $path='')
-{
-    global $_CONF_DON;
-
-    // Put parameters into an array if not already.
-    if (!is_array($name) && !empty($id)) {
-        $templates = array($id => $name);
-    } elseif (is_array($name)) {
-        $templates = $name;
-    }
-
-    // Add additional path info if needed
-    if (substr($path, 0, 9) != 'templates') {
-        $path = 'templates/' . $path;
-    }
-
-    // May use "switch" later, for now there are only two options
-    $tpltype = $_CONF_DON['_is_uikit'] ? '.uikit' : '';
-    foreach ($templates as $t_id =>$t_name) {
-        if (file_exists(__DIR__ . "/$path/$t_name$tpltype.thtml")) {
-            $templates[$t_id] = "$t_name$tpltype.thtml";
-        } else {
-            $templates[$t_id] = "$t_name.thtml";
-        }
-    }
-    $T = new \Template(__DIR__ . '/' . $path);
-    $T->set_file($templates);
-    return $T;
-}
-
-
-/**
- * Get an icon from the CSS icon set, either UIkit or FontAwesome.
- *
- * @param   string  $name   Base name of icon, e.g. "edit" for "uk-icon-edit"
- * @param   string  $style  Style name from local CSS
- * @return  string      Class names for icon
- */
-function DON_getIcon($name, $style='info')
-{
-    global $_CONF_DON;
-
-    if ($style != '')
-        $style = ' don-icon-' . $style;
-    return $_CONF_DON['_iconset'] . '-' . $name . $style;
 }
 
 

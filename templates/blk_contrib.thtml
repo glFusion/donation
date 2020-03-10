@@ -3,15 +3,9 @@
   <a href="{pi_url}/index.php?mode=detail&amp;id={camp_id}">{title}</a>
 </span>
 {!if goal}
-{!if is_uikit}
 <div class="uk-progress tooltip" title="{pct_received}">
   <div class="uk-progress-bar" style="width:{pct}%">{pct}%</div>
 </div>
-{!else}
-<div class="don-blk-progress-outer">
-  <div class="don-blk-progress-inner" style="width:{pct}%;">&nbsp;{pct}%</div>
-</div>
-{!endif}
 {!endif}
 {description}
 <div class="aligncenter uk-margin-small-top">{donate_btn}</div>

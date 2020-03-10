@@ -45,9 +45,9 @@ function service_productinfo_donation($args, &$output, &$svc_msg)
     );
 
     $C = Donation\Campaign::getInstance($camp_id);
-    if (!$C->isNew) {
-        $dscp = $LANG_DON['donation'] . ': ' . $C->description;
-        $output['name'] = $LANG_DON['donation'] . ': ' . $C->name;
+    if (!$C->isNew()) {
+        $dscp = $LANG_DON['donation'] . ': ' . $C->getDscp();
+        $output['name'] = $LANG_DON['donation'] . ': ' . $C->getName();
         $output['short_description'] = $output['name'];
         $output['description'] = $dscp;
         $output['override_price'] = 1;
@@ -95,9 +95,9 @@ function service_getproducts_donation($cat='')
     while ($A = DB_fetchArray($result)) {
         $P = Donation\Campaign::getInstance($A);
         $output[] = array(
-            'id' => 'donation:' . $P->camp_id,
-            'name' => $P->name,
-            'short_description' => $P->description,
+            'id' => 'donation:' . $P->getCampaignID(),
+            'name' => $P->getName(),
+            'short_description' => $P->getDscp(),
             'price' => 0,
             'buttons' => array('donation' => $P->GetButton()),
             'url' => DON_URL . '/index.php?mode=detail&amp;id=' .
@@ -148,14 +148,15 @@ function service_handlePurchase_donation($args, &$output, &$svc_msg)
     $amount = (float)$ipn_data['payment_gross'];
 
     // Initialize the return array
-    $output = array('product_id' => implode(':', $item),
-            'name' => $LANG_DON['donation'] . ':' . $A['name'],
-            'short_description' => $LANG_DON['donation'] . ': ' . $A['name'],
-            'description' => $LANG_DON['donation'] . ': ' . $A['shortdesc'],
-            'price' =>  $amount,
-            'expiration' => NULL,
-            'download' => 0,
-            'file' => '',
+    $output = array(
+        'product_id' => implode(':', $item),
+        'name' => $LANG_DON['donation'] . ':' . $A['name'],
+        'short_description' => $LANG_DON['donation'] . ': ' . $A['name'],
+        'description' => $LANG_DON['donation'] . ': ' . $A['shortdesc'],
+        'price' =>  $amount,
+        'expiration' => NULL,
+        'download' => 0,
+        'file' => '',
     );
 
     // User ID is returned in the 'custom' field, so make sure it's numeric.

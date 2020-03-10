@@ -1,15 +1,9 @@
 {# begin {templatelocation} #}
-{!if is_uikit}
 <nav class="uk-navbar uk-margin-top">
   <div class="uk-navbar-content">
   {$LANG_DON['block_title']}
   </div>
 </nav>
-{!else}
-<div class="profile-header">
-  {$LANG_DON['block_title']}
-</div>
-{!endif}
 <ul>
 <!-- BEGIN donation_row -->
   <li>{name}:&nbsp;&nbsp;{amount}</li>

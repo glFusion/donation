@@ -34,9 +34,57 @@ class Campaign
      * @const string */
     const MAX_TIME      = '23:59:59';
 
-    private $properties = array();
-    private $isNew;
+    /** Flag to indicate a new campaign record.
+     * @var boolean */
+    private $isNew = 1;
+
+    /** Array of button types needed.
+     * @var array */
     private $btn_types = array('donation');
+
+    /** Campaign ID.
+     * @var string */
+    private $camp_id = '';
+
+    /** Starting date.
+     * @var object */
+    private $start = NULL;
+
+    /** Ending date.
+     * @var object */
+    private $end = NULL;
+
+    /** Campaign name.
+     * @var string */
+    private $name = '';
+
+    /** Short one-line description.
+     * @var string */
+    private $shortdscp = '';
+
+    /** Full text description.
+     * @var string */
+    private $dscp;
+
+    /** Donation goal for the campaign.
+     * @var float */
+    private $goal = 0;
+
+    /** Amount donated to date.
+     * @var float */
+    private $amount = 0;
+
+    /** Indicate that the campaign is accepting donations.
+     * @var boolean */
+    private $enabled = 1;
+
+    /** Indicate that donations will not be accepted once the goal is reached.
+     * @var boolean */
+    private $hardgoal = 0;
+
+    /** Show the percentage received in the block?
+     * @var boolean */
+    private $blk_show_pct = 0;
 
 
     /**
@@ -50,7 +98,6 @@ class Campaign
     {
         global $_USER, $_TABLES, $_CONF_DON;
 
-        $this->isNew = true;    // Assume new entry until we read one
         if (is_array($id)) {
             $this->setVars($id);
         } else {
@@ -58,10 +105,8 @@ class Campaign
             if ($this->camp_id != '') {
                 $this->Read($this->camp_id);
             } else {
-                // Set default values
-                $this->enabled = 1;
-                $this->start = '';
-                $this->end = '';
+                $this->setStart();
+                $this->setEnd();
             }
         }
     }
@@ -83,6 +128,9 @@ class Campaign
         if (!empty($A)) {
             $this->setVars($A);
             $this->isNew = false;
+        } else {
+            $this->setStart();
+            $this->setEnd();
         }
     }
 
@@ -101,90 +149,10 @@ class Campaign
 
 
     /**
-     * Set a property's value.
-     *
-     * @param   string  $var    Name of property to set.
-     * @param   mixed   $value  New value for property.
-     */
-    public function __set($key, $value)
-    {
-        global $_CONF;
-
-        switch ($key) {
-        case 'camp_id':
-        case 'old_camp_id':
-            $this->properties[$key] = COM_sanitizeID($value, false);
-            break;
-
-        case 'start':
-            if (empty($value)) {
-                $value = self::MIN_DATE . ' ' . self::MIN_TIME;
-            }
-            $this->properties[$key] = new \Date($value, $_CONF['timezone']);
-            break;
-
-        case 'end':
-            if (empty($value)) {
-                $value = self::MAX_DATE . ' ' . self::MAX_TIME;
-            }
-            $this->properties[$key] = new \Date($value, $_CONF['timezone']);
-            break;
-
-        case 'pp_buttons':
-            if (!empty($value))
-                $this->buttons = $value;
-            break;
-
-        case 'name':
-        case 'shortdesc':
-        case 'description':
-        //case 'startdt':
-        //case 'enddt':
-            $this->properties[$key] = trim($value);
-            break;
-
-        case 'goal':
-        case 'amount':
-            $this->properties[$key] = (float)$value;
-            break;
-
-        case 'use_pp':
-        case 'enabled':
-        case 'hardgoal':
-        case 'blk_show_pct':
-            $this->properties[$key] = $value == 1 ? 1 : 0;
-            break;
-
-        case 'buttons':
-            if (is_array($value)) {
-                $this->properties['buttons'] = $value;
-            } else {
-                $this->properties['buttons'] = unserialize($value);
-            }
-        }
-    }
-
-
-    /**
-     * Get the value of a property.
-     *
-     * @param   string  $var    Name of property to retrieve.
-     * @return  mixed           Value of property, NULL if undefined.
-     */
-    public function __get($var)
-    {
-        if (array_key_exists($var, $this->properties)) {
-            return $this->properties[$var];
-        } else {
-            return NULL;
-        }
-    }
-
-
-    /**
      * Set all the variables in this object from values provided.
      *
-     * @param   array   $A  Array of values, either from $_POST or database
+     * @param   array   $A      Array of values
+     * @param   boolean $fromDB True if reading from DB, false for a form
      */
     public function setVars($A, $fromDB=true)
     {
@@ -197,25 +165,24 @@ class Campaign
         //$this->startdt = $A['startdt'];
         //$this->enddt = $A['enddt'];
         $this->name = $A['name'];
-        $this->shortdesc = $A['shortdesc'];
-        $this->description = $A['description'];
+        $this->shortdscp = $A['shortdscp'];
+        $this->dscp = $A['dscp'];
         $this->goal = $A['goal'];
         $this->enabled = isset($A['enabled']) ? $A['enabled'] : 0;
         $this->hardgoal = isset($A['hardgoal']) ? $A['hardgoal'] : 0;
         $this->blk_show_pct = $A['blk_show_pct'];
-        //$this->pp_buttons = $A['pp_buttons'];
         $this->amount = $A['amount'];
 
         if ($fromDB) {
-            $this->start = $A['start_ts'];
-            $this->end   = $A['end_ts'];
+            $this->setStart($A['start_ts']);
+            $this->setEnd($A['end_ts']);
         } else {
             if (empty($A['end_date'])) $A['end_date'] = self::MAX_DATE;
             if (empty($A['end_time'])) $A['end_time'] = self::MAX_TIME;
             if (empty($A['start_date'])) $A['start_date'] = self::MIN_DATE;
             if (empty($A['start_time'])) $A['start_time'] = self::MIN_TIME;
-            $this->start = $A['start_date'] . ' ' . $A['start_time'];
-            $this->end = $A['end_date'] . ' ' . $A['end_time'];
+            $this->setStart($A['start_date'] . ' ' . $A['start_time']);
+            $this->setEnd($A['end_date'] . ' ' . $A['end_time']);
         }
     }
 
@@ -293,7 +260,8 @@ class Campaign
     {
         global $_CONF, $_CONF_DON, $LANG24, $LANG_postmodes;
 
-        $T = DON_getTemplate('campaignform', 'editform');
+        $T = new \Template(__DIR__ . '/../templates');
+        $T->set_file('editform', 'campaignform.thtml');
 
         // Set up the wysiwyg editor, if available
         switch (PLG_getEditorType()) {
@@ -334,8 +302,8 @@ class Campaign
             'camp_id'       => $this->camp_id,
             'old_camp_id'   => $this->camp_id,
             'name'          => $this->name,
-            'shortdesc'     => $this->shortdesc,
-            'description'   => $this->description,
+            'shortdscp'     => $this->shortdscp,
+            'dscp'          => $this->dscp,
             'start_date'    => $st_dt,
             'end_date'      => $end_dt,
             'start_time'    => $st_tm,
@@ -390,8 +358,8 @@ class Campaign
         }
         $sql = $sql1 .
                 " name = '" . DB_escapeString($this->name) . "',
-                shortdesc = '" . DB_escapeString($this->shortdesc) . "',
-                description = '" . DB_escapeString($this->description) . "',
+                shortdesc = '" . DB_escapeString($this->shortdscp) . "',
+                description = '" . DB_escapeString($this->dscp) . "',
                 start_ts = " . $this->start->toUnix() . ",
                 end_ts = " . $this->end->toUnix() . ",
                 goal = {$this->goal},
@@ -451,6 +419,7 @@ class Campaign
      * Return the option elements for a campaign selection dropdown.
      *
      * @param   string  $sel    Campaign ID to show as selected
+     * @param   integer $access Access level required
      * @return  string          HTML for option statements
      */
     public static function DropDown($sel='', $access=3)
@@ -483,13 +452,321 @@ class Campaign
     /**
      * Check if this campaign is enabled.
      *
-     * @return  boolean     true if enabled, false if not.
+     * @return  integer     1 if enabled, 0 if not.
      */
     public function isEnabled()
     {
-        return $this->enabled == 1 ? true : false;
+        return $this->enabled ? 1 : 0;
     }
 
-}   // class Campaign
+
+    /**
+     * Check whether this campaign has a hard cutoff at the goal.
+     *
+     * @return  integer     1 if the goal is a hard stop, 0 if not
+     */
+    public function isHardGoal()
+    {
+        return $this->hardgoal ? 1 : 0;
+    }
+
+
+    /**
+     * Get the name of the campaign.
+     *
+     * @return  string      Campaign name
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+
+    /**
+     * Get the short description of the campaign.
+     *
+     * @return  string      Short description
+     */
+    public function getShortDscp()
+    {
+        return $this->shortdscp;
+    }
+
+
+    /**
+     * Get the full description of the campaign.
+     *
+     * @return  string      Full description
+     */
+    public function getDscp()
+    {
+        return $this->dscp;
+    }
+
+
+    /**
+     * Set the starting date object.
+     *
+     * @param   string  $value  Starting date string
+     * @return  object  $this
+     */
+    private function setStart($value=NULL)
+    {
+        global $_CONF;
+
+        if (empty($value)) {
+            $value = self::MIN_DATE . ' ' . self::MIN_TIME;
+        }
+        $this->start = new \Date($value, $_CONF['timezone']);
+        return $this;
+    }
+
+
+    /**
+     * Set the ending  date object.
+     *
+     * @param   string  $value  Starting date string
+     * @return  object  $this
+     */
+    private function setEnd($value=NULL)
+    {
+        global $_CONF;
+
+        if (empty($value)) {
+            $value = self::MAX_DATE . ' ' . self::MAX_TIME;
+        }
+        $this->end = new \Date($value, $_CONF['timezone']);
+        return $this;
+    }
+
+
+    /**
+     * Check if there is a starting date, where start is not the minimum date.
+     *
+     * @return  boolean     True if a valid starting date, False if not
+     */
+    public function hasStart()
+    {
+        return $this->start->toMySQL(true) == self::MIN_DATE . ' ' . self::MIN_TIME ? false : true;
+    }
+
+
+    /**
+     * Get the starting date.
+     *
+     * @return  object      Starting date object
+     */
+    public function getStart()
+    {
+        return $this->start;
+    }
+
+
+    /**
+     * Get the ending date.
+     *
+     * @return  object      Ending date object
+     */
+    public function getEnd()
+    {
+        return $this->end;
+    }
+
+
+    /**
+     * Get the campaign ID.
+     *
+     * @return  string  Campaign ID
+     */
+    public function getCampaignID()
+    {
+        return $this->camp_id;
+    }
+
+
+    /**
+     * Check if this is a new, uninitialized record.
+     *
+     * @return  integer     1 if a new record, 0 if existing
+     */
+    public function isNew()
+    {
+        return $this->isNew ? 1 : 0;
+    }
+    
+    
+    /**
+     * Create an admin list of campaigns.
+     *
+     * @return  string  HTML for list
+     */
+    public static function adminList()
+    {
+        global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_ACCESS;
+        global $_CONF_DON, $LANG_DON;
+
+        USES_lib_admin();
+        $retval = '';
+
+        $header_arr = array(      # display 'text' and use table field 'field'
+            array(
+                'field' => 'edit',
+                'text' => $LANG_ADMIN['edit'],
+                'sort' => false,
+                'align', 'center',
+            ),
+            array(
+                'field' => 'enabled',
+                'text' => $LANG_DON['enabled'],
+                'sort' => false,
+                'align', 'center',
+            ),
+            array(
+                'field' => 'name',
+                'text' => $LANG_DON['camp_name'],
+                'sort' => true,
+            ),
+            array(
+                'field' => 'start_ts',
+                'text' => $LANG_DON['startdate'],
+                'sort' => true,
+            ),
+            array(
+                'field' => 'end_ts',
+                'text' => $LANG_DON['enddate'],
+                'sort' => true,
+            ),
+            array(
+                'field' => 'goal',
+                'text' => $LANG_DON['goal'],
+                'sort' => true,
+            ),
+            array(
+                'field' => 'received',
+                'text' => $LANG_DON['received'],
+                'sort' => true,
+            ),
+            array(
+                'text' => $LANG_ADMIN['delete'] . '&nbsp;' .
+                    '<i class="uk-icon uk-icon-question-circle tooltip" '.
+                    'title="' . $LANG_DON['hlp_camp_del'] . '"></i>',
+                'field' => 'delete', 'sort' => false,
+                'align' => 'center',
+            ),
+        );
+
+        $defsort_arr = array('field' => 'start_ts', 'direction' => 'desc');
+        $text_arr = array(
+            'has_extras' => true,
+            'form_url' => DON_ADMIN_URL . '/index.php?type=campaigns',
+        );
+
+        //$options = array('chkdelete' => 'true', 'chkfield' => 'camp_id');
+
+        $query_arr = array('table' => 'don_campaigns',
+            'sql' => "SELECT c.*, (SELECT SUM(amount)
+                    FROM {$_TABLES['don_donations']} d
+                    WHERE d.camp_id = c.camp_id) as received
+                    FROM {$_TABLES['don_campaigns']} c",
+            'query_fields' => array('name', 'description'),
+            'default_filter' => 'WHERE 1=1'
+        );
+        //echo $query_arr['sql'];die;}
+        $options = array();
+        $form_arr = array();
+        $retval .= ADMIN_list(
+            'donation_campaignlist',
+            array(__CLASS__, 'getListField'),
+            $header_arr,
+            $text_arr, $query_arr, $defsort_arr, '', '',
+            $options, $form_arr
+        );
+        return $retval;
+    }
+
+
+    /**
+     * Get a single field for the Campaign admin list.
+     *
+     * @param   string  $fieldname  Name of field
+     * @param   mixed   $fieldvalue Value of field
+     * @param   array   $A          Array of all fields
+     * @param   array   $icon_arr   Array of system icons
+     * @return  string              HTML content for field display
+     */
+    public static function getListField($fieldname, $fieldvalue, $A, $icon_arr)
+    {
+        global $_CONF, $LANG_ACCESS, $LANG_DON, $_CONF_DON;
+
+        static $Dt = NULL;
+        $retval = '';
+
+        if ($Dt === NULL) $Dt = new \Date('now', $_CONF['timezone']);
+
+        switch($fieldname) {
+        case 'edit':
+            $retval .= COM_createLink(
+                '<i class="uk-icon uk-icon-edit" tooltip" title="' .
+                    $LANG_DON['edit_item'] . '"></i>',
+                DON_ADMIN_URL .
+                    '/index.php?editcampaign=x&amp;camp_id=' . $A['camp_id']
+            );
+            break;
+
+        case 'delete':
+            if (!self::isUsed($A['camp_id'])) {
+                $retval = COM_createLink(
+                    '<i class="uk-icon uk-icon-trash uk-text-danger" ' .
+                        ' tooltip" title="' . $LANG_DON['delete'] . '"></i>',
+                    DON_ADMIN_URL .
+                        "/index.php?deletecampaign=x&amp;camp_id={$A['camp_id']}",
+                    array(
+                        'onclick' => 'return confirm(\'' . $LANG_DON['q_del_item'] . '\');',
+                    )
+                );
+            }
+            break;
+
+        case 'enabled':
+            if ($fieldvalue == '1') {
+                $switch = ' checked="checked"';
+                $enabled = 1;
+            } else {
+                $switch = '';
+                $enabled = 0;
+            }
+            $retval .= "<input type=\"checkbox\" $switch value=\"1\" name=\"ena_check\"
+                id=\"togenabled{$A['camp_id']}\" class=\"tooltip\" title=\"{$LANG_DON['ena_or_disa']}\"
+                onclick='DON_toggle(this,\"{$A['camp_id']}\",\"campaign\");' />" . LB;
+            break;
+
+        case 'goal':
+        case 'received':
+            $retval = '<span class="text-align:right;">' .
+                sprintf("%6.2f", $fieldvalue) .
+                '</span>';
+            break;
+        case 'start_ts':
+        case 'end_ts':
+            $Dt->setTimestamp($fieldvalue);
+            $retval = $Dt->toMySQL(true);
+            break;
+
+        case 'name':
+            $retval = COM_createLink(
+                $fieldvalue,
+                DON_ADMIN_URL .
+                '/index.php?donations=x&camp_id=' . $A['camp_id']
+            );
+            break;
+
+        default:
+            $retval = $fieldvalue;
+            break;
+        }
+        return $retval;
+    }
+
+}
 
 ?>
