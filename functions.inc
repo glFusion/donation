@@ -17,14 +17,7 @@ if (!defined('GVERSION')) {
 
 /** @global array $_CONF_DON */
 global $_CONF_DON;
-
-//  Check and see if we need to load the plugin configuration
-if (!isset($_CONF_DON['use_pp_donation'])) {
-    /** Import configuration-handling class */
-    require_once $_CONF['path_system'] . 'classes/config.class.php';
-    $don_config = config::get_instance();
-    $_CONF_DON = $don_config->get_config('donation');
-}
+$_CONF_DON = config::get_instance()->get_config('donation');
 
 /** Additional config items and table definitions are added here */
 require_once __DIR__ . '/donation.php';
