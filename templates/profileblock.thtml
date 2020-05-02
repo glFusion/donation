@@ -4,8 +4,8 @@
   {$LANG_DON['block_title']}
   </div>
 </nav>
-<ul>
+<table class="uk-table uk-table-condensed">
 <!-- BEGIN donation_row -->
-  <li>{name}:&nbsp;&nbsp;{amount}</li>
+  <tr><td class="uk-width-1-2">{name}</td><td>{amount}</td></tr>
 <!-- END donation_row -->
-</ul>
+</table>
