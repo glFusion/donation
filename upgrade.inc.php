@@ -3,9 +3,9 @@
  * Upgrade routines for the Donation plugin.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2009-2019 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2020 Lee Garner <lee@leegarner.com>
  * @package     donation
- * @version     v0.0.2
+ * @version     v0.0.3
  * @license     http://opensource.org/licenses/gpl-2.0.php 
  *              GNU Public License v2 or later
  * @filesource
@@ -67,11 +67,18 @@ function donation_do_upgrade($dvlp=false)
         if (!donation_do_upgrade_sql($current_ver, $dvlp)) return false;
         if (!donation_do_set_version($current_ver)) return false;
     }
+    if (!COM_checkVersion($current_ver, '0.0.3')) {
+        $current_ver = '0.0.3';
+        if (!donation_do_upgrade_sql($current_ver, $dvlp)) return false;
+        if (!donation_do_set_version($current_ver)) return false;
+    }
 
     // Final version update to catch updates that don't go through
     // any of the update functions, e.g. code-only updates
-    if (!COM_checkVersion($current_ver, $installed_ver)) {
-        if (!donation_do_set_version($installed_ver)) {
+    if (
+        !COM_checkVersion($current_ver, $installed_ver) &&
+        !donation_do_set_version($installed_ver)
+    ) {
             return false;
         }
     }

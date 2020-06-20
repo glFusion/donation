@@ -2,9 +2,9 @@
 /**
 *   Table names and other global configuraiton values.
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2020 Lee Garner <lee@leegarner.com>
 *   @package    donation
-*   @version    0.0.2
+*   @version    0.0.3
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -16,7 +16,7 @@ global $_TABLES;
 global $_DB_table_prefix;
 
 // Static configuration items
-$_CONF_DON['pi_version'] = '0.0.2';
+$_CONF_DON['pi_version'] = '0.0.3';
 $_CONF_DON['pi_name'] = 'donation';
 $_CONF_DON['gl_version'] = '1.7.0';
 $_CONF_DON['pi_url'] = 'http://www.leegarner.com';

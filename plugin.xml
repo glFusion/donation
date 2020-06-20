@@ -2,7 +2,7 @@
     <id>donation</id>
     <name>Donations</name>
     <description>Manage donations and fundraising campaigns.</description>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
     <glfusionversion>1.7.0</glfusionversion>
     <phpversion>7.1.0</phpversion>
     <url>http://www.leegarner.com</url>

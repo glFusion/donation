@@ -42,6 +42,16 @@ $_SQL['don_campaigns'] = "CREATE TABLE {$_TABLES['don_campaigns']} (
 )";
 
 $_UPGRADE_SQL = array(
+    '0.0.2' => array(
+        "ALTER TABLE {$_TABLES['don_campaigns']} ADD amount float(8,2) NOT NULL default '0.00' AFTER enabled",
+        "ALTER TABLE {$_TABLES['don_campaigns']} ADD description text AFTER name",
+        "ALTER TABLE {$_TABLES['don_campaigns']} ADD shortdesc varchar(255) default NULL after name",
+        "ALTER TABLE {$_TABLES['don_campaigns']} DROP received",
+    ),
+    '0.0.3' => array(
+        "ALTER TABLE {$_TABLES['don_campaigns']} CHANGE shortdesc `shortdscp` varchar(255)",
+        "ALTER TABLE {$_TABLES['don_campaigns']} CHANGE desc `dscp` text",
+    ),
 );
 
 ?>
