@@ -83,13 +83,12 @@ function service_getproducts_donation($args, &$output, &$svc_msg)
     global $_TABLES, $_USER, $_CONF_DON;
 
     // Initialize the return value as empty.
-    $products = '';
+    $output = array();
 
-    $_CONF_DON['show_in_pp_cat'] = 1;
     // If we're not configured to show campaigns in the Shop catalog,
     // just return
-    if ($_CONF_DON['show_in_pp_cat'] != 1) {
-        return $products;
+    if ($_CONF_DON['show_in_shop_cat'] != 1) {
+        return PLG_RET_OK;  // nothing to show is a valid return
     }
 
     $sql = "SELECT c.*, SUM(d.amount) as received
@@ -104,7 +103,6 @@ function service_getproducts_donation($args, &$output, &$svc_msg)
         return PLG_RET_ERROR;
     }
 
-    $output = array();
     while ($A = DB_fetchArray($result)) {
         $P = Donation\Campaign::getInstance($A);
         if (!$P->isActive()) {

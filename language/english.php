@@ -96,6 +96,7 @@ $LANG_configsections['donation'] = array(
 $LANG_confignames['donation'] = array(
     'pp_use_donation'   => 'Use Donation Payment Button Type',
     'num_in_blk'        => 'Number of campaigns in block (0=unlimited)',
+    'show_in_shop_cat'  => 'Show open campaigns in Shop catalog?',
 );
 
 $LANG_configsubgroups['donation'] = array(
@@ -109,11 +110,7 @@ $LANG_fs['donation'] = array(
 
 // Note: entries 0, 1, and 12 are the same as in $LANG_configselects['Core']
 $LANG_configselects['donation'] = array(
-    0 => array('True' => 1, 'False' => 0),
-    1 => array('True' => TRUE, 'False' => FALSE),
-    3 => array('Yes' => 1, 'No' => 0),
-    //5 => array('Top of Page' => 1, 'Below Featured Article' => 2, 'Bottom of Page' => 3),
-    //12 => array('No access' => 0, 'Read-Only' => 2, 'Read-Write' => 3),
+    1 => array('Yes' => 1, 'No' => 0),
 );
 
 ?>
