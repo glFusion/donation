@@ -197,7 +197,7 @@ function service_handlePurchase_donation($args, &$output, &$svc_msg)
     DB_query($sql, 1);     // Execute event record update
 
     $sql = "UPDATE {$_TABLES['don_campaigns']}
-            SET received=received + $amount
+            SET amount = amount + $amount
             WHERE camp_id = '{$item_id[1]}'";
     DB_query($sql, 1);
     return PLG_RET_OK;
