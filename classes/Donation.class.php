@@ -128,7 +128,26 @@ class Donation
     {
         global $_TABLES;
 
-        DB_delete($_TABLES['don_donations'], 'don_id', $don_id);
+        DB_delete($_TABLES['don_donations'], 'don_id', (int)$don_id);
+    }
+
+
+    /**
+     * Delete multiple donation records at once.
+     *
+     * @param   array   $delitem    Array of donation record IDs
+     */
+    public static function deleteMulti($delitem)
+    {
+        global $_TABLES;
+
+        $delitem = array_map('intval', $delitem);
+        $items = implode(',', $delitem);
+        if (!empty($items)) {
+            $sql = "DELETE FROM {$_TABLES['don_donations']}
+                WHERE don_id IN ($items)";
+            DB_query($sql);
+        }
     }
 
 

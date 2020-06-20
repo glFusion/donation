@@ -36,7 +36,7 @@ $action = '';
 $expected = array(
     // Actions to perform
     'savecampaign', 'deletecampaign', 'savedonation', 'deletedonation',
-    'resetbuttons',
+    'resetbuttons', 'delbutton_x',
     // Views to display
     'campaigns', 'editcampaign', 'editdonation', 'donations', 'campaigns',
 );
@@ -63,18 +63,18 @@ case 'savecampaign':
     $old_camp_id = isset($_POST['old_camp_id']) ? $_POST['old_camp_id'] : '';
     $C = Donation\Campaign::getInstance($old_camp_id);
     $C->Save($_POST);
-    $view = 'campaigns';
+    COM_refresh(DON_ADMIN_URL . '/index.php?campaigns');
     break;
 
 case 'deletecampaign':
     Donation\Campaign::Delete($camp_id);
-    $view = 'campaigns';
+    COM_refresh(DON_ADMIN_URL . '/index.php?campaigns');
     break;
 
 case 'savedonation':
     $D = new Donation\Donation($don_id);
     $D->Save($_POST);
-    $view = 'donations';
+    COM_refresh(DON_ADMIN_URL . '/index.php?donations');
     break;
 
 case 'deletedonation':
@@ -82,7 +82,7 @@ case 'deletedonation':
     // Set camp_id to stay on the donations page for the campaign
     $camp_id = $D->getCampaiginID();
     Donation\Donation::Delete($don_id);
-    $view = 'donations';
+    COM_refresh(DON_ADMIN_URL . '/index.php?donations');
     break;
 
 case 'resetbuttons':
@@ -92,7 +92,16 @@ case 'resetbuttons':
         $P = Donation\Campaign::getInstance($A);
         $P->Save();
     }
-    $view = 'campaigne';
+    COM_refresh(DON_ADMIN_URL . '/index.php?campaigns');
+    break;
+
+case 'delbutton_x':     // deleting multiple items
+    if (isset($_GET['donations'])) {
+        Donation\Donation::deleteMulti($_POST['delitem']);
+        COM_refresh(DON_ADMIN_URL . '/index.php?donations=x&camp_id=' . $_GET['camp_id']);
+    } elseif (isset($_GET['campaigns'])) {
+        $type = 'campaigns';
+    }
     break;
 
 default:
