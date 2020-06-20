@@ -95,14 +95,13 @@ function plugin_showstats_donation($showsitestats)
 
     $retval = '';
 
-    $sql = "SELECT c.camp_id, c.name, SUM(d.amount) as received
+    $sql = "SELECT c.goal, c.camp_id, c.name, SUM(d.amount) as received
             FROM `{$_TABLES['don_campaigns']}` c
             LEFT JOIN `{$_TABLES['don_donations']}` d
             ON d.camp_id=c.camp_id
             WHERE c.enabled = 1
                 AND c.start_ts < UNIX_TIMESTAMP()
                 AND c.end_ts > UNIX_TIMESTAMP()
-                AND (c.hardgoal = 0 OR received < c.goal)
             GROUP BY c.camp_id";
     //COM_errorLog("Sending $sql to DB_query");
     $result = DB_query($sql);
@@ -111,13 +110,23 @@ function plugin_showstats_donation($showsitestats)
     if ($nrows > 0) {
         USES_lib_admin();
         $header_arr = array(
-            array('text' => $LANG_DON['camp_name'],
-                    'field' => 'name',
-                    'header_class' => 'stats-header-title'),
-            array('text' => $LANG_DON['received'],
-                    'field' => 'received',
-                    'header_class' => 'stats-header-count',
-                    'field_class' => 'stats-list-count'),
+            array(
+                'text' => $LANG_DON['camp_name'],
+                'field' => 'name',
+                'header_class' => 'stats-header-title',
+            ),
+            array(
+                'text' => $LANG_DON['goal'],
+                'field' => 'goal',
+                'header_class' => 'stats-header-count',
+                'field_class' => 'stats-list-count',
+            ),
+            array(
+                'text' => $LANG_DON['received'],
+                'field' => 'received',
+                'header_class' => 'stats-header-count',
+                'field_class' => 'stats-list-count',
+            ),
         );
         $data_arr = array();
         $text_arr = array('has_menu'     => false,
@@ -127,7 +136,8 @@ function plugin_showstats_donation($showsitestats)
             $A['name'] = "<a href=\"" . COM_buildUrl(DON_URL .
                     "/index.php?mode=detail&amp;id={$A['camp_id']}"). '">' .
                     htmlspecialchars($A['name']) . '</a>';
-            $A['received'] = COM_NumberFormat($A['received']);
+            $A['received'] = COM_NumberFormat($A['received'], 2);
+            $A['goal'] = COM_NumberFormat($A['goal'], 2);
             $data_arr[] = $A;
         }
         $retval .= ADMIN_simpleList("", $header_arr, $text_arr, $data_arr);
