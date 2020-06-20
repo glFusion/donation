@@ -55,6 +55,7 @@ function service_productinfo_donation($args, &$output, &$svc_msg)
         if ($_CONF_DON['pp_use_donation']) {
             $output['btn_type'] = 'donation';
         }
+        $output['cancel_url'] = DON_URL . '/index.php';
         return PLG_RET_OK;
     } else {
         // Invalid campaign ID requested
@@ -152,7 +153,7 @@ function service_handlePurchase_donation($args, &$output, &$svc_msg)
         'product_id' => implode(':', $item),
         'name' => $LANG_DON['donation'] . ':' . $A['name'],
         'short_description' => $LANG_DON['donation'] . ': ' . $A['name'],
-        'description' => $LANG_DON['donation'] . ': ' . $A['shortdesc'],
+        'description' => $LANG_DON['donation'] . ': ' . $A['shortdscp'],
         'price' =>  $amount,
         'expiration' => NULL,
         'download' => 0,
@@ -182,13 +183,12 @@ function service_handlePurchase_donation($args, &$output, &$svc_msg)
     } else {
         $pp_contrib = 'Unknown';
     }
-
     $sql = "INSERT INTO {$_TABLES['don_donations']} (
                 uid, contrib_name, dt, camp_id, amount, txn_id, comment
             ) VALUES (
                 '$uid',
                 '" . DB_escapeString($pp_contrib) . "',
-                '{$_CONF['now']}',
+                '{$_CONF['_now']->toMySQL(true)}',
                 '{$item_id[1]}',
                 '{$amount}',
                 '" . DB_escapeString($ipn_data['txn_id']) . "',

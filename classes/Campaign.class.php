@@ -70,7 +70,7 @@ class Campaign
      * @var float */
     private $goal = 0;
 
-    /** Amount donated to date.
+    /** Suggested donation amount.
      * @var float */
     private $amount = 0;
 
@@ -165,8 +165,8 @@ class Campaign
         //$this->startdt = $A['startdt'];
         //$this->enddt = $A['enddt'];
         $this->name = $A['name'];
-        $this->shortdscp = $A['shortdesc'];
-        $this->dscp = $A['description'];
+        $this->shortdscp = $A['shortdscp'];
+        $this->dscp = $A['dscp'];
         $this->goal = $A['goal'];
         $this->enabled = isset($A['enabled']) ? (int)$A['enabled'] : 0;
         $this->hardgoal = isset($A['hardgoal']) ? (int)$A['hardgoal'] : 0;
@@ -358,8 +358,8 @@ class Campaign
         }
         $sql = $sql1 .
                 " name = '" . DB_escapeString($this->name) . "',
-                shortdesc = '" . DB_escapeString($this->shortdscp) . "',
-                description = '" . DB_escapeString($this->dscp) . "',
+                shortdscp = '" . DB_escapeString($this->shortdscp) . "',
+                dscp = '" . DB_escapeString($this->dscp) . "',
                 start_ts = " . $this->start->toUnix() . ",
                 end_ts = " . $this->end->toUnix() . ",
                 goal = {$this->goal},
@@ -392,14 +392,15 @@ class Campaign
                 'quantity' => 1,
                 'return' => DON_URL . '/index.php?mode=thanks&id=' . urlencode($this->name),
                 'btn_type' => 'donation',
+                'cancel_return' => DON_URL . '/index.php',
             );
             if ($_CONF_DON['pp_use_donation']) {
                 // Set the Shop command if configured.
                 $vars['cmd'] = '_donations';
             }
-            if ($this->amount > 0) {
+            /*if ($this->amount > 0) {
                 $vars['amount'] = $this->amount;
-            }
+            }*/
             $status = LGLIB_invokeService(
                 'shop',
                 'genButton',
@@ -618,9 +619,9 @@ class Campaign
 
 
     /**
-     * Get the amount donated to date.
+     * Get the suggexted donation amount.
      *
-     * @return  float   Amount donated so far
+     * @return  float   Suggested donation amount
      */
     public function getAmount()
     {
@@ -675,8 +676,8 @@ class Campaign
                 'sort' => true,
             ),
             array(
-                'field' => 'received',
-                'text' => $LANG_DON['received'],
+                'field' => 'amount',
+                'text' => $LANG_DON['sug_amount'],
                 'sort' => true,
             ),
             array(
@@ -688,7 +689,10 @@ class Campaign
             ),
         );
 
-        $defsort_arr = array('field' => 'start_ts', 'direction' => 'desc');
+        $defsort_arr = array(
+            'field' => 'start_ts',
+            'direction' => 'DESC',
+        );
         $text_arr = array(
             'has_extras' => true,
             'form_url' => DON_ADMIN_URL . '/index.php?type=campaigns',
@@ -696,13 +700,14 @@ class Campaign
 
         //$options = array('chkdelete' => 'true', 'chkfield' => 'camp_id');
 
-        $query_arr = array('table' => 'don_campaigns',
+        $query_arr = array(
+            'table' => 'don_campaigns',
             'sql' => "SELECT c.*, (SELECT SUM(amount)
                     FROM {$_TABLES['don_donations']} d
                     WHERE d.camp_id = c.camp_id) as received
                     FROM {$_TABLES['don_campaigns']} c",
-            'query_fields' => array('name', 'description'),
-            'default_filter' => 'WHERE 1=1'
+            'query_fields' => array('name', 'shortdscp', 'dscp'),
+            'default_filter' => 'WHERE 1=1',
         );
         //echo $query_arr['sql'];die;}
         $options = array();
@@ -775,6 +780,7 @@ class Campaign
 
         case 'goal':
         case 'received':
+        case 'amount':
             $retval = '<span class="text-align:right;">' .
                 sprintf("%6.2f", $fieldvalue) .
                 '</span>';

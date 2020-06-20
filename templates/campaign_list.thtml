@@ -3,19 +3,17 @@
 {$LANG_DON['open_campaigns_desc']}<p />
 <hr>
 <!-- BEGIN CampaignBlk -->
-<div class="prodlistitem" style="padding:10px;clear:both;">
-  <div style="float:left;">
-    <div>
-      <h2><a href="{pi_url}/index.php?mode=detail&amp;id={camp_id}">{name}</a></h2>
+<div class="uk-grid">
+    <div class="uk-width-4-5">
+        <h2><a href="{pi_url}/index.php?mode=detail&amp;id={camp_id}">{name}</a></h2>
+        {shortdscp}
     </div>
-    <div>{description}<p /></div>
-  </div>
-  <div style="float:right; width:250px; text-align:right;">
-    {donate_btn}
-  {!if have_pct_received}
-    <div style="white-space:nowrap;">{received_txt}</div>
-  {!endif}
-  </div>
+    <div class="uk-width-1-5" style="text-align:right;">
+        {donate_btn}
+{!if have_pct_received}
+        <div style="white-space:nowrap;">{received_txt}</div>
+{!endif}
+    </div>
 </div>
 <div style="clear:both;">
   <hr />

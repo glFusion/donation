@@ -14,21 +14,22 @@ global $_UPGRADE_SQL;
 
 $_SQL['don_donations'] = "CREATE TABLE {$_TABLES['don_donations']} (
   `don_id` int(11) unsigned NOT NULL auto_increment,
+  `camp_id` varchar(40) NOT NULL default '',
   `uid` int(11) unsigned NOT NULL default '0',
   `contrib_name` varchar(255) default NULL,
   `dt` date NOT NULL,
-  `camp_id` varchar(40) NOT NULL default '',
   `amount` float(8,2) NOT NULL default '0.00',
   `comment` text,
   `txn_id` varchar(40) default '',
-  PRIMARY KEY  (`don_id`)
+  PRIMARY KEY  (`don_id`),
+  KEY `don_camp` (`don_id`, `camp_id`)
 )";
 
 $_SQL['don_campaigns'] = "CREATE TABLE {$_TABLES['don_campaigns']} (
   `camp_id` varchar(40) NOT NULL,
   `name` varchar(255) default NULL,
-  `shortdesc` varchar(255),
-  `description` text,
+  `shortdscp` varchar(255),
+  `dscp` text,
   `start_ts` int(11) unsigned NOT NULL,
   `end_ts` int(11) unsigned NOT NULL,
   `enabled` tinyint(1) NOT NULL default '1',
@@ -41,12 +42,6 @@ $_SQL['don_campaigns'] = "CREATE TABLE {$_TABLES['don_campaigns']} (
 )";
 
 $_UPGRADE_SQL = array(
-    '0.0.2' => array(
-        "ALTER TABLE {$_TABLES['don_campaigns']} ADD amount float(8,2) NOT NULL default '0.00' AFTER enabled",
-        "ALTER TABLE {$_TABLES['don_campaigns']} ADD description text AFTER name",
-        "ALTER TABLE {$_TABLES['don_campaigns']} ADD shortdesc varchar(255) default NULL after name",
-        "ALTER TABLE {$_TABLES['don_campaigns']} DROP received",
-    ),
 );
 
 ?>

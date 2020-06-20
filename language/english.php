@@ -24,8 +24,8 @@ $LANG_DON = array(
 'enabled'       => 'Enabled',
 'disabled'      => 'Disabled',
 'ena_or_disa'   => 'Enable or Disable',
-'shortdesc'     => 'Short Description',
-'description'   => 'Description',
+'shortdscp'     => 'Short Description',
+'dscp'          => 'Description',
 'campaigns'     => 'Campaigns',
 'campaign'      => 'Campaign',
 'donations'     => 'Donations',
@@ -94,7 +94,7 @@ $LANG_configsections['donation'] = array(
 );
 
 $LANG_confignames['donation'] = array(
-    'pp_use_donation'   => 'Use Donation Shop Button Type',
+    'pp_use_donation'   => 'Use Donation Payment Button Type',
     'num_in_blk'        => 'Number of campaigns in block (0=unlimited)',
 );
 

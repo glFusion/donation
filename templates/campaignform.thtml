@@ -34,7 +34,7 @@ function DON_resetSaleDates(type)
     </div>
 
     <div class="uk-form-row">
-      <label class="uk-form-label" for="f_shortdscp">{$LANG_DON['shortdesc']}
+      <label class="uk-form-label" for="f_shortdscp">{$LANG_DON['shortdscp']}
         <span id="short_dscp" class="tooltip_cfg tooltipstered"></span>
       </label>
       <div class="uk-form-controls">
@@ -43,7 +43,7 @@ function DON_resetSaleDates(type)
     </div>
 
     <div class="uk-form-row">
-      <label class="uk-form-label" for="dscp">{$LANG_DON['description']}
+      <label class="uk-form-label" for="dscp">{$LANG_DON['dscp']}
         <span id="dscp" class="tooltip_cfg tooltipstered"></span>
       </label>
       <div class="uk-form-controls">
@@ -53,7 +53,8 @@ function DON_resetSaleDates(type)
     </div>
 
     <div class="uk-form-row">
-      <label class="uk-form-label" for="amount">{$LANG_DON['sug_amount']}
+      <label class="uk-form-label" for="f_amount">{$LANG_DON['sug_amount']}
+        <span id="amount" class="tooltip_cfg tooltipstered"></span>
       </label>
       <div class="uk-form-controls">
         <input name="amount" value="{amount}" type="text" id="f_amount" />
