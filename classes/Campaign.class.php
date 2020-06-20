@@ -165,8 +165,8 @@ class Campaign
         //$this->startdt = $A['startdt'];
         //$this->enddt = $A['enddt'];
         $this->name = $A['name'];
-        $this->shortdscp = $A['shortdscp'];
-        $this->dscp = $A['dscp'];
+        $this->shortdscp = $A['shortdesc'];
+        $this->dscp = $A['description'];
         $this->goal = $A['goal'];
         $this->enabled = isset($A['enabled']) ? $A['enabled'] : 0;
         $this->hardgoal = isset($A['hardgoal']) ? $A['hardgoal'] : 0;
