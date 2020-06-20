@@ -84,6 +84,20 @@ case 'detail':
                 'start_dt'          => $C->getStart()->toMySQL(true),
                 'end_dt'            => $C->getEnd()->toMySQL(true),
             ) );
+            if ($C->getBlkShowPct()) {
+                if ($C->getGoal() == 0) {
+                    $pct_rcvd = '';
+                } elseif ($C->getReceived() < $C->getGoal()) {
+                    $pct_rcvd = sprintf(
+                        $LANG_DON['pct_received'],
+                        $C->getReceived(),
+                        $C->getGoal()
+                    );
+                } else {
+                    $pct_rcvd = '';
+                }
+                $T->set_var('pct_rcvd', $pct_rcvd);
+            }
             $T->parse('output', 'page');
             $pageTitle = $LANG_DON['campaign'] . '::' . $C->getName();
             $result = $T->finish($T->get_var('output'));
@@ -118,7 +132,7 @@ echo COM_siteFooter(true);
  */
 function DONATION_CampaignList()
 {
-    global $_TABLES, $_CONF_DON, $LANG_DON;
+    global $_TABLES, $_CONF_DON, $LANG_DON, $_CONF;
 
     // Get all open campaigns
     $sql = "SELECT c.*, SUM(d.amount) as received
@@ -142,11 +156,15 @@ function DONATION_CampaignList()
         // Skip campaigns that have reached their hard goal cutoff
         $received = (float)$A['received'];
         $goal = (float)$A['goal'];
-        if ($C->isHardGoal() && $received >= $goal) continue;
+        if ($C->isHardGoal() && $received >= $goal) {
+            // Goal reached, do not display
+            continue;
+        }
 
         $have_pct_recvd = true;
         if ($goal == 0) {
             $have_pct_recvd = false;
+            $pct_recvd = 100;
         } elseif ($received < $goal) {
             $pct_recvd = ($received / $goal) * 100;
         } else {
@@ -173,14 +191,15 @@ function DONATION_CampaignList()
             $received = $A['goal'];
         }
         $received_txt = sprintf($LANG_DON['amt_received'], $received, $goal, $pct_recvd);
-        $startdt  = new \Date($A['startdt'], $_CONF['timezone']);
-        $enddt    = new \Date($A['enddt'], $_CONF['timezone']);
+        $startdt  = new Date($A['start_ts'], $_CONF['timezone']);
+        $enddt    = new Date($A['end_ts'], $_CONF['timezone']);
         $T->set_var(array(
             'camp_id'       => $A['camp_id'],
             'name'          => $A['name'],
             'startdt'       => $startdt->toMySQL(true),
             'enddt'         => $enddt->toMySQL(true),
-            'description'   => $A['description'],
+            'shortdscp'     => $A['shortdscp'],
+            'dscp'          => $A['dscp'],
             'received_txt'  => $received_txt,
             'have_pct_received' => $have_pct_recvd,
             'donate_btn'    => $C->getButton(),

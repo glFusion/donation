@@ -86,6 +86,10 @@ class Campaign
      * @var boolean */
     private $blk_show_pct = 0;
 
+    /** Amount received so far. Taken from the provided data if available.
+     * @var float */
+    private $received = 0;
+
 
     /**
      * Constructor.
@@ -121,8 +125,11 @@ class Campaign
     {
         global $_TABLES;
 
-        $sql = "SELECT * FROM {$_TABLES['don_campaigns']}
-            WHERE camp_id='" . COM_sanitizeID($id, false) . "'";
+        $sql = "SELECT c.*, SUM(d.amount) AS received
+            FROM {$_TABLES['don_campaigns']} c
+            LEFT JOIN {$_TABLES['don_donations']} d
+            ON c.camp_id = d.camp_id
+            WHERE c.camp_id='" . COM_sanitizeID($id, false) . "'";
         $res = DB_query($sql, 1);
         $A = DB_fetchArray($res, false);
         if (!empty($A)) {
@@ -172,6 +179,9 @@ class Campaign
         $this->hardgoal = isset($A['hardgoal']) ? (int)$A['hardgoal'] : 0;
         $this->blk_show_pct = isset($A['blk_show_pct']) ? (int)$A['blk_show_pct'] : 0;
         $this->amount = (float)$A['amount'];
+        if (isset($A['received'])) {
+            $this->received = (float)$A['received'];
+        }
 
         if ($fromDB) {
             $this->setStart($A['start_ts']);
@@ -451,6 +461,38 @@ class Campaign
 
 
     /**
+     * Get the campaign record ID.
+     *
+     * @return  string      Campaign ID
+     */
+    public function getID()
+    {
+        return $this->camp_id;
+    }
+
+
+    /**
+     * Check if this campaign is active.
+     * Enabled is true, no hard goal or amount received < goal.
+     *
+     * @return  boolean     True if active, False if not
+     */
+    public function isActive()
+    {
+        if (!$this->isEnabled()) {
+            return false;
+        }
+        if (
+            $this->isHardGoal() &&
+            $this->received >= $this->goal
+        ) {
+            return false;
+        }
+        return true;
+    }
+
+
+    /**
      * Check if this campaign is enabled.
      *
      * @return  integer     1 if enabled, 0 if not.
@@ -619,7 +661,29 @@ class Campaign
 
 
     /**
-     * Get the suggexted donation amount.
+     * Get the amount received to date.
+     *
+     * @return   float      Amount received
+     */
+    public function getReceived()
+    {
+        return (float)$this->received;
+    }
+
+
+    /**
+     * Get the goal for the campaign.
+     *
+     * @return  float       Goal amount
+     */
+    public function getGoal()
+    {
+        return (float)$this->goal;
+    }
+
+
+    /**
+     * Get the suggested donation amount.
      *
      * @return  float   Suggested donation amount
      */

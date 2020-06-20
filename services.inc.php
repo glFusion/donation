@@ -39,11 +39,20 @@ function service_productinfo_donation($args, &$output, &$svc_msg)
     // The actual shop product ID is photocomp:type:id
     $output = array(
         'product_id' => 'donation:' . $camp_id,
+        'id' => 'donation:' . $camp_id,
         'name' => 'Unknown',
         'short_description' => 'Unknown Donation Item',
+        'description'       => '',
         'price' => '0.00',
+        'taxable' => 0,
+        'have_detail_svc' => false,  // Tell Shop to use it's detail page wrapper
+        'fixed_q' => 1,         // Purchase qty fixed at 1
+        'isUnique' => true,     // Only on purchase of this item allowed
+        'supportsRatings' => false,
+        'cancel_url' => DON_URL . '/index.php',
+        'add_cart' => false,    // cannot use the Shop cart
+        'url' => DON_URL . '/index.php?mode=detail&id=' . $camp_id,
     );
-
     $C = Donation\Campaign::getInstance($camp_id);
     if (!$C->isNew()) {
         $dscp = $LANG_DON['donation'] . ': ' . $C->getDscp();
@@ -55,7 +64,6 @@ function service_productinfo_donation($args, &$output, &$svc_msg)
         if ($_CONF_DON['pp_use_donation']) {
             $output['btn_type'] = 'donation';
         }
-        $output['cancel_url'] = DON_URL . '/index.php';
         return PLG_RET_OK;
     } else {
         // Invalid campaign ID requested
@@ -70,7 +78,7 @@ function service_productinfo_donation($args, &$output, &$svc_msg)
  * @param   string  $cat    Name of category (unused)
  * @return  array           Array of product info, empty string if none
  */
-function service_getproducts_donation($cat='')
+function service_getproducts_donation($args, &$output, &$svc_msg)
 {
     global $_TABLES, $_USER, $_CONF_DON;
 
@@ -84,27 +92,40 @@ function service_getproducts_donation($cat='')
         return $products;
     }
 
-    $sql = "SELECT * FROM {$_TABLES['don_campaigns']} c
+    $sql = "SELECT c.*, SUM(d.amount) as received
+            FROM {$_TABLES['don_campaigns']} c
+            LEFT JOIN {$_TABLES['don_donations']} d
+            ON c.camp_id = d.camp_id
             WHERE c.enabled = 1
             AND c.end_ts > UNIX_TIMESTAMP()
             AND c.start_ts < UNIX_TIMESTAMP()";
     $result = DB_query($sql);
-    if (!$result)
+    if (!$result) {
         return PLG_RET_ERROR;
+    }
 
     $output = array();
     while ($A = DB_fetchArray($result)) {
         $P = Donation\Campaign::getInstance($A);
+        if (!$P->isActive()) {
+            continue;
+        }
         $output[] = array(
             'id' => 'donation:' . $P->getCampaignID(),
+            'item_id' => $P->getID(),
             'name' => $P->getName(),
-            'short_description' => $P->getDscp(),
-            'price' => 0,
+            'short_description' => $P->getShortDscp(),
+            'description' => $P->getDscp(),
+            'price' => $P->getAmount(),
             'buttons' => array('donation' => $P->GetButton()),
             'url' => DON_URL . '/index.php?mode=detail&amp;id=' .
                         urlencode($A['camp_id']),
+            'have_detail_svc' => true,  // Tell Shop to use it's detail page wrapper
+            'img_url' => '',
+            'add_cart' => false,    // cannot use the Shop cart
         );
     }
+    //var_dump($output);die;
     return PLG_RET_OK;
 }
 

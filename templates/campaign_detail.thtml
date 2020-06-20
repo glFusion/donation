@@ -12,13 +12,18 @@
     <p>{camp_description}</p>
 </div>
 <div>
-  {!if start_dt}
+{!if start_dt}
   {$LANG_DON['startdate']}: {start_dt}<br />
-  {!endif}
-  {!if end_dt}
+{!endif}
+{!if end_dt}
   {$LANG_DON['enddate']}: {end_dt}<br />
-  {!endif}
+{!endif}
 </div> 
+{!if pct_rcvd}
+<div style="width:100%;text-align:right;">
+    {pct_rcvd}
+</div>
+{!endif}
 <div style="text-align:center;">
 <hr width="80%">
 </div>
