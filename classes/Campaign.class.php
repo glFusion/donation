@@ -168,10 +168,10 @@ class Campaign
         $this->shortdscp = $A['shortdesc'];
         $this->dscp = $A['description'];
         $this->goal = $A['goal'];
-        $this->enabled = isset($A['enabled']) ? $A['enabled'] : 0;
-        $this->hardgoal = isset($A['hardgoal']) ? $A['hardgoal'] : 0;
-        $this->blk_show_pct = $A['blk_show_pct'];
-        $this->amount = $A['amount'];
+        $this->enabled = isset($A['enabled']) ? (int)$A['enabled'] : 0;
+        $this->hardgoal = isset($A['hardgoal']) ? (int)$A['hardgoal'] : 0;
+        $this->blk_show_pct = isset($A['blk_show_pct']) ? (int)$A['blk_show_pct'] : 0;
+        $this->amount = (float)$A['amount'];
 
         if ($fromDB) {
             $this->setStart($A['start_ts']);
@@ -311,8 +311,8 @@ class Campaign
             //'startdt'       => $this->startdt,
             //'enddt'         => $this->enddt,
             'chk_enabled'   => $this->enabled == 1 ? DON_CHECKED : '',
-            'chk_hardgoal'  => $this->hardgoal == 1 ? DON_CHECKED : '',
-            'chk_blk_show_pct'  => $this->blk_show_pct == 1 ? DON_CHECKED : '',
+            'chk_hardgoal'  => $this->getHardgoal() ? DON_CHECKED : '',
+            'chk_blk_show_pct'  => $this->getBlkShowPct() ? DON_CHECKED : '',
             'goal'          => $this->goal,
             'doc_url'       => LGLIB_getDocURL('campaignform.html',
                                 $_CONF_DON['pi_name'],
@@ -363,10 +363,10 @@ class Campaign
                 start_ts = " . $this->start->toUnix() . ",
                 end_ts = " . $this->end->toUnix() . ",
                 goal = {$this->goal},
-                hardgoal = {$this->hardgoal},
-                amount = {$this->amount},
-                blk_show_pct = {$this->blk_show_pct},
-                enabled = {$this->enabled} " .
+                hardgoal = {$this->getHardgoal()},
+                amount = {$this->getAmount()},
+                blk_show_pct = {$this->getBlkShowPct()},
+                enabled = {$this->isEnabled()} " .
                 $sql3;
         //echo $sql;die;
         DB_query($sql);
@@ -593,8 +593,41 @@ class Campaign
     {
         return $this->isNew ? 1 : 0;
     }
-    
-    
+
+
+    /**
+     * Get the integer value for the "show percent in block" flag.
+     *
+     * @return  integer     Zero if disabled, 1 if enabled
+     */
+    public function getBlkShowPct()
+    {
+        return $this->blk_show_pct ? 1 : 0;
+    }
+
+
+    /**
+     * Get the integer value for the "stop when goal is reached" flag.
+     *
+     * @return  integer     Zero if disabled, 1 if enabled
+     */
+    public function getHardgoal()
+    {
+        return $this->hardgoal ? 1 : 0;
+    }
+
+
+    /**
+     * Get the amount donated to date.
+     *
+     * @return  float   Amount donated so far
+     */
+    public function getAmount()
+    {
+        return (float)$this->amount;
+    }
+
+
     /**
      * Create an admin list of campaigns.
      *
