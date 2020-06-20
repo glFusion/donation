@@ -100,8 +100,9 @@ function donation_do_upgrade_sql($version='', $ignore_errors=false)
     global $_TABLES, $_UPGRADE_SQL;
 
     // If no sql statements passed in, return success
-    if (!is_array($_UPGRADE_SQL[$version]))
+    if (!isset($_UPGRADE_SQL[$version]) || !is_array($_UPGRADE_SQL[$version])) {
         return true;
+    }
 
     // Execute SQL now to perform the upgrade
     COM_ErrorLog("--Updating Donation SQL to version $version");
