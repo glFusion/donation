@@ -34,6 +34,7 @@ function service_productinfo_donation($args, &$output, &$svc_msg)
     }
 
     $camp_id = $args['item_id'][0];
+    $C = Donation\Campaign::getInstance($camp_id);
 
     // Create a return array with values to be populated later.
     // The actual shop product ID is photocomp:type:id
@@ -52,8 +53,8 @@ function service_productinfo_donation($args, &$output, &$svc_msg)
         'cancel_url' => DON_URL . '/index.php',
         'add_cart' => false,    // cannot use the Shop cart
         'url' => DON_URL . '/index.php?mode=detail&id=' . $camp_id,
+        'custom_price' => false,
     );
-    $C = Donation\Campaign::getInstance($camp_id);
     if (!$C->isNew()) {
         $dscp = $LANG_DON['donation'] . ': ' . $C->getDscp();
         $output['name'] = $LANG_DON['donation'] . ': ' . $C->getName();
@@ -63,6 +64,10 @@ function service_productinfo_donation($args, &$output, &$svc_msg)
         $output['btn_text'] = $LANG_DON['donate'];
         if ($_CONF_DON['pp_use_donation']) {
             $output['btn_type'] = 'donation';
+        }
+        if ($C->getAmount() > 0) {
+            $output['price'] = $C->getAmount();
+            $output['custom_price'] = true;
         }
         return PLG_RET_OK;
     } else {
