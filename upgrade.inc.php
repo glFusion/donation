@@ -73,14 +73,19 @@ function donation_do_upgrade($dvlp=false)
         if (!donation_do_set_version($current_ver)) return false;
     }
 
+    if (!COM_checkVersion($current_ver, '0.0.5')) {
+        $current_ver = '0.0.5';
+        if (!donation_do_upgrade_sql($current_ver, $dvlp)) return false;
+        if (!donation_do_set_version($current_ver)) return false;
+    }
+
     // Final version update to catch updates that don't go through
     // any of the update functions, e.g. code-only updates
     if (
         !COM_checkVersion($current_ver, $installed_ver) &&
         !donation_do_set_version($installed_ver)
     ) {
-            return false;
-        }
+        return false;
     }
 
     // Sync any configuration item changes

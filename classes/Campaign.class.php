@@ -262,7 +262,6 @@ class Campaign
         $this->hardgoal = isset($A['hardgoal']) ? (int)$A['hardgoal'] : 0;
         $this->blk_show_pct = isset($A['blk_show_pct']) ? (int)$A['blk_show_pct'] : 0;
         $this->setGoal($A['goal']);
-        $this->setAmount($A['amount']);
         if (isset($A['received'])) {
             $this->received = (float)$A['received'];
         }
@@ -411,7 +410,6 @@ class Campaign
             'doc_url'       => LGLIB_getDocURL('campaignform.html',
                                 $_CONF_DON['pi_name'],
                                 $_CONF['language']),
-            'amount'        => $this->amount,
         ) );
         $T->parse ('output', 'editform');
         return $T->finish($T->get_var('output'));
@@ -469,7 +467,6 @@ class Campaign
                 end_ts = " . $this->end->toUnix() . ",
                 goal = {$this->goal},
                 hardgoal = {$this->getHardgoal()},
-                amount = {$this->getAmount()},
                 blk_show_pct = {$this->getBlkShowPct()},
                 enabled = {$this->isEnabled()} " .
                 $sql3;
@@ -508,9 +505,6 @@ class Campaign
                 // Set the Shop command if configured.
                 $vars['cmd'] = '_donations';
             }
-            /*if ($this->amount > 0) {
-                $vars['amount'] = $this->amount;
-            }*/
             $status = LGLIB_invokeService(
                 'shop',
                 'genButton',
@@ -698,20 +692,6 @@ class Campaign
 
 
     /**
-     * Set the suggested amount as a floating-point number.
-     *
-     * @uses    self::fixFloat()
-     * @param   mixed   $val    Value to set
-     * @return  object  $this
-     */
-    private function setAmount($val)
-    {
-        $this->amount = self::fixFloat($val);
-        return $this;
-    }
-
-
-    /**
      * Check if there is a starting date, where start is not the minimum date.
      *
      * @return  boolean     True if a valid starting date, False if not
@@ -811,17 +791,6 @@ class Campaign
 
 
     /**
-     * Get the suggested donation amount.
-     *
-     * @return  float   Suggested donation amount
-     */
-    public function getAmount()
-    {
-        return (float)$this->amount;
-    }
-
-
-    /**
      * Create an admin list of campaigns.
      *
      * @return  string  HTML for list
@@ -868,8 +837,8 @@ class Campaign
                 'sort' => true,
             ),
             array(
-                'field' => 'amount',
-                'text' => $LANG_DON['sug_amount'],
+                'field' => 'received',
+                'text' => $LANG_DON['received'],
                 'sort' => true,
             ),
             array(
@@ -972,7 +941,6 @@ class Campaign
 
         case 'goal':
         case 'received':
-        case 'amount':
             $retval = '<span class="text-align:right;">' .
                 sprintf("%6.2f", $fieldvalue) .
                 '</span>';

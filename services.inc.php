@@ -65,10 +65,6 @@ function service_productinfo_donation($args, &$output, &$svc_msg)
         if ($_CONF_DON['pp_use_donation']) {
             $output['btn_type'] = 'donation';
         }
-        if ($C->getAmount() > 0) {
-            $output['price'] = $C->getAmount();
-            $output['custom_price'] = true;
-        }
         return PLG_RET_OK;
     } else {
         // Invalid campaign ID requested
@@ -104,7 +100,7 @@ function service_getproducts_donation($args, &$output, &$svc_msg)
             'name' => $P->getName(),
             'short_description' => $P->getShortDscp(),
             'description' => $P->getDscp(),
-            'price' => $P->getAmount(),
+            'price' => '0.00',
             'buttons' => array('donation' => $P->GetButton()),
             'url' => DON_URL . '/index.php?mode=detail&amp;id=' .
                         urlencode($P->getID()),
