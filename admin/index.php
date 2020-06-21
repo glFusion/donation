@@ -74,7 +74,7 @@ case 'deletecampaign':
 case 'savedonation':
     $D = new Donation\Donation($don_id);
     $D->Save($_POST);
-    COM_refresh(DON_ADMIN_URL . '/index.php?donations');
+    COM_refresh(DON_ADMIN_URL . '/index.php?donations&camp_id=' . $camp_id);
     break;
 
 case 'deletedonation':
