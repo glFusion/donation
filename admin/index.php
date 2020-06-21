@@ -36,7 +36,7 @@ $action = '';
 $expected = array(
     // Actions to perform
     'savecampaign', 'deletecampaign', 'savedonation', 'deletedonation',
-    'resetbuttons', 'delbutton_x',
+    'delbutton_x',
     // Views to display
     'campaigns', 'editcampaign', 'editdonation', 'donations', 'campaigns',
 );
@@ -83,16 +83,6 @@ case 'deletedonation':
     $camp_id = $D->getCampaiginID();
     Donation\Donation::Delete($don_id);
     COM_refresh(DON_ADMIN_URL . '/index.php?donations');
-    break;
-
-case 'resetbuttons':
-    $sql = "SELECT * FROM {$_TABLES['don_campaigns']}";
-    $res = DB_query($sql);
-    while ($A = DB_fetchArray($res, false)) {
-        $P = Donation\Campaign::getInstance($A);
-        $P->Save();
-    }
-    COM_refresh(DON_ADMIN_URL . '/index.php?campaigns');
     break;
 
 case 'delbutton_x':     // deleting multiple items
