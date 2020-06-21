@@ -336,7 +336,7 @@ function phpblock_donation_donations()
 
     $T = new \Template(DON_PI_PATH . '/templates');
     $i = 0;
-    $limit = min($_CONF_DON['num_in_blk'], 10);
+    $limit = (int)$_CONF_DON['num_in_blk'];
     foreach ($Campaigns as $C) {
         $T->set_file('block', 'blk_contrib.thtml');
         $T->set_var(array(
@@ -377,7 +377,7 @@ function phpblock_donation_donations()
         $T->parse('output','block');
         $retval .= $T->finish($T->get_var('output'));
 
-        if ($i < $limit) {
+        if ($limit > 0 && $i > $limit) {
             break;
         }
     }
