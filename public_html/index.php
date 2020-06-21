@@ -152,7 +152,7 @@ function DONATION_CampaignList()
         }
 
         $have_pct_recvd = true;
-        if ($goal == 0) {
+        if ($goal == 0 || !$C->getBlkShowPct()) {
             $have_pct_recvd = false;
             $pct_recvd = 100;
         } elseif ($received < $goal) {
