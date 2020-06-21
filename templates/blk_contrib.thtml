@@ -1,4 +1,5 @@
 {# begin {templatelocation} #}
+{hr}
 <span style="font-weight:bold;">
   <a href="{pi_url}/index.php?mode=detail&amp;id={camp_id}">{title}</a>
 </span>
@@ -6,6 +7,8 @@
 <div class="uk-progress tooltip" title="{pct_received}">
   <div class="uk-progress-bar" style="width:{pct}%">{pct}%</div>
 </div>
+{!else}
+    <br />
 {!endif}
 {description}
 <div class="aligncenter uk-margin-small-top">{donate_btn}</div>
