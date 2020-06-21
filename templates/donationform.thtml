@@ -8,7 +8,7 @@
         <input required type="text"
             class="uk-form-width-small tooltip"
             title="{$LANG_DON['timepicker']}"
-            data-uk-datepicker="{format:YYYY-MM-DD}
+            data-uk-datepicker="{format:YYYY-MM-DD}"
             name="dt" value="{dt}" />
         <input type="text" name="tm"
             class="uk-form-width-small tooltip"
