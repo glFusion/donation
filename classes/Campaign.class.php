@@ -104,6 +104,7 @@ class Campaign
 
         if (is_array($id)) {
             $this->setVars($id);
+            $this->isNew = 0;
         } else {
             $this->camp_id = COM_sanitizeID($id, false);
             if ($this->camp_id != '') {
@@ -171,7 +172,8 @@ class Campaign
             ON c.camp_id = d.camp_id
             WHERE c.enabled = 1
             AND c.end_ts > UNIX_TIMESTAMP()
-            AND c.start_ts < UNIX_TIMESTAMP()";
+            AND c.start_ts < UNIX_TIMESTAMP()
+            GROUP BY c.camp_id";
         $res = DB_query($sql);
         if (!$res) {
             return $retval;
@@ -256,11 +258,11 @@ class Campaign
         $this->name = $A['name'];
         $this->shortdscp = $A['shortdscp'];
         $this->dscp = $A['dscp'];
-        $this->goal = $A['goal'];
         $this->enabled = isset($A['enabled']) ? (int)$A['enabled'] : 0;
         $this->hardgoal = isset($A['hardgoal']) ? (int)$A['hardgoal'] : 0;
         $this->blk_show_pct = isset($A['blk_show_pct']) ? (int)$A['blk_show_pct'] : 0;
-        $this->amount = (float)$A['amount'];
+        $this->setGoal($A['goal']);
+        $this->setAmount($A['amount']);
         if (isset($A['received'])) {
             $this->received = (float)$A['received'];
         }
@@ -428,25 +430,36 @@ class Campaign
         if (is_array($A)) {
             $this->setVars($A, false);
         }
-        $this->old_camp_id = $A['old_camp_id'];
+        $old_camp_id = $A['old_camp_id'];
         if ($this->camp_id == '') {
             $this->camp_id = COM_makeSid();
         }
 
+        // If the old and new campaign IDs are different (always true
+        // for new records), check that the new ID isn't already in use.
+        if (
+            $old_camp_id != $this->camp_id &&
+            DB_count(
+                $_TABLES['don_campaigns'],
+                'camp_id',
+                $this->camp_id
+            ) > 0
+        ) {
+            return $LANG_DON['duplicate_camp_id'];
+        }
+
+        $update_don_ids = false;
         if ($this->isNew) {
-            if (DB_count($_TABLES['don_campaigns'], 'camp_id',
-                        $this->old_camp_id) > 0) {
-                return $LANG_DON['duplicate_camp_id'];
-            }
             $sql1 = "INSERT INTO {$_TABLES['don_campaigns']} SET
                     camp_id = '" . DB_escapeString($this->camp_id) . "',";
             $sql3 = '';
         } else {
             $sql1 = "UPDATE {$_TABLES['don_campaigns']} SET";
-            if ($this->camp_id != '' && $this->old_camp_id != $this->camp_id) {
+            if ($old_camp_id != $this->camp_id) {
                 $sql1 .= " camp_id = '" . DB_escapeString($this->camp_id) . "',";
+                $update_don_ids = true;
             }
-            $sql3 = "WHERE camp_id='" . DB_escapeString($this->old_camp_id) . "'";
+            $sql3 = "WHERE camp_id='" . DB_escapeString($old_camp_id) . "'";
         }
         $sql = $sql1 .
                 " name = '" . DB_escapeString($this->name) . "',
@@ -462,6 +475,11 @@ class Campaign
                 $sql3;
         //echo $sql;die;
         DB_query($sql);
+        if (!DB_error()) {
+            if ($update_don_ids) {
+                Donation::updateCampaignIDs($old_camp_id, $this->camp_id);
+            }
+        }
     }
 
 
@@ -661,6 +679,34 @@ class Campaign
             $value = self::MAX_DATE . ' ' . self::MAX_TIME;
         }
         $this->end = new \Date($value, $_CONF['timezone']);
+        return $this;
+    }
+
+
+    /**
+     * Set the goal as a floating-point number.
+     *
+     * @uses    self::fixFloat()
+     * @param   mixed   $val    Value to set
+     * @return  object  $this
+     */
+    private function setGoal($val)
+    {
+        $this->goal = self::fixFloat($val);
+        return $this;
+    }
+
+
+    /**
+     * Set the suggested amount as a floating-point number.
+     *
+     * @uses    self::fixFloat()
+     * @param   mixed   $val    Value to set
+     * @return  object  $this
+     */
+    private function setAmount($val)
+    {
+        $this->amount = self::fixFloat($val);
         return $this;
     }
 
@@ -952,6 +998,21 @@ class Campaign
         return $retval;
     }
 
+
+    /**
+     * Sanitize a floating point number from a string.
+     *
+     * @param   string  $val    Value as entered
+     * @return  float       Sanitized floating-point value
+     */
+    private static function fixFloat($val)
+    {
+        return filter_var(
+            $val,
+            FILTER_SANITIZE_NUMBER_FLOAT,
+            FILTER_FLAG_ALLOW_FRACTION
+        );
+    }
 }
 
 ?>

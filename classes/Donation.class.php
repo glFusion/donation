@@ -555,6 +555,24 @@ class Donation
         return $retval;
     }
 
+
+    /**
+     * Update all donation records from an old campaign ID to a new one.
+     * Called from Campaign::Save() if the campaign ID was changed.
+     *
+     * @param   string  $old_id     Original campaign ID
+     * @param   string  $new_id     New campaign ID
+     */
+    public static function updateCampaignIDs($old_id, $new_id)
+    {
+        global $_TABLES;
+
+        $sql = "UPDATE {$_TABLES['don_donations']}
+            SET camp_id = '" . DB_escapeString($new_id) . "'
+            WHERE camp_id = '" . DB_escapeString($old_id) . "'";
+        DB_query($sql);
+    }
+
 }
 
 ?>
