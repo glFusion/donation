@@ -134,28 +134,18 @@ function DONATION_CampaignList()
 {
     global $_TABLES, $_CONF_DON, $LANG_DON, $_CONF;
 
-    // Get all open campaigns
-    $sql = "SELECT c.*, SUM(d.amount) as received
-            FROM {$_TABLES['don_campaigns']} c
-            LEFT JOIN {$_TABLES['don_donations']} d
-                ON d.camp_id=c.camp_id
-            WHERE c.enabled = 1
-            AND c.start_ts < UNIX_TIMESTAMP()
-            AND c.end_ts > UNIX_TIMESTAMP()
-            GROUP BY c.camp_id";
-    //echo $sql;die;
-    $res = DB_query($sql);
-    if (!$res || DB_numRows($res) < 1)
+    $Campaigns = Donation\Campaign::getAllActive();
+    if (count($Campaigns) < 1) {
         return '<span class="info">'.$LANG_DON['no_open_campaigns'].'</span>';
+    }
 
     $T = new Template(DON_PI_PATH . '/templates');
     $T->set_file('camplist', 'campaign_list.thtml');
     $T->set_block('camplist', 'CampaignBlk', 'CBlk');
-    while ($A = DB_fetchArray($res, false)) {
-        $C = Donation\Campaign::getInstance($A);
+    foreach ($Campaigns as $C) {
         // Skip campaigns that have reached their hard goal cutoff
-        $received = (float)$A['received'];
-        $goal = (float)$A['goal'];
+        $received = $C->getReceived();
+        $goal = $C->getGoal();
         if ($C->isHardGoal() && $received >= $goal) {
             // Goal reached, do not display
             continue;
@@ -171,35 +161,40 @@ function DONATION_CampaignList()
             $pct_recvd = 100;
         }
 
+
         $status = LGLIB_invokeService(
             'shop', 'formatAmount',
-            $A['received'],
-            $received,
+            array(
+                'amount' => $received,
+            ),
+            $output,
             $svc_msg
         );
-        if ($status !== PLG_RET_OK) {
-            $received = $A['received'];
+        if ($status == PLG_RET_OK) {
+            $received = $output;
         }
 
         $status = LGLIB_invokeService(
             'shop', 'formatAmount',
-            $A['goal'],
-            $goal,
+            array(
+                'amount' => $goal,
+            ),
+            $output,
             $svc_msg
         );
-        if ($status !== PLG_RET_OK) {
-            $received = $A['goal'];
+        if ($status == PLG_RET_OK) {
+            $goal = $output;
         }
         $received_txt = sprintf($LANG_DON['amt_received'], $received, $goal, $pct_recvd);
-        $startdt  = new Date($A['start_ts'], $_CONF['timezone']);
-        $enddt    = new Date($A['end_ts'], $_CONF['timezone']);
+        $startdt  = new Date($C->getStart(), $_CONF['timezone']);
+        $enddt    = new Date($C->getEnd(), $_CONF['timezone']);
         $T->set_var(array(
-            'camp_id'       => $A['camp_id'],
-            'name'          => $A['name'],
+            'camp_id'       => $C->getID(),
+            'name'          => $C->getName(),
             'startdt'       => $startdt->toMySQL(true),
             'enddt'         => $enddt->toMySQL(true),
-            'shortdscp'     => $A['shortdscp'],
-            'dscp'          => $A['dscp'],
+            'shortdscp'     => $C->getShortDscp(),
+            'dscp'          => $C->getDscp(),
             'received_txt'  => $received_txt,
             'have_pct_received' => $have_pct_recvd,
             'donate_btn'    => $C->getButton(),

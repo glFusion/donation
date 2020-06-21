@@ -95,18 +95,8 @@ function plugin_showstats_donation($showsitestats)
 
     $retval = '';
 
-    $sql = "SELECT c.goal, c.camp_id, c.name, SUM(d.amount) as received
-            FROM `{$_TABLES['don_campaigns']}` c
-            LEFT JOIN `{$_TABLES['don_donations']}` d
-            ON d.camp_id=c.camp_id
-            WHERE c.enabled = 1
-                AND c.start_ts < UNIX_TIMESTAMP()
-                AND c.end_ts > UNIX_TIMESTAMP()
-            GROUP BY c.camp_id";
-    //COM_errorLog("Sending $sql to DB_query");
-    $result = DB_query($sql);
-    //COM_errorLog("Query Sent");
-    $nrows  = DB_numRows ($result);
+    $Campaigns = Donation\Campaign::getAllActive();
+    $nrows = count($Campaigns);
     if ($nrows > 0) {
         USES_lib_admin();
         $header_arr = array(
@@ -129,16 +119,22 @@ function plugin_showstats_donation($showsitestats)
             ),
         );
         $data_arr = array();
-        $text_arr = array('has_menu'     => false,
-                          'title'        => $LANG_DON['camp_mgr'],
+        $text_arr = array(
+            'has_menu'     => false,
+            'title'        => $LANG_DON['camp_mgr'],
         );
-        while ($A = DB_fetchArray($result, false)) {
-            $A['name'] = "<a href=\"" . COM_buildUrl(DON_URL .
-                    "/index.php?mode=detail&amp;id={$A['camp_id']}"). '">' .
-                    htmlspecialchars($A['name']) . '</a>';
-            $A['received'] = COM_NumberFormat($A['received'], 2);
-            $A['goal'] = COM_NumberFormat($A['goal'], 2);
-            $data_arr[] = $A;
+
+        foreach ($Campaigns as $C) {
+            $data_arr[] = array(
+                'name' => COM_createLink(
+                    htmlspecialchars($C->getName()),
+                    COM_buildUrl(
+                        DON_URL . '/index.php?mode=detail&id=' . $C->getID()
+                    )
+                ),
+                'received' => COM_NumberFormat($C->getReceived(), 2),
+                'goal' => COM_NumberFormat($C->getGoal(), 2),
+            );
         }
         $retval .= ADMIN_simpleList("", $header_arr, $text_arr, $data_arr);
     }
@@ -333,47 +329,33 @@ function phpblock_donation_donations()
 
     $retval = '';
 
-    $sql = "SELECT c.*, SUM(d.amount) as received
-            FROM {$_TABLES['don_campaigns']} c
-            LEFT JOIN {$_TABLES['don_donations']} d
-                ON c.camp_id=d.camp_id
-            WHERE c.enabled = 1
-                AND c.end_ts > UNIX_TIMESTAMP()
-                AND (c.goal = 0 OR c.hardgoal = 0 OR c.amount < goal)
-            GROUP BY c.camp_id";
-    if ($_CONF_DON['num_in_blk'] > 0) {
-        $sql .= ' LIMIT ' . (int)$_CONF_DON['num_in_blk'];
-    }
-    //echo $sql;die;
-    $r = DB_query($sql, 1);
-    $n = DB_numRows($r);
-    if ($n < 1) {
+    $Campaigns = Donation\Campaign::getAllActive();
+    if (count($Campaigns) < 1) {
         return '';
     }
 
     $T = new \Template(DON_PI_PATH . '/templates');
-
     $i = 0;
-    while ($row = DB_fetchArray($r, false)) {
-
+    $limit = min($_CONF_DON['num_in_blk'], 10);
+    foreach ($Campaigns as $C) {
         $T->set_file('block', 'blk_contrib.thtml');
         $T->set_var(array(
-            'title'     => $row['name'],
-            'description' => $row['shortdesc'],
-            'camp_id'   => $row['camp_id'],
+            'title'     => $C->getName(),
+            'description' => $C->getShortDscp(),
+            'camp_id'   => $C->getID(),
             'pi_url'    => DON_URL,
         ) );
-        if ($row['goal'] > 0 && $row['blk_show_pct'] == 1) {
-            if ($row['received'] < $row['goal']) {
-                $pct_received = (int)((float)$row['received'] / (float)$row['goal'] * 100);
+        if ($C->getGoal() > 0 && $C->getBlkShowPct()) {
+            if ($C->getReceived() < $C->getGoal()) {
+                $pct_received = (int)(((float)$C->getReceived() / (float)$C->getGoal()) * 100);
             } else {
                 $pct_received = 100;
             }
             $T->set_var(array(
-                'goal'  => sprintf('%6.2f', (float)$row['goal']),
+                'goal'  => sprintf('%6.2f', (float)$C->getGoal()),
                 'pct'   => $pct_received,
-                'collected' => sprintf("%.2f / %.2f", $row['received'], $row['goal']),
-                'pct_received' => sprintf($LANG_DON['pct_received'], $row['received'], $row['goal']),
+                'collected' => sprintf("%.2f / %.2f", $C->getReceived(), $C->getGoal()),
+                'pct_received' => sprintf($LANG_DON['pct_received'], $C->getReceived(), $C->getGoal()),
             ) );
         } else {
             $T->clear_var('goal');
@@ -381,21 +363,23 @@ function phpblock_donation_donations()
 
         // Do not include the amount to have the donor enter it.
         $vars = array(
-                'item_number' => 'donation:' . $row['camp_id'],
-                'item_name' => $row['name'],
+                'item_number' => 'donation:' . $C->getID(),
+                'item_name' => $C->getName(),
                 'quantity' => 1,
                 'return' => DON_URL . '/index.php',
         );
-
-        $C = Donation\Campaign::getInstance($row);
         $T->set_var('donate_btn', $C->getButton());
 
-        if ($i > 0)
+        if ($i > 0) {
             $T->set_var('hr', '<hr />');
+        }
         $i++;
-
         $T->parse('output','block');
         $retval .= $T->finish($T->get_var('output'));
+
+        if ($i < $limit) {
+            break;
+        }
     }
     return $retval;
 }
@@ -412,34 +396,29 @@ function plugin_profilevariablesdisplay_donation($uid, &$T)
 {
     global $_CONF_DON, $LANG_DON, $_TABLES, $_CONF;
 
-    $sql = "SELECT sum(d.amount) as total, c.name
-            FROM {$_TABLES['don_donations']} d
-            LEFT JOIN {$_TABLES['don_campaigns']} c
-            ON d.camp_id = c.camp_id
-            WHERE d.uid = $uid
-            GROUP BY d.camp_id";
-    $res = DB_query($sql);
-    if (DB_numRows($res) > 0) {
+    $Campaigns = Donation\Campaign::getByUser($uid);
+    if (count($Campaigns) > 0) {
         $LT = new \Template(__DIR__ . '/templates/');
         $LT->set_file(array(
             'block' => 'profileblock.thtml',
         ));
         $LT->set_block('block', 'donation_row', 'drow');
 
-        while ($A = DB_fetchArray($res, false)) {
+        foreach ($Campaigns as $C) {
             $LT->set_var(array(
-                'name'      => $A['name'],
-                'amount'    => $A['total'],
+                'name'      => $C->getName(),
+                'amount'    => COM_numberFormat($C->getReceived(), 2),
             ) );
             $LT->parse('drow', 'donation_row', true);
         }
-
         $LT->parse('output', 'block');
         $existingFields = $T->get_var('plugin_fields');
-        $T->set_var('plugin_fields',
-                $existingFields . $T->finish($LT->get_var('output')));
+        $T->set_var(
+            'plugin_fields',
+            $existingFields . $T->finish($LT->get_var('output'))
+        );
     } else {
-        return '';
+        return;
     }
 }
 
@@ -466,20 +445,8 @@ function plugin_dopluginsearch_donation(
     }
 
     // Encode query for inclusion in result's url
-    $htmlquery = urlencode($query);
-
     $query = DB_escapeString(trim($query));
-
-    $sql = "SELECT
-                c.camp_id, c.name as title, c.description as description,
-                c.start_ts as date,
-                CONCAT('/{$_CONF_DON['pi_name']}/index.php?mode=detail&id=',c.camp_id,'&query=$htmlquery') as url
-            FROM {$_TABLES['don_campaigns']} c
-            WHERE c.enabled = 1
-            AND c.start_ts < UNIX_TIMESTAMP()
-            AND c.end_ts > UNIX_TIMESTAMP()
-            ";
-
+    $sql = Donation\Campaign::getSearchSql($query);
     $search = new \SearchCriteria($_CONF_DON['pi_name'], $LANG_DON['donations']);
     $columns = array('c.name', 'c.description',
                     );

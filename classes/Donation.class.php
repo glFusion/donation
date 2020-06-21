@@ -112,7 +112,7 @@ class Donation
         }
         $this->setDate($A['dt']);
         $this->camp_id = $A['camp_id'];
-        $this->amount = (float)$A['amount'];
+        $this->setAmount($A['amount']);
         $this->comment = $A['comment'];
         $this->txn_id = $A['txn_id'];
     }
@@ -204,23 +204,25 @@ class Donation
         else
             $dt = "'" . DB_escapeString($dt) . "'";
 
-        if (empty($this->properties['contrib_name']) &&
-                $this->properties['uid'] > 0) {
+        if (
+            empty($this->contrib_name) &&
+            $this->uid > 0
+        ) {
             $this->contrib_name = COM_getDisplayName($this->uid);
         }
 
         $don_id = $this->don_id;
         if ($this->isNew || $don_id == 0) {
-
             $sql = "INSERT INTO {$_TABLES['don_donations']} (
-                    uid, contrib_name, dt, amount, comment, camp_id
+                    uid, contrib_name, dt, amount, comment, camp_id, txn_id
                 ) VALUES (
                     '". $this->uid . "',
                     '". $this->contrib_name . "',
                     $dt,
                     " . $this->amount . ",
                     '" . $this->comment . "',
-                    '" . DB_escapeString($this->camp_id) . "'
+                    '" . DB_escapeString($this->camp_id) . "',
+                    '" . DB_escapeString($this->txn_id) . "'
                 )";
         } else {
             $sql = "UPDATE {$_TABLES['don_donations']}
@@ -230,6 +232,7 @@ class Donation
                 contrib_name='" . $this->contrib_name . "',
                 comment='" . DB_escapeString($this->comment) . "',
                 dt=$dt,
+                txn_id = '" . DB_escapeString($this->txn_id) . "',
                 amount=" . $this->amount . "
             WHERE don_id='" . $don_id . "'";
         }
@@ -301,11 +304,94 @@ class Donation
      * @param   string  $dt_str     Datetime string
      * @return  object  $this
      */
-    private function setDate($dt_str)
+    public function setDate($dt_str)
     {
         global $_CONF;
 
         $this->dt = new \Date($dt_str, $_CONF['timezone']);
+        return $this;
+    }
+
+
+    /**
+     * Set the contributing user ID.
+     *
+     * @param   integer $uid        User ID
+     * @return  object  $this
+     */
+    public function setUid($uid=0)
+    {
+        global $_USER;
+
+        if ($uid == 0) {
+            $uid = $_USER['uid'];
+        }
+        $this->uid = (int)$uid;
+        return $this;
+    }
+
+
+    /**
+     * Set the donation amount.
+     *
+     * @param   float   $amount     Amount donated
+     * @return  object  $this
+     */
+    public function setAmount($amount)
+    {
+        $this->amount = (float)$amount;
+        return $this;
+    }
+
+
+    /**
+     * Set the contributor name.
+     *
+     * @param   string  $name   Contributor name
+     * @return  object  $this
+     */
+    public function setContributorName($name)
+    {
+        $this->contrib_name = $name;
+        return $this;
+    }
+
+
+    /**
+     * Set the related campaign ID.
+     *
+     * @param   string  $camp_id    Campaign ID
+     * @return  object  $this
+     */
+    public function setCampaignID($camp_id)
+    {
+        $this->camp_id = $camp_id;
+        return $this;
+    }
+
+
+    /**
+     * Set the comment text field value.
+     *
+     * @param   string  $text       Comment text
+     * @return  object  $this
+     */
+    public function setComment($text)
+    {
+        $this->comment = $text;
+        return $this;
+    }
+
+
+    /**
+     * Set the transaction ID for this donation.
+     *
+     * @param   string  $id         Transaction ID
+     * @return  object  $this
+     */
+    public function setTxnId($id)
+    {
+        $this->txn_id = $id;
         return $this;
     }
 

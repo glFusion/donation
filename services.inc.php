@@ -91,23 +91,8 @@ function service_getproducts_donation($args, &$output, &$svc_msg)
         return PLG_RET_OK;  // nothing to show is a valid return
     }
 
-    $sql = "SELECT c.*, SUM(d.amount) as received
-            FROM {$_TABLES['don_campaigns']} c
-            LEFT JOIN {$_TABLES['don_donations']} d
-            ON c.camp_id = d.camp_id
-            WHERE c.enabled = 1
-            AND c.end_ts > UNIX_TIMESTAMP()
-            AND c.start_ts < UNIX_TIMESTAMP()";
-    $result = DB_query($sql);
-    if (!$result) {
-        return PLG_RET_ERROR;
-    }
-
-    while ($A = DB_fetchArray($result)) {
-        $P = Donation\Campaign::getInstance($A);
-        if (!$P->isActive()) {
-            continue;
-        }
+    $Campaigns = Donation\Campaign::getAllActive();
+    foreach ($Campaigns as $P) {
         $output[] = array(
             'id' => 'donation:' . $P->getCampaignID(),
             'item_id' => $P->getID(),
@@ -117,7 +102,7 @@ function service_getproducts_donation($args, &$output, &$svc_msg)
             'price' => $P->getAmount(),
             'buttons' => array('donation' => $P->GetButton()),
             'url' => DON_URL . '/index.php?mode=detail&amp;id=' .
-                        urlencode($A['camp_id']),
+                        urlencode($P->getID()),
             'have_detail_svc' => true,  // Tell Shop to use it's detail page wrapper
             'img_url' => '',
             'add_cart' => false,    // cannot use the Shop cart
@@ -150,17 +135,9 @@ function service_handlePurchase_donation($args, &$output, &$svc_msg)
     }
 
     $item_id[1] = COM_sanitizeID($item_id[1], false);
-    $sql = "SELECT * FROM {$_TABLES['don_campaigns']}
-            WHERE camp_id='{$item_id[1]}'";
-    $res = DB_query($sql, 1);
-    $A = DB_fetchArray($res, false);
-    if (empty($A)) {
-        $A = array(
-            'camp_id'   => '',
-            'name'      => 'Miscellaneous',
-            'description' => '',
-            'price'     => 0,
-        );
+    $C = Donation\Campaign::getInstance($item_id[1]);
+    if ($C->isNew()) {
+        return PLG_RET_ERROR;
     }
 
     // Donations typically have no fixed price, so take the
@@ -170,9 +147,9 @@ function service_handlePurchase_donation($args, &$output, &$svc_msg)
     // Initialize the return array
     $output = array(
         'product_id' => implode(':', $item),
-        'name' => $LANG_DON['donation'] . ':' . $A['name'],
-        'short_description' => $LANG_DON['donation'] . ': ' . $A['name'],
-        'description' => $LANG_DON['donation'] . ': ' . $A['shortdscp'],
+        'name' => $LANG_DON['donation'] . ':' . $C->getName(),
+        'short_description' => $LANG_DON['donation'] . ': ' . $C->getName(),
+        'description' => $LANG_DON['donation'] . ': ' . $C->getShortDscp(),
         'price' =>  $amount,
         'expiration' => NULL,
         'download' => 0,
@@ -194,7 +171,6 @@ function service_handlePurchase_donation($args, &$output, &$svc_msg)
     }
 
     $memo = isset($ipn_data['memo']) ? $ipn_data['memo'] : '';
-    $memo = DB_escapeString($memo);
     if (isset($ipn_data['payer_name'])) {
         $pp_contrib = $ipn_data['payer_name'];
     } elseif (isset($ipn_data['first_name']) && isset($ipn_data['last_name']) ) {
@@ -202,23 +178,14 @@ function service_handlePurchase_donation($args, &$output, &$svc_msg)
     } else {
         $pp_contrib = 'Unknown';
     }
-    $sql = "INSERT INTO {$_TABLES['don_donations']} (
-                uid, contrib_name, dt, camp_id, amount, txn_id, comment
-            ) VALUES (
-                '$uid',
-                '" . DB_escapeString($pp_contrib) . "',
-                '{$_CONF['_now']->toMySQL(true)}',
-                '{$item_id[1]}',
-                '{$amount}',
-                '" . DB_escapeString($ipn_data['txn_id']) . "',
-                '$memo'
-            )";
-    DB_query($sql, 1);     // Execute event record update
-
-    $sql = "UPDATE {$_TABLES['don_campaigns']}
-            SET amount = amount + $amount
-            WHERE camp_id = '{$item_id[1]}'";
-    DB_query($sql, 1);
+    $D = new Donation\Donation;
+    $D->setUid($uid)
+        ->setCampaignID($C->getID())
+        ->setContributorName($pp_contrib)
+        ->setAmount($amount)
+        ->setTxnId($ipn_data['txn_id'])
+        ->setComment($memo)
+        ->Save();
     return PLG_RET_OK;
 }
 

@@ -3,9 +3,9 @@
  * Class to handle donation campaigns.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2009-2019 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2020 Lee Garner <lee@leegarner.com>
  * @package     donation
- * @version     v0.1.1
+ * @version     v0.0.3
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -152,6 +152,88 @@ class Campaign
     public static function getInstance($campaign)
     {
         return new self($campaign);
+    }
+
+
+    /**
+     * Get all currently-active campaigns.
+     *
+     * @return  array       Array of Campaign objects
+     */
+    public static function getAllActive()
+    {
+        global $_TABLES;
+
+        $retval = array();
+        $sql = "SELECT c.*, SUM(d.amount) as received
+            FROM {$_TABLES['don_campaigns']} c
+            LEFT JOIN {$_TABLES['don_donations']} d
+            ON c.camp_id = d.camp_id
+            WHERE c.enabled = 1
+            AND c.end_ts > UNIX_TIMESTAMP()
+            AND c.start_ts < UNIX_TIMESTAMP()";
+        $res = DB_query($sql);
+        if (!$res) {
+            return $retval;
+        }
+        while ($A = DB_fetchArray($res, false)) {
+            // Check that the goal isn't reached
+            if (!$A['hardgoal'] || $A['received'] < $A['goal']) {
+                $retval[$A['camp_id']] = new self($A);
+            }
+        }
+        return $retval;
+    }
+
+
+    /**
+     * Get all campaigns to which a specific user has donated.
+     *
+     * @param   integer $uid    User ID
+     * @return  array       Array of Campaign objects
+     */
+    public static function getByUser($uid)
+    {
+        global $_TABLES;
+
+        $retval = array();
+        $uid = (int)$uid;
+        $sql = "SELECT sum(d.amount) as received, c.*
+            FROM {$_TABLES['don_donations']} d
+            LEFT JOIN {$_TABLES['don_campaigns']} c
+            ON d.camp_id = c.camp_id
+            WHERE d.uid = $uid
+            GROUP BY d.camp_id";
+        $res = DB_query($sql);
+        if (!$res) {
+            return $retval;
+        }
+        while ($A = DB_fetchArray($res, false)) {
+            $retval[$A['camp_id']] = new self($A);
+        }
+        return $retval;
+    }
+
+
+    /**
+     * Get the search SQL.
+     *
+     * @param   string  $query      Query string
+     * @return  string      SQL query
+     */
+    public static function getSearchSql($query)
+    {
+        global $_TABLES, $_CONF_DON;
+
+        $htmlquery = urlencode($query);
+        return "SELECT
+                c.camp_id, c.name as title, c.description as description,
+                c.start_ts as date,
+                CONCAT('/{$_CONF_DON['pi_name']}/index.php?mode=detail&id=',c.camp_id,'&query=$htmlquery') as url
+            FROM {$_TABLES['don_campaigns']} c
+            WHERE c.enabled = 1
+            AND c.start_ts < UNIX_TIMESTAMP()
+            AND c.end_ts > UNIX_TIMESTAMP()";
     }
 
 
