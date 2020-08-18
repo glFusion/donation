@@ -166,7 +166,13 @@ class Campaign
         global $_TABLES;
 
         $retval = array();
-        $sql = "SELECT c.*, SUM(d.amount) as received
+        $sql = "SELECT c.camp_id, MAX(c.name) AS name,
+            MAX(c.shortdscp) AS shortdscp, MAX(c.dscp) AS dscp,
+            MAX(c.start_ts) AS start_ts, MAX(c.end_ts) AS end_ts,
+            MAX(c.enabled) AS enabled, MAX(c.goal) AS goal,
+            MAX(c.hardgoal) AS hardgoal, MAX(blk_show_pct) AS blk_show_pct,
+            MAX(c.pp_buttons) AS pp_buttons,
+            SUM(d.amount) as received
             FROM {$_TABLES['don_campaigns']} c
             LEFT JOIN {$_TABLES['don_donations']} d
             ON c.camp_id = d.camp_id
@@ -200,12 +206,19 @@ class Campaign
 
         $retval = array();
         $uid = (int)$uid;
-        $sql = "SELECT sum(d.amount) as received, c.*
+        //$sql = "SELECT sum(d.amount) as received, c.*
+        $sql = "SELECT c.camp_id, MAX(c.name) AS name,
+            MAX(c.shortdscp) AS shortdscp, MAX(c.dscp) AS dscp,
+            MAX(c.start_ts) AS start_ts, MAX(c.end_ts) AS end_ts,
+            MAX(c.enabled) AS enabled, MAX(c.goal) AS goal,
+            MAX(c.hardgoal) AS hardgoal, MAX(blk_show_pct) AS blk_show_pct,
+            MAX(c.pp_buttons) AS pp_buttons,
+            SUM(d.amount) as received
             FROM {$_TABLES['don_donations']} d
             LEFT JOIN {$_TABLES['don_campaigns']} c
             ON d.camp_id = c.camp_id
             WHERE d.uid = $uid
-            GROUP BY d.camp_id";
+            GROUP BY c.camp_id";
         $res = DB_query($sql);
         if (!$res) {
             return $retval;
@@ -249,8 +262,9 @@ class Campaign
     {
         global $_CONF;
 
-        if (!is_array($A))
+        if (!is_array($A)) {
             return;
+        }
 
         $this->camp_id = $A['camp_id'];
         //$this->startdt = $A['startdt'];
