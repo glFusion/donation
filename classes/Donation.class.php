@@ -281,8 +281,11 @@ class Donation
         global $_TABLES;
 
         $camp_id = DB_escapeString($camp_id);
-        $received = DB_getItem($_TABLES['don_donations'],
-                'SUM(amount)', "camp_id = '$camp_id'");
+        $received = DB_getItem(
+            $_TABLES['don_donations'],
+            'SUM(amount)',
+            "camp_id = '$camp_id'"
+        );
         return $received;
     }
 

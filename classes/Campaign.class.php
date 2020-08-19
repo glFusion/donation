@@ -126,11 +126,13 @@ class Campaign
     {
         global $_TABLES;
 
-        $sql = "SELECT c.*, SUM(d.amount) AS received
+        $id = COM_sanitizeID($id, false);
+        $sql = "SELECT c.*, (
+                SELECT SUM(amount) FROM {$_TABLES['don_donations']} d
+                WHERE d.camp_id = c.camp_id
+            ) as received
             FROM {$_TABLES['don_campaigns']} c
-            LEFT JOIN {$_TABLES['don_donations']} d
-            ON c.camp_id = d.camp_id
-            WHERE c.camp_id='" . COM_sanitizeID($id, false) . "'";
+            WHERE c.camp_id='$id'";
         $res = DB_query($sql, 1);
         $A = DB_fetchArray($res, false);
         if (!empty($A)) {
@@ -166,20 +168,14 @@ class Campaign
         global $_TABLES;
 
         $retval = array();
-        $sql = "SELECT c.camp_id, MAX(c.name) AS name,
-            MAX(c.shortdscp) AS shortdscp, MAX(c.dscp) AS dscp,
-            MAX(c.start_ts) AS start_ts, MAX(c.end_ts) AS end_ts,
-            MAX(c.enabled) AS enabled, MAX(c.goal) AS goal,
-            MAX(c.hardgoal) AS hardgoal, MAX(blk_show_pct) AS blk_show_pct,
-            MAX(c.pp_buttons) AS pp_buttons,
-            SUM(d.amount) as received
+        $sql = "SELECT c.*, (
+                SELECT SUM(amount) FROM {$_TABLES['don_donations']} d
+                WHERE d.camp_id = c.camp_id
+            ) as received
             FROM {$_TABLES['don_campaigns']} c
-            LEFT JOIN {$_TABLES['don_donations']} d
-            ON c.camp_id = d.camp_id
             WHERE c.enabled = 1
             AND c.end_ts > UNIX_TIMESTAMP()
-            AND c.start_ts < UNIX_TIMESTAMP()
-            GROUP BY c.camp_id";
+            AND c.start_ts < UNIX_TIMESTAMP()";
         $res = DB_query($sql);
         if (!$res) {
             return $retval;
@@ -206,7 +202,6 @@ class Campaign
 
         $retval = array();
         $uid = (int)$uid;
-        //$sql = "SELECT sum(d.amount) as received, c.*
         $sql = "SELECT c.camp_id, MAX(c.name) AS name,
             MAX(c.shortdscp) AS shortdscp, MAX(c.dscp) AS dscp,
             MAX(c.start_ts) AS start_ts, MAX(c.end_ts) AS end_ts,
