@@ -40,7 +40,7 @@
     <div class="uk-form-row">
       <label class="uk-form-label" for="f_amount">{$LANG_DON['amount']}</label>
       <div class="uk-form-controls">
-        <input name="amount" value="{amount}" type="text" id="f_amount" />
+        <input name="amount" value="{amountx}" placeholder="0.00" type="text" id="f_amount" />
         <span class="uk-icon-question-circle tooltip"
             title="{$LANG_DON['hlp_amount']}"></span>
       </div>

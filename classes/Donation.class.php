@@ -172,7 +172,7 @@ class Donation
             'dt'            => $this->dt->format('Y-m-d', true),
             'tm'            => $this->dt->format('H:i', true),
             'comment'       => $this->comment,
-            'amount'        => $this->amount,
+            'amount'        => $this->amount > 0 ? $this->amount : '',
             'campaign_select' =>
                         Campaign::DropDown($this->camp_id),
             'txn_id'        => $this->txn_id,
