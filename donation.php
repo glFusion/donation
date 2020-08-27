@@ -4,7 +4,7 @@
 *   @author     Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2009-2020 Lee Garner <lee@leegarner.com>
 *   @package    donation
-*   @version    0.0.5
+*   @version    0.0.6
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -16,9 +16,9 @@ global $_TABLES;
 global $_DB_table_prefix;
 
 // Static configuration items
-$_CONF_DON['pi_version'] = '0.0.5';
+$_CONF_DON['pi_version'] = '0.0.6';
 $_CONF_DON['pi_name'] = 'donation';
-$_CONF_DON['gl_version'] = '1.7.0';
+$_CONF_DON['gl_version'] = '1.7.8';
 $_CONF_DON['pi_url'] = 'http://www.leegarner.com';
 $_CONF_DON['pi_display_name'] = 'Donations';
 
