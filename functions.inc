@@ -449,13 +449,136 @@ function plugin_dopluginsearch_donation(
     $sql = Donation\Campaign::getSearchSql($query);
     $search = new \SearchCriteria($_CONF_DON['pi_name'], $LANG_DON['donations']);
     $columns = array(
-        'c.name',
-        'c.shortdscp',
+        'name',
+        'shortdscp',
         'dscp',
     );
     list($sql, $ftsql) = $search->buildSearchSQL($keyType, $query, $columns, $sql);
     $search->setSQL($sql);
     return $search;
+}
+
+
+/**
+ * Provides the getItemInfo function for campaigns.
+ *
+ * @param   string  $id         Product ID
+ * @param   string  $what       Comma-separated list of fields to return
+ * @param   integer $uid        User ID
+ * @param   array   $options    Not used
+ * @return  array           Array of product information
+ */
+function plugin_getiteminfo_donation($id, $what, $uid=0, $options=array())
+{
+    global $_TABLES, $_CONF, $LANG_ADVT;
+
+    $properties = explode(',', $what);
+    $fields = array();
+    $retval = array();
+    $buildingSearchIndex = false;
+    foreach ($properties as $p) {
+        switch ($p) {
+        case 'search_index':
+            $buildingSearchIndex = true;
+            break;
+        case 'id':
+            $fields[] = 'camp_id';
+            break;
+        case 'title':
+            $fields[] = 'name';
+            break;
+        case 'content':
+        case 'description':
+            $fields[] = 'dscp';
+            break;
+        case 'searchidx':
+            $fields[] = 'name';
+            $fields[] = 'shortdscp';
+            $fields[] = 'dscp';
+            break;
+        case 'date':
+            $fields[] = 'start_ts';
+            break;
+        }
+    }
+    if (count($fields) == 0) {
+        return $retval;
+    }
+    $fields = array_unique($fields);
+    $fields = implode(',', $fields);
+    $retval = array();
+    $sql = "SELECT $fields
+            FROM {$_TABLES['don_campaigns']} ";
+    if ($id == '*') {
+        if ( $buildingSearchIndex ) {
+            $where = ' WHERE exp_date > UNIX_TIMESTAMP() ';
+        } else {
+            $where = ' WHERE 1=1 ';
+        }
+    } else {
+        $where = " WHERE (camp_id = '" . DB_escapeString($id) . "')";
+    }
+    //echo $sql;die;
+    $res = DB_query($sql . $where);
+    while ($A = DB_fetchArray($res, false)) {
+        foreach ($properties as $p) {
+            switch ($p) {
+            case 'id':
+                $props[$p] = $A['camp_id'];
+                break;
+            case 'excerpt':
+            case 'description':
+            case 'content':
+                $props[$p] = $A['dscp'];
+                break;
+            case 'title':
+                $props[$p] = $A['name'];
+                break;
+            case 'date':
+                $props[$p] = $A['start_ts'];
+                break;
+            case 'searchidx':
+                $props[$p] = $A['name'] . ' ' . $A['shortdscp'] . ' ' .
+                        $A['dscp'];
+                break;
+            case 'url':
+                $props[$p] = COM_buildUrl($_CONF['site_url'] .
+                    '/donation/index.php?mode=detail&id=' . urlencode($A['camp_id'])
+                );
+                break;
+            default:
+                $props[$p] = isset($A[$p]) ? $A[$p] : NULL;
+                break;
+            }
+        }
+        $mapped = array();
+        foreach ($props as $key => $value) {
+            if ($id == '*') {
+                if ($value != '') {
+                    $mapped[$key] = $value;
+                }
+            } else {
+                $mapped[$key] = $value;
+            }
+        }
+
+        if ($id == '*') {
+            $retval[] = $mapped;
+        } else {
+            $retval = $mapped;
+            break;
+        }
+    }
+
+    if (($id != '*') && (count($retval) == 1)) {
+        $tRet = array_values($retval);
+        $retval = $tRet[0];
+    }
+    if ($retval === '' || (is_array($retval) && count($retval) == 0)) {
+        return NULL;
+    } else {
+        return $retval;
+    }
 }
 
 

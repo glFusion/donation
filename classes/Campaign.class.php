@@ -237,13 +237,13 @@ class Campaign
 
         $htmlquery = urlencode($query);
         return "SELECT
-                c.camp_id, c.name as title, c.description as description,
-                c.start_ts as date,
-                CONCAT('/{$_CONF_DON['pi_name']}/index.php?mode=detail&id=',c.camp_id,'&query=$htmlquery') as url
-            FROM {$_TABLES['don_campaigns']} c
-            WHERE c.enabled = 1
-            AND c.start_ts < UNIX_TIMESTAMP()
-            AND c.end_ts > UNIX_TIMESTAMP()";
+                camp_id, name as title, dscp as description,
+                start_ts as date,
+                CONCAT('/{$_CONF_DON['pi_name']}/index.php?mode=detail&id=',camp_id,'&query=$htmlquery') as url
+            FROM {$_TABLES['don_campaigns']}
+            WHERE enabled = 1
+            AND start_ts < UNIX_TIMESTAMP()
+            AND end_ts > UNIX_TIMESTAMP()";
     }
 
 
@@ -416,9 +416,11 @@ class Campaign
             'chk_hardgoal'  => $this->getHardgoal() ? DON_CHECKED : '',
             'chk_blk_show_pct'  => $this->getBlkShowPct() ? DON_CHECKED : '',
             'goal'          => $this->goal,
-            'doc_url'       => LGLIB_getDocURL('campaignform.html',
-                                $_CONF_DON['pi_name'],
-                                $_CONF['language']),
+            'doc_url'       => LGLIB_getDocURL(
+                'campaignform.html',
+                $_CONF_DON['pi_name'],
+                $_CONF['language']
+            ),
         ) );
         $T->parse ('output', 'editform');
         return $T->finish($T->get_var('output'));
@@ -432,7 +434,7 @@ class Campaign
      */
     public function Save($A='')
     {
-        global $_TABLES, $LANG_DON;
+        global $_TABLES, $LANG_DON, $_CONF_DON;
 
         if (is_array($A)) {
             $this->setVars($A, false);
@@ -485,6 +487,7 @@ class Campaign
             if ($update_don_ids) {
                 Donation::updateCampaignIDs($old_camp_id, $this->camp_id);
             }
+            PLG_itemSaved($this->camp_id, $_CONF_DON['pi_name']);
         }
     }
 
