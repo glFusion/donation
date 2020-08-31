@@ -11,7 +11,7 @@
     <div class="uk-width-1-1 uk-width-medium-1-3" style="text-align:right;">
         {donate_btn}
 {!if have_pct_received}
-        <div style="white-space:nowrap;">{received_txt}</div>
+        <div style="clear:both;white-space:nowrap;">{received_txt}</div>
 {!endif}
     </div>
 </div>
