@@ -49,8 +49,8 @@ $_UPGRADE_SQL = array(
         "ALTER TABLE {$_TABLES['don_campaigns']} DROP received",
     ),
     '0.0.3' => array(
-        "ALTER TABLE {$_TABLES['don_campaigns']} CHANGE shortdesc `shortdscp` varchar(255)",
-        "ALTER TABLE {$_TABLES['don_campaigns']} CHANGE desc `dscp` text",
+        "ALTER TABLE {$_TABLES['don_campaigns']} CHANGE `shortdesc` `shortdscp` varchar(255)",
+        "ALTER TABLE {$_TABLES['don_campaigns']} CHANGE `description` `dscp` text",
     ),
     '0.0.5' => array(
         "ALTER TABLE {$_TABLES['don_campaigns']} DROP amount",

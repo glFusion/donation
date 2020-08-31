@@ -448,8 +448,11 @@ function plugin_dopluginsearch_donation(
     $query = DB_escapeString(trim($query));
     $sql = Donation\Campaign::getSearchSql($query);
     $search = new \SearchCriteria($_CONF_DON['pi_name'], $LANG_DON['donations']);
-    $columns = array('c.name', 'c.description',
-                    );
+    $columns = array(
+        'c.name',
+        'c.shortdscp',
+        'dscp',
+    );
     list($sql, $ftsql) = $search->buildSearchSQL($keyType, $query, $columns, $sql);
     $search->setSQL($sql);
     return $search;
