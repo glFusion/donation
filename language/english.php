@@ -97,6 +97,7 @@ $LANG_confignames['donation'] = array(
     'pp_use_donation'   => 'Use Donation Payment Button Type',
     'num_in_blk'        => 'Number of campaigns in block (0=unlimited)',
     'show_in_shop_cat'  => 'Show open campaigns in Shop catalog?',
+    'show_in_menu'      => 'Show in the Plugin menu?',
 );
 
 $LANG_configsubgroups['donation'] = array(

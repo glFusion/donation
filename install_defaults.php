@@ -81,6 +81,17 @@ $donationConfigData = array(
         'set' => true,
         'group' => 'donation',
     ),
+    array(
+        'name' => 'show_in_menu',
+        'default_value' => 0,
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 1,
+        'sort' => 40,
+        'set' => true,
+        'group' => 'donation',
+    ),
 );
 
 

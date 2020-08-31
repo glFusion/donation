@@ -66,6 +66,28 @@ spl_autoload_register(function ($class)
 
 
 /**
+ * Returns the items for this plugin that should appear on the main menu.
+ *
+ * NOTE: this MUST return the url/value pairs in the following format
+ *      $<arrayname>[<label>] = <url>
+ *
+ * @return  array   Associative array of menu items to be added to menu
+ */
+function plugin_getmenuitems_donation()
+{
+    global $LANG_DON, $_CONF_DON;
+
+    if ($_CONF_DON['show_in_menu']) {
+        return array(
+            $LANG_DON['donations'] => DON_URL . '/index.php',
+        );
+    } else {
+        return NULL;
+    }
+}
+
+
+/**
  * Get additional Javascript into the site header.
  *
  * @return  array   List of paths to Javascript files
