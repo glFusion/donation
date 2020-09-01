@@ -16,7 +16,7 @@ global $_TABLES;
 global $_DB_table_prefix;
 
 // Static configuration items
-$_CONF_DON['pi_version'] = '0.0.7';
+$_CONF_DON['pi_version'] = '0.1.0';
 $_CONF_DON['pi_name'] = 'donation';
 $_CONF_DON['gl_version'] = '1.7.8';
 $_CONF_DON['pi_url'] = 'http://www.leegarner.com';
