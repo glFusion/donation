@@ -174,7 +174,7 @@ function plugin_cclabel_donation()
 {
     global $_CONF, $_CONF_DON;
 
-    if (SEC_hasRights('donation.admin')) {
+    if (plugin_ismoderator_donation()) {
         return array(
             $_CONF_DON['pi_display_name'],
             DON_ADMIN_URL . '/index.php',
@@ -195,7 +195,7 @@ function plugin_getadminoption_donation()
 {
     global $_CONF, $_TABLES, $LANG_DON, $_CONF_DON;
 
-    if (SEC_hasRights('donation.admin')) {
+    if (plugin_ismoderator_donation()) {
         return array(
             $_CONF_DON['pi_display_name'],
             DON_ADMIN_URL . '/index.php',
@@ -203,6 +203,21 @@ function plugin_getadminoption_donation()
     } else {
         return '';
     }
+}
+
+
+/**
+ * See if the current user is a moderator/admin.
+ *
+ * @return  boolean     True if a moderator, False otherwise
+ */
+function plugin_ismoderator_donation()
+{
+    static $isAdmin = NULL;
+    if ($isAdmin === NULL) {
+        $isAdmin = SEC_hasRights('donation.admin');
+    }
+    return $isAdmin;
 }
 
 
@@ -411,12 +426,16 @@ function phpblock_donation_donations()
  * Displays donations received in the user's profile.
  *
  * @param   integer  $uid    User ID whose profile is being displayed
- * @param   object   &$T     Pointer to template object
  * @return  string          HTML to include in profile page
  */
-function plugin_profilevariablesdisplay_donation($uid, &$T)
+function plugin_profileblocksdisplay_donation($uid)
 {
-    global $_CONF_DON, $LANG_DON, $_TABLES, $_CONF;
+    global $_CONF_DON, $LANG_DON, $_TABLES, $_CONF, $_USER;
+
+    $retval = '';
+    if ($uid != $_USER['uid'] && !plugin_ismoderator_donation()) {
+        return $retval;
+    }
 
     $Campaigns = Donation\Campaign::getByUser($uid);
     if (count($Campaigns) > 0) {
@@ -434,14 +453,9 @@ function plugin_profilevariablesdisplay_donation($uid, &$T)
             $LT->parse('drow', 'donation_row', true);
         }
         $LT->parse('output', 'block');
-        $existingFields = $T->get_var('plugin_fields');
-        $T->set_var(
-            'plugin_fields',
-            $existingFields . $T->finish($LT->get_var('output'))
-        );
-    } else {
-        return;
+        $retval = $LT->finish($LT->get_var('output'));
     }
+    return $retval;
 }
 
 
@@ -533,7 +547,7 @@ function plugin_getiteminfo_donation($id, $what, $uid=0, $options=array())
             FROM {$_TABLES['don_campaigns']} ";
     if ($id == '*') {
         if ( $buildingSearchIndex ) {
-            $where = ' WHERE exp_date > UNIX_TIMESTAMP() ';
+            $where = ' WHERE end_ts > UNIX_TIMESTAMP() ';
         } else {
             $where = ' WHERE 1=1 ';
         }

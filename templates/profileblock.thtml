@@ -1,11 +1,9 @@
 {# begin {templatelocation} #}
-<nav class="uk-navbar uk-margin-top">
-  <div class="uk-navbar-content">
-  {$LANG_DON['block_title']}
-  </div>
-</nav>
-<table class="uk-table uk-table-condensed">
+<div class="block-box">
+    <h2>{$LANG_DON['block_title']}</h2>
+    <table class="uk-table uk-table-condensed">
 <!-- BEGIN donation_row -->
-  <tr><td class="uk-width-1-2">{name}</td><td>{amount}</td></tr>
+        <tr><td class="uk-width-1-2">{name}</td><td>{amount}</td></tr>
 <!-- END donation_row -->
-</table>
+    </table>
+</div>

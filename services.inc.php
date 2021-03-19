@@ -143,7 +143,7 @@ function service_handlePurchase_donation($args, &$output, &$svc_msg)
 
     // Donations typically have no fixed price, so take the
     // payment amount sent by Shop
-    $amount = (float)$ipn_data['payment_gross'];
+    $amount = (float)$ipn_data['pmt_gross'];
 
     // Initialize the return array
     $output = array(
@@ -160,8 +160,8 @@ function service_handlePurchase_donation($args, &$output, &$svc_msg)
     // User ID is returned in the 'custom' field, so make sure it's numeric.
     // If not, try to get it from the payer's email address. This will yield
     // zero if not found.
-    if (is_numeric($ipn_data['custom']['uid'])) {
-        $uid = (int)$ipn_data['custom']['uid'];
+    if (is_numeric($ipn_data['uid'])) {
+        $uid = (int)$ipn_data['uid'];
     } else {
         $uid = (int)DB_getItem(
             $_TABLES['users'],
