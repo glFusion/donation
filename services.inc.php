@@ -54,7 +54,7 @@ function service_productinfo_donation($args, &$output, &$svc_msg)
         'cancel_url' => Config::get('url') . '/index.php',
         'add_cart' => false,    // cannot use the Shop cart
         'url' => Config::get('url') . '/index.php?mode=detail&id=' . $camp_id,
-        'custom_price' => false,
+        'custom_price' => true,
     );
     if (!$C->isNew()) {
         $dscp = $LANG_DON['donation'] . ': ' . $C->getDscp();
