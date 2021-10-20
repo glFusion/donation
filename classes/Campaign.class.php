@@ -524,8 +524,12 @@ class Campaign
                 $output,
                 $svc_msg
             );
-            if ($status == PLG_RET_OK && !empty($output)) {
-                $button = $output[0];
+            if ($status == PLG_RET_OK && is_array($output) && !empty($output)) {
+                foreach ($output as $btn) {
+                    if (!empty($btn)) {
+                        $button .= $btn . LB;
+                    }
+                }
             }
         }
         return $button;
