@@ -13,6 +13,7 @@
 
 /** Import core glFusion libraries */
 require_once '../lib-common.php';
+use Donation\Config;
 
 // If plugin is installed but not enabled, display an error and exit gracefully
 if (!in_array('donation', $_PLUGINS)) {
@@ -65,7 +66,7 @@ case 'detail':
     if (!empty($id)) {
         $C = Donation\Campaign::getInstance($id);
         if ($C->isEnabled()) {
-            $T = new \Template(DON_PI_PATH . '/templates');
+            $T = new \Template(Config::get('path') . '/templates');
             $T->set_file('page', 'campaign_detail.thtml');
             if (!empty($query)) {
                 $name = COM_highlightQuery($C->getName(), $query);
@@ -139,7 +140,7 @@ function DONATION_CampaignList()
         return '<span class="info">'.$LANG_DON['no_open_campaigns'].'</span>';
     }
 
-    $T = new Template(DON_PI_PATH . '/templates');
+    $T = new Template(Config::get('path') . '/templates');
     $T->set_file('camplist', 'campaign_list.thtml');
     $T->set_block('camplist', 'CampaignBlk', 'CBlk');
     foreach ($Campaigns as $C) {

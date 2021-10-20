@@ -55,7 +55,7 @@ class Menu
             ),
         );
 
-        $T = new \Template(DON_PI_PATH . '/templates');
+        $T = new \Template(Config::get('path') . '/templates');
         $T->set_file('page', 'admin.thtml');
         $T->set_var(array(
             'header'    => $LANG_DON['don_mgr'],

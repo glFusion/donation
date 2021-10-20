@@ -3,9 +3,9 @@
  * Administrative entry point for the Donation plugin.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2009-2019 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2021 Lee Garner <lee@leegarner.com>
  * @package     donation
- * @version     v0.0.2
+ * @version     v0.2.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -13,6 +13,7 @@
 
 /** Import core glFusion functions */
 require_once('../../../lib-common.php');
+use Donation\Config;
 
 /**
  * MAIN

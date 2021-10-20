@@ -3,14 +3,15 @@
  * Shop integration functions for the Donation plugin.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2021 Lee Garner <lee@leegarner.com>
  * @package     donation
- * @version     v0.0.2
+ * @version     v0.2.0
+ * @since       v0.0.2
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
  */
-
+use Donation\Config;
 
 /**
  * Get information about a specific item.
