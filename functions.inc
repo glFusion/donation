@@ -547,7 +547,7 @@ function plugin_getiteminfo_donation($id, $what, $uid=0, $options=array())
             FROM {$_TABLES['don_campaigns']} ";
     if ($id == '*') {
         if ( $buildingSearchIndex ) {
-            $where = ' WHERE end_ts > UNIX_TIMESTAMP() ';
+            $where = ' WHERE beg_ts < UNIX_TIMESTAMP() AND end_ts > UNIX_TIMESTAMP() ';
         } else {
             $where = ' WHERE 1=1 ';
         }
