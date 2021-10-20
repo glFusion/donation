@@ -198,7 +198,7 @@ function DONATION_CampaignList()
             'received_txt'  => $received_txt,
             'have_pct_received' => $have_pct_recvd,
             'donate_btn'    => $C->getButton(),
-            'pi_url'        => DON_URL,
+            'pi_url'        => Config::get('url'),
         ) );
         $T->parse('CBlk', 'CampaignBlk', true);
     }

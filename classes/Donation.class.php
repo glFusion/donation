@@ -163,9 +163,9 @@ class Donation
         $T = new \Template(__DIR__ . '/../templates');
         $T->set_file('editform', 'donationform.thtml');
         $T->set_var(array(
-            'pi_url'        => DON_URL,
-            'help_url'      => DON_URL . '/docs/campaignform_help.html',
-            'action_url'    => DON_ADMIN_URL . '/index.php',
+            'pi_url'        => Config::get('url'),
+            'help_url'      => Config::get('url') . '/docs/campaignform_help.html',
+            'action_url'    => Config::get('admin_url') . '/index.php',
             'don_id'            => $this->don_id,
             'contributor_select' => $this->UserDropdown($this->uid),
             'contrib_name'  => $this->contrib_name,
@@ -467,7 +467,7 @@ class Donation
 
         $text_arr = array(
             'has_extras' => true,
-            'form_url' => DON_ADMIN_URL .
+            'form_url' => Config::get('admin_url') .
                 '/index.php?donations=x&camp_id='.$camp_id,
         );
         $options = array('chkdelete' => 'true', 'chkfield' => 'don_id');
@@ -511,7 +511,7 @@ class Donation
             $retval .= COM_createLink(
                 '<i class="uk-icon uk-icon-edit tooltip" title="' .
                     $LANG_DON['edit_item'] . '"></i>',
-                DON_ADMIN_URL .
+                Config::get('admin_url') .
                     '/index.php?editdonation=' . $A['don_id'] . '&amp;camp_id=' . $A['camp_id']
             );
         break;
@@ -545,7 +545,7 @@ class Donation
             $retval = COM_createLink(
                 '<i class="uk-icon uk-icon-trash uk-text-danger" ' .
                     ' tooltip" title="' . $LANG_DON['delete'] . '"></i>',
-                DON_ADMIN_URL .
+                Config::get('admin_url') .
                     "/index.php?deletedonation=x&amp;don_id={$A['don_id']}",
                 array(
                     'onclick' => 'return confirm(\'' . $LANG_DON['q_del_item'] . '\');',

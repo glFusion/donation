@@ -35,17 +35,17 @@ class Menu
         $retval = '';
         $menu_arr = array(
             array(
-                'url' => DON_ADMIN_URL . '/index.php',
+                'url' => Config::get('admin_url') . '/index.php',
                 'text' => $LANG_DON['campaigns'],
                 'active' => $view == 'campaigns' ? true : false,
             ),
             array(
-                'url' => DON_ADMIN_URL . '/index.php?editcampaign=x',
+                'url' => Config::get('admin_url') . '/index.php?editcampaign=x',
                 'text' => $LANG_DON['new_campaign'],
                 'active' => $view == 'editcampaign' ? true : false,
             ),
             array(
-                'url' => DON_ADMIN_URL . '/index.php?editdonation=x',
+                'url' => Config::get('admin_url') . '/index.php?editdonation=x',
                 'text' => $LANG_DON['new_donation'],
                 'active' => $view == 'editdonation' ? true : false,
             ),
@@ -59,7 +59,7 @@ class Menu
         $T->set_file('page', 'admin.thtml');
         $T->set_var(array(
             'header'    => $LANG_DON['don_mgr'],
-            'pi_url'    => DON_URL,
+            'pi_url'    => Config::get('url'),
             'pi_icon'   => plugin_geticon_donation(),
             'plugin'    => Config::PI_NAME,
             'version'   => Config::get('pi_version'),

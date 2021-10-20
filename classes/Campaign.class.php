@@ -399,8 +399,8 @@ class Campaign
         }
 
         $T->set_var(array(
-            'help_url'      => DON_URL . '/docs/campaignform_help.html',
-            'action_url'    => DON_ADMIN_URL . '/index.php',
+            'help_url'      => Config::get('url') . '/docs/campaignform_help.html',
+            'action_url'    => Config::get('admin_url') . '/index.php',
             'camp_id'       => $this->camp_id,
             'old_camp_id'   => $this->camp_id,
             'name'          => $this->name,
@@ -509,9 +509,9 @@ class Campaign
                 'item_number' => 'donation:' . $this->camp_id,
                 'item_name' => $this->name,
                 'quantity' => 1,
-                'return' => DON_URL . '/index.php?mode=thanks&id=' . urlencode($this->name),
+                'return' => Config::get('url') . '/index.php?mode=thanks&id=' . urlencode($this->name),
                 'btn_type' => 'donation',
-                'cancel_return' => DON_URL . '/index.php',
+                'cancel_return' => Config::get('url') . '/index.php',
             );
             if (Config::get('pp_use_donation')) {
                 // Set the Shop command if configured.
@@ -868,7 +868,7 @@ class Campaign
         );
         $text_arr = array(
             'has_extras' => true,
-            'form_url' => DON_ADMIN_URL . '/index.php?type=campaigns',
+            'form_url' => Config::get('admin_url') . '/index.php?type=campaigns',
         );
 
         //$options = array('chkdelete' => 'true', 'chkfield' => 'camp_id');
@@ -919,7 +919,7 @@ class Campaign
             $retval .= COM_createLink(
                 '<i class="uk-icon uk-icon-edit" tooltip" title="' .
                     $LANG_DON['edit_item'] . '"></i>',
-                DON_ADMIN_URL .
+                Config::get('admin_url') .
                     '/index.php?editcampaign=x&amp;camp_id=' . $A['camp_id']
             );
             break;
@@ -929,7 +929,7 @@ class Campaign
                 $retval = COM_createLink(
                     '<i class="uk-icon uk-icon-trash uk-text-danger" ' .
                         ' tooltip" title="' . $LANG_DON['delete'] . '"></i>',
-                    DON_ADMIN_URL .
+                    Config::get('admin_url') .
                         "/index.php?deletecampaign=x&amp;camp_id={$A['camp_id']}",
                     array(
                         'onclick' => 'return confirm(\'' . $LANG_DON['q_del_item'] . '\');',
@@ -966,7 +966,7 @@ class Campaign
         case 'name':
             $retval = COM_createLink(
                 $fieldvalue,
-                DON_ADMIN_URL .
+                Config::get('admin_url') .
                 '/index.php?donations=x&camp_id=' . $A['camp_id']
             );
             break;

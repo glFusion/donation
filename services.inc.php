@@ -50,9 +50,9 @@ function service_productinfo_donation($args, &$output, &$svc_msg)
         'fixed_q' => 1,         // Purchase qty fixed at 1
         'isUnique' => true,     // Only on purchase of this item allowed
         'supportsRatings' => false,
-        'cancel_url' => DON_URL . '/index.php',
+        'cancel_url' => Config::get('url') . '/index.php',
         'add_cart' => false,    // cannot use the Shop cart
-        'url' => DON_URL . '/index.php?mode=detail&id=' . $camp_id,
+        'url' => Config::get('url') . '/index.php?mode=detail&id=' . $camp_id,
         'custom_price' => false,
     );
     if (!$C->isNew()) {
@@ -102,7 +102,7 @@ function service_getproducts_donation($args, &$output, &$svc_msg)
             'description' => $P->getDscp(),
             'price' => '0.00',
             'buttons' => array('donation' => $P->GetButton()),
-            'url' => DON_URL . '/index.php?mode=detail&amp;id=' .
+            'url' => Config::get('url') . '/index.php?mode=detail&amp;id=' .
                         urlencode($P->getID()),
             'have_detail_svc' => true,  // Tell Shop to use it's detail page wrapper
             'img_url' => '',
