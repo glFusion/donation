@@ -15,9 +15,17 @@ if (!defined('GVERSION')) {
     die('This file can not be used on its own.');
 }
 
-/** @global array $_CONF_DON */
-global $_CONF_DON;
-$_CONF_DON = config::get_instance()->get_config('donation');
+spl_autoload_register(function ($class)
+{
+    if (strpos($class, 'Donation\\') === 0) {
+        $class = str_replace('Donation\\', '', $class);
+        $path = __DIR__ . '/classes/' . $class . '.class.php';
+        if (file_exists($path)) {
+            include $path;
+        }
+    }
+});
+use Donation\Config;
 
 /** Additional config items and table definitions are added here */
 require_once __DIR__ . '/donation.php';
@@ -26,14 +34,8 @@ if (file_exists(__DIR__ . '/config.php')) {
     include_once __DIR__ . '/config.php';
 }
 
-define('DON_PI_PATH', __DIR__);
-define('DON_ADMIN_URL',
-    $_CONF['site_url'].'/admin/plugins/'.$_CONF_DON['pi_name']);
-define('DON_URL',  $_CONF['site_url'].'/'.$_CONF_DON['pi_name']);
 define('DON_CHECKED', 'checked="checked"');
 define('DON_SELECTED', 'selected="selected"');
-
-$_CONF_DON['now'] = new \Date('now', $_CONF['timezone']);
 
 // Include inter-plugin services
 require_once __DIR__ . '/services.inc.php';
@@ -53,18 +55,6 @@ if (is_file("$langpath/custom/$langfile")) {
     include_once "$langpath/custom/$langfile";
 }
 
-spl_autoload_register(function ($class)
-{
-    if (strpos($class, 'Donation\\') === 0) {
-        $class = str_replace('Donation\\', '', $class);
-        $path = __DIR__ . '/classes/' . $class . '.class.php';
-        if (file_exists($path)) {
-            include $path;
-        }
-    }
-});
-
-
 /**
  * Returns the items for this plugin that should appear on the main menu.
  *
@@ -75,11 +65,11 @@ spl_autoload_register(function ($class)
  */
 function plugin_getmenuitems_donation()
 {
-    global $LANG_DON, $_CONF_DON;
+    global $LANG_DON;
 
-    if ($_CONF_DON['show_in_menu']) {
+    if (Config::get('show_in_menu')) {
         return array(
-            $LANG_DON['donations'] => DON_URL . '/index.php',
+            $LANG_DON['donations'] => Config::get('url') . '/index.php',
         );
     } else {
         return NULL;
@@ -94,7 +84,7 @@ function plugin_getmenuitems_donation()
  */
 function plugin_getheaderjs_donation()
 {
-    $js_dir = DON_PI_PATH . '/js';
+    $js_dir = __DIR__ . '/js';
     $files = array(
         "$js_dir/toggleEnabled.js",
     );
@@ -113,7 +103,7 @@ function plugin_getheaderjs_donation()
  */
 function plugin_showstats_donation($showsitestats)
 {
-    global $_CONF, $_USER, $_TABLES, $LANG_DON, $_CONF_DON;
+    global $_CONF, $_USER, $_TABLES, $LANG_DON;
 
     $retval = '';
 
@@ -151,7 +141,7 @@ function plugin_showstats_donation($showsitestats)
                 'name' => COM_createLink(
                     htmlspecialchars($C->getName()),
                     COM_buildUrl(
-                        DON_URL . '/index.php?mode=detail&id=' . $C->getID()
+                        Config::get('url') . '/index.php?mode=detail&id=' . $C->getID()
                     )
                 ),
                 'received' => COM_NumberFormat($C->getReceived(), 2),
@@ -172,13 +162,11 @@ function plugin_showstats_donation($showsitestats)
  */
 function plugin_cclabel_donation()
 {
-    global $_CONF, $_CONF_DON;
-
     if (plugin_ismoderator_donation()) {
         return array(
-            $_CONF_DON['pi_display_name'],
-            DON_ADMIN_URL . '/index.php',
-            DON_URL . '/images/donation.png'
+            Config::get('pi_display_name'),
+            Config::get('admin_url') . '/index.php',
+            Config::get('url') . '/images/donation.png'
         );
     } else {
         return '';
@@ -193,12 +181,10 @@ function plugin_cclabel_donation()
  */
 function plugin_getadminoption_donation()
 {
-    global $_CONF, $_TABLES, $LANG_DON, $_CONF_DON;
-
     if (plugin_ismoderator_donation()) {
         return array(
-            $_CONF_DON['pi_display_name'],
-            DON_ADMIN_URL . '/index.php',
+            Config::get('pi_display_name'),
+            Config::get('admin_url') . '/index.php',
         );
     } else {
         return '';
@@ -228,9 +214,7 @@ function plugin_ismoderator_donation()
  */
 function plugin_chkVersion_donation()
 {
-    global $_CONF_DON;
-
-    return $_CONF_DON['pi_version'];
+    return Config::get('pi_version');
 }
 
 
@@ -241,15 +225,13 @@ function plugin_chkVersion_donation()
  */
 function plugin_autouninstall_donation()
 {
-    global $_CONF_DON;
-
     $out = array (
         'tables'    => array('don_campaigns', 'don_donations'),
-        'groups'    => array($_CONF_DON['pi_name'] . ' Admin'),
-        'features'  => array($_CONF_DON['pi_name'] . '.admin',
+        'groups'    => array(Config::PI_NAME . ' Admin'),   // legacy
+        'features'  => array(Config::PI_NAME . '.admin',
                         ),
         'php_blocks' => array('phpblock_donation_donations'),
-        'vars'      => array($_CONF_DON['pi_name'] . '_gid')
+        'vars'      => array(Config::PI_NAME . '_gid')
     );
     return $out;
 }
@@ -262,9 +244,7 @@ function plugin_autouninstall_donation()
  */
 function plugin_geticon_donation()
 {
-    global $_CONF;
-
-    return $_CONF['site_url'] . '/donation/images/donation.png';
+    return Config::get('url') . '/images/donation.png';
 }
 
 
@@ -327,9 +307,9 @@ function plugin_itemdeleted_donation($id, $type)
  */
 function plugin_getconfigelementhelp_donation($option, $doclang='english')
 {
-    global $_CONF, $_CONF_DON;
+    global $_CONF;
 
-    $doc_url = LGLIB_getDocURL('config.html', $_CONF_DON['pi_name'], $doclang);
+    $doc_url = LGLIB_getDocURL('config.html', Config::PI_NAME, $doclang);
     if (empty($doc_url))
         return false;
 
@@ -362,7 +342,7 @@ function plugin_upgrade_donation()
  */
 function phpblock_donation_donations()
 {
-    global $_TABLES, $_CONF, $LANG_DON, $_CONF_DON;
+    global $_TABLES, $_CONF, $LANG_DON;
 
     $retval = '';
 
@@ -371,16 +351,16 @@ function phpblock_donation_donations()
         return '';
     }
 
-    $T = new \Template(DON_PI_PATH . '/templates');
+    $T = new \Template(Config::get('path') . '/templates');
     $i = 0;
-    $limit = (int)$_CONF_DON['num_in_blk'];
+    $limit = (int)Config::get('num_in_blk');
     foreach ($Campaigns as $C) {
         $T->set_file('block', 'blk_contrib.thtml');
         $T->set_var(array(
             'title'     => $C->getName(),
             'description' => $C->getShortDscp(),
             'camp_id'   => $C->getID(),
-            'pi_url'    => DON_URL,
+            'pi_url'    => Config::get('url'),
         ) );
         if ($C->getGoal() > 0 && $C->getBlkShowPct()) {
             if ($C->getReceived() < $C->getGoal()) {
@@ -403,7 +383,7 @@ function phpblock_donation_donations()
                 'item_number' => 'donation:' . $C->getID(),
                 'item_name' => $C->getName(),
                 'quantity' => 1,
-                'return' => DON_URL . '/index.php',
+                'return' => Config::get('url') . '/index.php',
         );
         $T->set_var('donate_btn', $C->getButton());
 
@@ -430,7 +410,7 @@ function phpblock_donation_donations()
  */
 function plugin_profileblocksdisplay_donation($uid)
 {
-    global $_CONF_DON, $LANG_DON, $_TABLES, $_CONF, $_USER;
+    global $LANG_DON, $_TABLES, $_CONF, $_USER;
 
     $retval = '';
     if ($uid != $_USER['uid'] && !plugin_ismoderator_donation()) {
@@ -474,7 +454,7 @@ function plugin_dopluginsearch_donation(
     $query, $datestart, $dateend, $topic, $keyType, $author
 )
 {
-    global $_CONF, $_TABLES, $_CONF_DON, $LANG_DON;
+    global $_CONF, $_TABLES, $LANG_DON;
 
     if (empty($keyType)) {
         $type = 'all';
@@ -483,7 +463,7 @@ function plugin_dopluginsearch_donation(
     // Encode query for inclusion in result's url
     $query = DB_escapeString(trim($query));
     $sql = Donation\Campaign::getSearchSql($query);
-    $search = new \SearchCriteria($_CONF_DON['pi_name'], $LANG_DON['donations']);
+    $search = new \SearchCriteria(Config::PI_NAME, $LANG_DON['donations']);
     $columns = array(
         'name',
         'shortdscp',
@@ -578,8 +558,9 @@ function plugin_getiteminfo_donation($id, $what, $uid=0, $options=array())
                         $A['dscp'];
                 break;
             case 'url':
-                $props[$p] = COM_buildUrl($_CONF['site_url'] .
-                    '/donation/index.php?mode=detail&id=' . urlencode($A['camp_id'])
+                $props[$p] = COM_buildUrl(
+                    Config::get('url') .
+                    '/index.php?mode=detail&id=' . urlencode($A['camp_id'])
                 );
                 break;
             default:
@@ -651,4 +632,3 @@ function DON_shop_enabled()
     return $enabled;
 }
 
-?>

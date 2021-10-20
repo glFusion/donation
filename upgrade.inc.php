@@ -12,10 +12,11 @@
  */
 
 // Required to get the config values
-global $_CONF, $_CONF_DON, $_UPGRADE_SQL;
+global $_CONF, $_UPGRADE_SQL;
+use Donation\Config;
 
 /** Include the table creation strings */
-require_once DON_PI_PATH . "/sql/mysql_install.php";
+require_once __DIR__ . "/sql/mysql_install.php";
 
 /**
  * Perform the upgrade starting at the current version.
@@ -28,15 +29,15 @@ require_once DON_PI_PATH . "/sql/mysql_install.php";
  */
 function donation_do_upgrade($dvlp=false)
 {
-    global $_CONF, $_CONF_DON, $_PLUGIN_INFO, $_UPGRADE_SQL, $_TABLES;
+    global $_CONF, $_PLUGIN_INFO, $_UPGRADE_SQL, $_TABLES;
 
-    if (isset($_PLUGIN_INFO[$_CONF_DON['pi_name']])) {
-        if (is_array($_PLUGIN_INFO[$_CONF_DON['pi_name']])) {
+    if (isset($_PLUGIN_INFO[Config::PI_NAME])) {
+        if (is_array($_PLUGIN_INFO[Config::PI_NAME])) {
             // glFusion > 1.6.5
-            $current_ver = $_PLUGIN_INFO[$_CONF_DON['pi_name']]['pi_version'];
+            $current_ver = $_PLUGIN_INFO[Config::PI_NAME]['pi_version'];
         } else {
             // legacy
-            $current_ver = $_PLUGIN_INFO[$_CONF_DON['pi_name']];
+            $current_ver = $_PLUGIN_INFO[Config::PI_NAME];
         }
     } else {
         return false;
@@ -92,7 +93,7 @@ function donation_do_upgrade($dvlp=false)
     include_once 'install_defaults.php';
     plugin_updateconfig_donation();
 
-    COM_errorLog("Successfully updated the {$_CONF_DON['pi_display_name']} Plugin", 1);
+    COM_errorLog("Successfully updated the " . Config::get('pi_display_name') . " Plugin", 1);
     return true;
 }
 
@@ -140,24 +141,24 @@ function donation_do_upgrade_sql($version='', $ignore_errors=false)
  */
 function donation_do_set_version($ver)
 {
-    global $_TABLES, $_CONF_DON, $_PLUGIN_INFO;
+    global $_TABLES, $_PLUGIN_INFO;
 
     // now update the current version number.
     $sql = "UPDATE {$_TABLES['plugins']} SET
             pi_version = '$ver',
-            pi_gl_version = '{$_CONF_DON['gl_version']}',
-            pi_homepage = '{$_CONF_DON['pi_url']}'
-        WHERE pi_name = '{$_CONF_DON['pi_name']}'";
+            pi_gl_version = '" . Config::get('gl_version') . "',
+            pi_homepage = '" . Config::get(Config::get('url') . "'
+        WHERE pi_name = '" . Config::PI_NAME . "'";
 
     $res = DB_query($sql, 1);
     if (DB_error()) {
-        COM_errorLog("Error updating the {$_CONF_DON['pi_display_name']} Plugin version",1);
+        COM_errorLog("Error updating the " . Config::get('pi_display_name') . " Plugin version",1);
         return false;
     } else {
-        COM_errorLog("{$_CONF_DON['pi_display_name']} version set to $ver");
+        COM_errorLog(Config::get('pi_display_name') . " version set to $ver");
         // Set in-memory config vars to avoid tripping PP_isMinVersion();
-        $_CONF_DON['pi_version'] = $ver;
-        $_PLUGIN_INFO[$_CONF_DON['pi_name']]['pi_version'] = $ver;
+        Config::set('pi_version', $ver);
+        $_PLUGIN_INFO[Config::PI_NAME]['pi_version'] = $ver;
         return true;
     }
 }
@@ -179,4 +180,3 @@ function _DON_tableHasColumn($table, $col_name)
     return DB_numRows($res) == 0 ? false : true;
 }
 
-?>

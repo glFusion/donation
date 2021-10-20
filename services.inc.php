@@ -22,7 +22,7 @@
  */
 function service_productinfo_donation($args, &$output, &$svc_msg)
 {
-    global $_TABLES, $LANG_PHOTO, $LANG_DON, $_CONF_DON;
+    global $_TABLES, $LANG_PHOTO, $LANG_DON;
 
     // $args should be an array of item info
     if (
@@ -62,7 +62,7 @@ function service_productinfo_donation($args, &$output, &$svc_msg)
         $output['description'] = $dscp;
         $output['override_price'] = 1;
         $output['btn_text'] = $LANG_DON['donate'];
-        if ($_CONF_DON['pp_use_donation']) {
+        if (Config::get('pp_use_donation')) {
             $output['btn_type'] = 'donation';
         }
         return PLG_RET_OK;
@@ -81,14 +81,14 @@ function service_productinfo_donation($args, &$output, &$svc_msg)
  */
 function service_getproducts_donation($args, &$output, &$svc_msg)
 {
-    global $_TABLES, $_USER, $_CONF_DON;
+    global $_TABLES, $_USER;
 
     // Initialize the return value as empty.
     $output = array();
 
     // If we're not configured to show campaigns in the Shop catalog,
     // just return
-    if ($_CONF_DON['show_in_shop_cat'] != 1) {
+    if (Config::get('show_in_shop_cat') != 1) {
         return PLG_RET_OK;  // nothing to show is a valid return
     }
 
@@ -124,7 +124,7 @@ function service_getproducts_donation($args, &$output, &$svc_msg)
  */
 function service_handlePurchase_donation($args, &$output, &$svc_msg)
 {
-    global $_CONF, $_CONF_DON, $_TABLES, $LANG_DON;
+    global $_CONF, $_TABLES, $LANG_DON;
 
     $item = $args['item'];
     $ipn_data = $args['ipn_data'];
@@ -190,4 +190,3 @@ function service_handlePurchase_donation($args, &$output, &$svc_msg)
     return PLG_RET_OK;
 }
 
-?>

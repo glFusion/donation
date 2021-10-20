@@ -28,7 +28,7 @@ class Menu
      */
     public static function Admin($view='')
     {
-        global $_CONF, $LANG_ADMIN, $LANG_DON, $_CONF_DON;
+        global $_CONF, $LANG_ADMIN, $LANG_DON;
 
         USES_lib_admin();
 
@@ -61,8 +61,8 @@ class Menu
             'header'    => $LANG_DON['don_mgr'],
             'pi_url'    => DON_URL,
             'pi_icon'   => plugin_geticon_donation(),
-            'plugin'    => $_CONF_DON['pi_name'],
-            'version'   => $_CONF_DON['pi_version'],
+            'plugin'    => Config::PI_NAME,
+            'version'   => Config::get('pi_version'),
         ) );
         $T->parse('output','page');
         $retval .= $T->finish($T->get_var('output'));
@@ -75,7 +75,4 @@ class Menu
     }
 
 }
-
-?>
-
 

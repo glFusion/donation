@@ -120,7 +120,7 @@ default:
 
 echo COM_siteHeader('menu', $pageTitle);
 if ($msg != '')
-    echo  COM_showMessage($msg, $_CONF_DON['pi_name']);
+    echo  COM_showMessage($msg, Donation\Config::PI_NAME);
 echo $content;
 echo COM_siteFooter(true);
 
@@ -132,7 +132,7 @@ echo COM_siteFooter(true);
  */
 function DONATION_CampaignList()
 {
-    global $_TABLES, $_CONF_DON, $LANG_DON, $_CONF;
+    global $_TABLES, $LANG_DON, $_CONF;
 
     $Campaigns = Donation\Campaign::getAllActive();
     if (count($Campaigns) < 1) {
@@ -206,4 +206,3 @@ function DONATION_CampaignList()
     return $T->finish($T->get_var('output'));
 }
 
-?>

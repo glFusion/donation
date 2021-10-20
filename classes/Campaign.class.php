@@ -100,7 +100,7 @@ class Campaign
      */
     public function __construct($id='')
     {
-        global $_USER, $_TABLES, $_CONF_DON;
+        global $_USER, $_TABLES;
 
         if (is_array($id)) {
             $this->setVars($id);
@@ -233,13 +233,13 @@ class Campaign
      */
     public static function getSearchSql($query)
     {
-        global $_TABLES, $_CONF_DON;
+        global $_TABLES;
 
         $htmlquery = urlencode($query);
         return "SELECT
                 camp_id, name as title, dscp as description,
                 start_ts as date,
-                CONCAT('/{$_CONF_DON['pi_name']}/index.php?mode=detail&id=',camp_id,'&query=$htmlquery') as url
+                CONCAT('/" . Config::PI_NAME . "/index.php?mode=detail&id=',camp_id,'&query=$htmlquery') as url
             FROM {$_TABLES['don_campaigns']}
             WHERE enabled = 1
             AND start_ts < UNIX_TIMESTAMP()
@@ -360,7 +360,7 @@ class Campaign
      */
     public function Edit()
     {
-        global $_CONF, $_CONF_DON, $LANG24, $LANG_postmodes;
+        global $_CONF, $LANG24, $LANG_postmodes;
 
         $T = new \Template(__DIR__ . '/../templates');
         $T->set_file('editform', 'campaignform.thtml');
@@ -418,7 +418,7 @@ class Campaign
             'goal'          => $this->goal,
             'doc_url'       => LGLIB_getDocURL(
                 'campaignform.html',
-                $_CONF_DON['pi_name'],
+                Config::PI_NAME,
                 $_CONF['language']
             ),
         ) );
@@ -434,7 +434,7 @@ class Campaign
      */
     public function Save($A='')
     {
-        global $_TABLES, $LANG_DON, $_CONF_DON;
+        global $_TABLES, $LANG_DON;
 
         if (is_array($A)) {
             $this->setVars($A, false);
@@ -487,7 +487,7 @@ class Campaign
             if ($update_don_ids) {
                 Donation::updateCampaignIDs($old_camp_id, $this->camp_id);
             }
-            PLG_itemSaved($this->camp_id, $_CONF_DON['pi_name']);
+            PLG_itemSaved($this->camp_id, Config::PI_NAME);
         }
     }
 
@@ -500,7 +500,7 @@ class Campaign
      */
     public function getButton()
     {
-        global $_TABLES, $_CONF, $_CONF_DON, $_USER;
+        global $_TABLES, $_CONF, $_USER;
 
         $button = '';
 
@@ -513,7 +513,7 @@ class Campaign
                 'btn_type' => 'donation',
                 'cancel_return' => DON_URL . '/index.php',
             );
-            if ($_CONF_DON['pp_use_donation']) {
+            if (Config::get('pp_use_donation')) {
                 // Set the Shop command if configured.
                 $vars['cmd'] = '_donations';
             }
@@ -810,7 +810,7 @@ class Campaign
     public static function adminList()
     {
         global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_ACCESS;
-        global $_CONF_DON, $LANG_DON;
+        global $LANG_DON;
 
         USES_lib_admin();
         $retval = '';
@@ -907,7 +907,7 @@ class Campaign
      */
     public static function getListField($fieldname, $fieldvalue, $A, $icon_arr)
     {
-        global $_CONF, $LANG_ACCESS, $LANG_DON, $_CONF_DON;
+        global $_CONF, $LANG_ACCESS, $LANG_DON;
 
         static $Dt = NULL;
         $retval = '';
@@ -995,4 +995,3 @@ class Campaign
     }
 }
 
-?>

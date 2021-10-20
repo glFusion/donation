@@ -16,16 +16,12 @@ global $_TABLES;
 global $_DB_table_prefix;
 
 // Static configuration items
-$_CONF_DON['pi_version'] = '0.1.1';
-$_CONF_DON['pi_name'] = 'donation';
-$_CONF_DON['gl_version'] = '1.7.8';
-$_CONF_DON['pi_url'] = 'http://www.leegarner.com';
-$_CONF_DON['pi_display_name'] = 'Donations';
+Donation\Config::set('pi_version', '0.1.1');
+Donation\Config::set('gl_version', '1.7.8');
 
-$DON_prefix = $_DB_table_prefix . $_CONF_DON['pi_name'] . '_';
+$DON_prefix = $_DB_table_prefix . Donation\Config::PI_NAME . '_';
 
 // Table definitions
 $_TABLES['don_campaigns']  = $DON_prefix . 'campaigns';
 $_TABLES['don_donations']  = $DON_prefix . 'donations';
 
-?>

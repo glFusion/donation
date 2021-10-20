@@ -62,7 +62,7 @@ class Donation
      */
     public function __construct($don_id = 0)
     {
-        global $_USER, $_TABLES, $_CONF_DON;
+        global $_USER, $_TABLES;
 
         $this->don_id = (int)$don_id;
 
@@ -158,7 +158,7 @@ class Donation
      */
     public function Edit()
     {
-        global $_CONF, $_CONF_DON;
+        global $_CONF;
 
         $T = new \Template(__DIR__ . '/../templates');
         $T->set_file('editform', 'donationform.thtml');
@@ -176,9 +176,11 @@ class Donation
             'campaign_select' =>
                         Campaign::DropDown($this->camp_id),
             'txn_id'        => $this->txn_id,
-            'doc_url'       => LGLIB_getDocURL('donationform.html',
-                                $_CONF_DON['pi_name'],
-                                $_CONF['language']),
+            'doc_url'       => LGLIB_getDocURL(
+                'donationform.html',
+                Config::PI_NAME,
+                $_CONF['language']
+            ),
         ) );
 
         $T->parse ('output', 'editform');
@@ -419,7 +421,7 @@ class Donation
     public static function adminList($camp_id='')
     {
         global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_ACCESS;
-        global $_CONF_DON, $LANG_DON;
+        global $LANG_DON;
 
         USES_lib_admin();
         $retval = '';
@@ -500,7 +502,7 @@ class Donation
      */
     public static function getListField($fieldname, $fieldvalue, $A, $icon_arr)
     {
-        global $_CONF, $LANG_ACCESS, $LANG_DON, $_CONF_DON;
+        global $_CONF, $LANG_ACCESS, $LANG_DON;
 
         $retval = '';
 
@@ -578,4 +580,3 @@ class Donation
 
 }
 
-?>

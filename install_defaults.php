@@ -127,5 +127,3 @@ function plugin_updateconfig_donation()
     USES_lib_install();
     _update_config('donation', $donationConfigData);
 }
-
-?>
