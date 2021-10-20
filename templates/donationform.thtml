@@ -1,5 +1,5 @@
 {# begin {templatelocation} #}
-<form action="{action_url}" method="post" class="uk-form-horizontal" id="submit">
+<form action="{action_url}" method="post" class="uk-form uk-form-horizontal" id="submit">
     <input type=hidden name="don_id" value="{don_id}">
 
     <div class="uk-form-row uk-margin-small">
