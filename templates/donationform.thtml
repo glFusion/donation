@@ -2,7 +2,7 @@
 <form action="{action_url}" method="post" class="uk-form-horizontal" id="submit">
     <input type=hidden name="don_id" value="{don_id}">
 
-    <div class="uk-form-row">
+    <div class="uk-form-row uk-margin-small">
       <label class="uk-form-label">{$LANG_DON['date']}</label>
       <div class="uk-form-controls">
         <input required type="text"
@@ -18,7 +18,7 @@
       </div>
     </div>
 
-    <div class="uk-form-row">
+    <div class="uk-form-row uk-margin-small">
       <label class="uk-form-label for="camp_id">{$LANG_DON['campaign']}</label>
       <div class="uk-form-controls">
         <select id="camp_id" name="camp_id">{campaign_select}</select>
@@ -27,7 +27,7 @@
       </div>
     </div>
 
-    <div class="uk-form-row">
+    <div class="uk-form-row uk-margin-small">
       <label class="uk-form-label" for="uid">{$LANG_DON['contributor']}</label>
       <div class="uk-form-controls">
         <select id="uid" name="uid">{contributor_select}</select>&nbsp;&nbsp;
@@ -37,7 +37,7 @@
       </div>
     </div>
 
-    <div class="uk-form-row">
+    <div class="uk-form-row uk-margin-small">
       <label class="uk-form-label" for="f_amount">{$LANG_DON['amount']}</label>
       <div class="uk-form-controls">
         <input name="amount" value="{amountx}" placeholder="0.00" type="text" id="f_amount" />
@@ -46,7 +46,7 @@
       </div>
     </div>
 
-    <div class="uk-form-row">
+    <div class="uk-form-row uk-margin-small">
       <label class="uk-form-label" for="txn_id">{$LANG_DON['txn_id']}</label>
       <div class="uk-form-controls">
         <input name="txn_id" value="{txn_id}" type="text" id="f_txn_id" />
@@ -55,7 +55,7 @@
       </div>
     </div>
 
-    <div class="uk-form-row">
+    <div class="uk-form-row uk-margin-small">
       <label class="uk-form-label" for="comment">{$LANG_DON['comment']}</label>
       <div class="uk-form-controls">
         <textarea name="comment" id="f_comment" style="width:50%" rows=4>{comment}</textarea>
@@ -64,7 +64,7 @@
       </div>
     </div>
 
-    <div class="uk-form-row">
+    <div class="uk-form-row uk-margin-small">
       <div class="uk-form-controls">
           <button type="submit" class="uk-button uk-button-success" name="savedonation">{$LANG_DON['submit']}</button>
           <button type="reset" class="uk-button uk-button-primary">{$LANG_DON['clearform']}</button>
