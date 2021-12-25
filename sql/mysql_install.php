@@ -10,8 +10,9 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
-global $_UPGRADE_SQL;
+global $_TABLES, $_UPGRADE_SQL;
 
+$_SQL = array();
 $_SQL['don_donations'] = "CREATE TABLE {$_TABLES['don_donations']} (
   `don_id` int(11) unsigned NOT NULL auto_increment,
   `camp_id` varchar(40) NOT NULL default '',
