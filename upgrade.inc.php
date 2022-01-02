@@ -147,7 +147,7 @@ function donation_do_set_version($ver)
     $sql = "UPDATE {$_TABLES['plugins']} SET
             pi_version = '$ver',
             pi_gl_version = '" . Config::get('gl_version') . "',
-            pi_homepage = '" . Config::get(Config::get('url') . "'
+            pi_homepage = '" . Config::get('url') . "'
         WHERE pi_name = '" . Config::PI_NAME . "'";
 
     $res = DB_query($sql, 1);
