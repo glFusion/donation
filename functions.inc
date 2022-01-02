@@ -3,9 +3,9 @@
  * Common functions for the Donation plugin.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2022 Lee Garner <lee@leegarner.com>
  * @package     donation
- * @version     v0.0.2
+ * @version     v0.1.1
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -46,7 +46,7 @@ require_once __DIR__ . '/services.inc.php';
 $langpath = __DIR__  . '/language';
 $langfile = "{$_CONF['language']}.php";
 if (!file_exists("$langpath/$langfile")) {
-    $langfile = 'english.php';
+    $langfile = 'english_utf-8.php';
 }
 require_once "$langpath/$langfile";
 
