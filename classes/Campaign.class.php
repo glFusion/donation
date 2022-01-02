@@ -5,7 +5,7 @@
  * @author      Lee Garner <lee@leegarner.com>
  * @copyright   Copyright (c) 2009-2020 Lee Garner <lee@leegarner.com>
  * @package     donation
- * @version     v0.0.3
+ * @version     v0.1.1
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -371,6 +371,15 @@ class Campaign
             $T->set_var('show_htmleditor', true);
             PLG_requestEditor('donation','donation_entry','ckeditor_donation.thtml');
             PLG_templateSetVars('donation_entry', $T);
+            SEC_setCookie(
+                $_CONF['cookie_name'] . 'adveditor',
+                SEC_createTokenGeneral('advancededitor'),
+                time() + 1200,
+                $_CONF['cookie_path'],
+                $_CONF['cookiedomain'],
+                $_CONF['cookiesecure'],
+                false
+            );
             break;
         case 'tinymce' :
             $T->set_var('show_htmleditor',true);

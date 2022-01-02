@@ -20,7 +20,7 @@ function DON_resetSaleDates(type)
         <span id="campaign_id" class="tooltip_cfg tooltipstered"></span>
       </label>
       <div class="uk-form-controls">
-        <input required' type="text" name="camp_id" value="{camp_id}" id="f_camp_id" />
+        <input required' class="uk-input" type="text" name="camp_id" value="{camp_id}" id="f_camp_id" />
       </div>
     </div>
 
@@ -29,7 +29,7 @@ function DON_resetSaleDates(type)
         <span id="campaign_name" class="tooltip_cfg tooltipstered"></span>
       </label>
       <div class="uk-form-controls">
-        <input required type="text" name="name" value="{name}" id="f_name" size="40" />
+        <input required class="uk-input uk-form-width-large" type="text" name="name" value="{name}" id="f_name" />
       </div>
     </div>
 
@@ -38,7 +38,7 @@ function DON_resetSaleDates(type)
         <span id="short_dscp" class="tooltip_cfg tooltipstered"></span>
       </label>
       <div class="uk-form-controls">
-        <textarea id="f_shortdscp" rows="2" name="shortdscp" cols="40" style="width:100%">{shortdscp}</textarea>
+        <textarea id="f_shortdscp" rows="2" name="shortdscp" class="uk-textarea uk-width-1-1">{shortdscp}</textarea>
       </div>
     </div>
 
@@ -47,8 +47,7 @@ function DON_resetSaleDates(type)
         <span id="dscp" class="tooltip_cfg tooltipstered"></span>
       </label>
       <div class="uk-form-controls">
-        <textarea id="html_content" name="dscp" cols="35" rows="5"
-          style="width:70%">{dscp}</textarea>
+        <textarea id="f_dscp" name="dscp" class="uk-textarea uk-width-1-1" rows="5">{dscp}</textarea>
       </div>
     </div>
 
