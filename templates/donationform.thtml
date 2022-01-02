@@ -6,12 +6,12 @@
       <label class="uk-form-label">{$LANG_DON['date']}</label>
       <div class="uk-form-controls">
         <input required type="text"
-            class="uk-form-width-small tooltip"
-            title="{$LANG_DON['timepicker']}"
+            class="uk-input uk-form-width-small tooltip"
+            title="{$LANG_DON['datepicker']}"
             data-uk-datepicker="{format:YYYY-MM-DD}"
             name="dt" value="{dt}" />
         <input type="text" name="tm"
-            class="uk-form-width-small tooltip"
+            class="uk-input uk-form-width-small tooltip"
             data-uk-timepicker="(format:24h}"
             title="{$LANG_DON['timepicker']}"
             value="{tm}" maxlength="16" />
@@ -21,7 +21,7 @@
     <div class="uk-form-row uk-margin-small">
       <label class="uk-form-label for="camp_id">{$LANG_DON['campaign']}</label>
       <div class="uk-form-controls">
-        <select id="camp_id" name="camp_id">{campaign_select}</select>
+        <select class="uk-select uk-form-width-medium" id="camp_id" name="camp_id">{campaign_select}</select>
         <span class="uk-icon-question-circle tooltip"
             title="{$LANG_DON['hlp_campaign']}"></span>
       </div>
@@ -31,7 +31,7 @@
       <label class="uk-form-label" for="uid">{$LANG_DON['contributor']}</label>
       <div class="uk-form-controls">
         <select id="uid" name="uid">{contributor_select}</select>&nbsp;&nbsp;
-        <input type="text" name="contrib_name" id="f_contrib_name" value="{contrib_name}" />
+        <input type="text" class="uk-input uk-form-width-medium" name="contrib_name" id="f_contrib_name" value="{contrib_name}" />
         <span class="uk-icon-question-circle tooltip"
             title="{$LANG_DON['hlp_contributor']}"></span>
       </div>
@@ -40,7 +40,7 @@
     <div class="uk-form-row uk-margin-small">
       <label class="uk-form-label" for="f_amount">{$LANG_DON['amount']}</label>
       <div class="uk-form-controls">
-        <input name="amount" value="{amountx}" placeholder="0.00" type="text" id="f_amount" />
+        <input class="uk-input uk-form-width-small" name="amount" value="{amount}" placeholder="0.00" type="text" id="f_amount" />
         <span class="uk-icon-question-circle tooltip"
             title="{$LANG_DON['hlp_amount']}"></span>
       </div>
@@ -49,7 +49,7 @@
     <div class="uk-form-row uk-margin-small">
       <label class="uk-form-label" for="txn_id">{$LANG_DON['txn_id']}</label>
       <div class="uk-form-controls">
-        <input name="txn_id" value="{txn_id}" type="text" id="f_txn_id" />
+        <input class="uk-input uk-form-width-large" name="txn_id" value="{txn_id}" type="text" id="f_txn_id" />
         <span class="uk-icon-question-circle tooltip"
             title="{$LANG_DON['hlp_transid']}"></span>
       </div>
@@ -58,7 +58,7 @@
     <div class="uk-form-row uk-margin-small">
       <label class="uk-form-label" for="comment">{$LANG_DON['comment']}</label>
       <div class="uk-form-controls">
-        <textarea name="comment" id="f_comment" style="width:50%" rows=4>{comment}</textarea>
+        <textarea class="uk-textarea uk-form-width-large" rows="4" name="comment" id="f_comment">{comment}</textarea>
         <span class="uk-icon-question-circle tooltip"
             title="{$LANG_DON['hlp_comment']}"></span>
       </div>
@@ -68,9 +68,10 @@
       <div class="uk-form-controls">
           <button type="submit" class="uk-button uk-button-success" name="savedonation">{$LANG_DON['submit']}</button>
           <button type="reset" class="uk-button uk-button-primary">{$LANG_DON['clearform']}</button>
-{!if can_delete}
-          <button type="submit" class="uk-button uk-button-danger" name="deletedonation"
+          <a href="{site_admin_url}/plugins/forms/index.php?donations=x&camp_id={camp_id}"class="uk-button uk-button-default">{$LANG_ADMIN['cancel']}</a>
+          <button type="submit" class="uk-button uk-button-danger" name="deletedonation" style="float:right;"
               onclick="return confirm('{$LANG_DON['q_del_item']}');">{$LANG_DON['delete']}</button>
+{!if can_delete}
 {!endif}
       </div>
     </div>

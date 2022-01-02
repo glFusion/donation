@@ -2,7 +2,8 @@
 
 ## Version 0.1.2
 Release 2022-01-02
-- Fix error in setting new version.
+- Fix error in setting new version (#1)
+- Update donation editing form with UIkit styles, fix missing amount (#2)
 
 ## Version 0.1.1
 Release 2022-01-02
