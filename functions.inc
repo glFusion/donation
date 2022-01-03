@@ -5,7 +5,7 @@
  * @author      Lee Garner <lee@leegarner.com>
  * @copyright   Copyright (c) 2009-2022 Lee Garner <lee@leegarner.com>
  * @package     donation
- * @version     v0.1.1
+ * @version     v0.1.2
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -386,7 +386,7 @@ function phpblock_donation_donations()
                 'quantity' => 1,
                 'return' => Config::get('url') . '/index.php',
         );
-        $T->set_var('donate_btn', $C->getButton());
+        $T->set_var('donate_btn', $C->getButton(1));
 
         if ($i > 0) {
             $T->set_var('hr', '<hr />');

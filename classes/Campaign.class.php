@@ -3,9 +3,9 @@
  * Class to handle donation campaigns.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2009-2020 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2022 Lee Garner <lee@leegarner.com>
  * @package     donation
- * @version     v0.1.1
+ * @version     v0.1.2
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -505,9 +505,10 @@ class Campaign
      * Create a Shop button for donations.
      * Used if the Shop plugin is not installed or available.
      *
+     * @param   integer $limit  Limit on number of buttons (default=unlimited)
      * @return  string      HTML for a Shop donation button
      */
-    public function getButton()
+    public function getButton(?int $limit=NULL) : string
     {
         global $_TABLES, $_CONF, $_USER;
 
@@ -534,8 +535,16 @@ class Campaign
                 $svc_msg
             );
             if ($status == PLG_RET_OK && is_array($output) && !empty($output)) {
+                $cnt = 0;       // count buttons supplied
+                $limit = (int)$limit;
                 foreach ($output as $btn) {
                     if (!empty($btn)) {
+                        if ($limit > 0) {
+                            if (++$cnt > $limit) {
+                                // quit if limit is reached
+                                break;
+                            }
+                        }
                         $button .= $btn . LB;
                     }
                 }
