@@ -1,7 +1,4 @@
 {# begin {templatelocation} #}
-<script src="{site_url}/javascript/addons/datetime/jquery.datetimepicker.full.min.js" type="text/javascript"></script>
-<link rel="stylesheet" type="text/css" href="{site_url}/javascript/addons/datetime/jquery.datetimepicker.min.css"/ >
-<script src="{site_url}/javascript/addons/datetime/datetimepicker.js" type="text/javascript"></script>
 <form action="{action_url}" method="post" class="uk-form uk-form-horizontal" id="submit">
     <input type=hidden name="don_id" value="{don_id}">
 
@@ -9,13 +6,8 @@
       <label class="uk-form-label">{$LANG_DON['date']}</label>
       <div class="uk-form-controls">
         <input required type="text" id="f_don_date"
-            class="uk-input uk-form-width-small donation_datepicker tooltip"
-            title="{$LANG_DON['datepicker']}"
-            name="dt" value="{dt}" />
-        <input type="text" name="tm" id="f_don_time"
-            class="uk-input uk-form-width-small donation_timepicker tooltip"
-            title="{$LANG_DON['timepicker']}"
-            value="{tm}" maxlength="16" />
+            class="uk-input uk-form-width-medium popupcal"
+            name="dt" value="{dt_tm}" />
       </div>
     </div>
 

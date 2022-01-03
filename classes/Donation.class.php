@@ -169,8 +169,9 @@ class Donation
             'don_id'            => $this->don_id,
             'contributor_select' => $this->UserDropdown($this->uid),
             'contrib_name'  => $this->contrib_name,
-            'dt'            => $this->dt->format('Y-m-d', true),
-            'tm'            => $this->dt->format('H:i', true),
+            //'dt'            => $this->dt->format('Y-m-d', true),
+            //'tm'            => $this->dt->format('H:i', true),
+            'dt_tm'         => $this->dt->format('Y-m-d H:i', true),
             'comment'       => $this->comment,
             'amount'        => $this->amount > 0 ? $this->amount : '',
             'campaign_select' =>
