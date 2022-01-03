@@ -87,6 +87,7 @@ function plugin_getheaderjs_donation()
     $js_dir = __DIR__ . '/js';
     $files = array(
         "$js_dir/toggleEnabled.js",
+        "$js_dir/datetimepicker.js",
     );
     return $files;
 }
