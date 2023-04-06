@@ -3,14 +3,17 @@
  * Class to handle donations.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2009-2020 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2023 Lee Garner <lee@leegarner.com>
  * @package     donation
- * @version     v0.0.2
+ * @version     v0.2.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
  */
 namespace Donation;
+use glFusion\Database\Database;
+use glFusion\Log\Log;
+
 
 /**
 *   Class to manage donation campaigns
@@ -50,9 +53,6 @@ class Donation
      * @var float */
     private $amount = 0;
 
-    /** Flag to indicate a new donation record.
-     * @var boolean */
-    private $isNew = 1;
 
     /**
      * Read campaign data from the database, or create
@@ -80,16 +80,22 @@ class Donation
      *
      * @param   integer $don_id     Donation record ID
      */
-    public function Read($don_id)
+    public function Read(int $don_id) : self
     {
         global $_TABLES;
 
-        $A = DB_fetchArray(DB_query("
-            SELECT * FROM {$_TABLES['don_donations']}
-            WHERE don_id='" . (int)$don_id . "'"), false);
-        if (!empty($A)) {
-            $this->setVars($A);
-            $this->isNew = false;
+        try {
+            $A = Database::getInstance()->conn->executeQuery(
+                "SELECT * FROM {$_TABLES['don_donations']} WHERE don_id = ?",
+                array($don_id),
+                array(Database::INTEGER)
+            )->fetchAssociative();
+        } catch (\Throwable $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            $A =- false;
+        }
+        if (is_array($A)) {
+            $this->setVars(new DataArray($A));
         }
     }
 
@@ -97,38 +103,47 @@ class Donation
     /**
      * Set all the variables in this object from values provided.
      *
-     * @param   array   $A  Array of values, either from $_POST or database
+     * @param   DataArray   $A  Array of values, either from $_POST or database
+     * @return  object      $this
      */
-    public function setVars($A)
+    public function setVars(DataArray $A) : self
     {
-        if (!is_array($A))
-            return;
-
-        $this->don_id = (int)$A['don_id'];
-        $this->uid = (int)$A['uid'];
-        $this->contrib_name = $A['contrib_name'];
+        $this->don_id = $A->getInt('don_id');
+        $this->uid = $A->getInt('uid');
+        $this->contrib_name = $A->getString('contrib_name');
         if (isset($A['tm'])) {  // from a form with separate date/time fields
             $A['dt'] .= ' ' . $A['tm'];
         }
-        $this->setDate($A['dt']);
-        $this->camp_id = $A['camp_id'];
-        $this->setAmount($A['amount']);
-        $this->comment = $A['comment'];
-        $this->txn_id = $A['txn_id'];
+        $this->setDate($A->getString('dt'));
+        $this->camp_id = $A->getString('camp_id');
+        $this->setAmount($A->getFloat('amount'));
+        $this->comment = $A->getString('comment');
+        $this->txn_id = $A->getString('txn_id');
+        return $this;
     }
 
 
     /**
      * Delete a donation.
-     * Can be called as self::Delete($id).
      *
-     * @param  integer  $don_id Donation record ID
+     * @param   integer $don_id Donation record ID
+     * @return  boolean     True on success, False on error
      */
-    public static function Delete($don_id = 0)
+    public static function Delete(int $don_id) : bool
     {
         global $_TABLES;
 
-        DB_delete($_TABLES['don_donations'], 'don_id', (int)$don_id);
+        try {
+            Database::getInstance()->conn->delete(
+                $_TABLES['don_donations'],
+                array('don_id' => $don_id),
+                array(Database::INTEGER)
+            );
+            return true;
+        } catch (\Throwable $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            return false;
+        }
     }
 
 
@@ -136,17 +151,22 @@ class Donation
      * Delete multiple donation records at once.
      *
      * @param   array   $delitem    Array of donation record IDs
+     * @return  boolean     True on success, False on error
      */
-    public static function deleteMulti($delitem)
+    public static function deleteMulti(array $delitem) : bool
     {
         global $_TABLES;
 
-        $delitem = array_map('intval', $delitem);
-        $items = implode(',', $delitem);
-        if (!empty($items)) {
-            $sql = "DELETE FROM {$_TABLES['don_donations']}
-                WHERE don_id IN ($items)";
-            DB_query($sql);
+        try {
+            Database::getInstance()->conn->executeStatement(
+                $sql = "DELETE FROM {$_TABLES['don_donations']} WHERE don_id IN ?",
+                array($delitems),
+                array(Database::PARAM_INT_ARRAY)
+            );
+            return true;
+        } catch (\Throwable $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            return false;
         }
     }
 
@@ -177,9 +197,8 @@ class Donation
             'campaign_select' =>
                         Campaign::DropDown($this->camp_id),
             'txn_id'        => $this->txn_id,
-            'doc_url'       => LGLIB_getDocURL(
+            'doc_url'       => DON_getDocUrl(
                 'donationform.html',
-                Config::PI_NAME,
                 $_CONF['language']
             ),
         ) );
@@ -194,12 +213,13 @@ class Donation
      *
      * @param   array   $A  Array of values from $_POST (optional)
      */
-    public function Save($A='')
+    public function Save(?DataArray $A=NULL) : bool
     {
         global $_TABLES, $LANG_DON;
 
-        if (is_array($A))
+        if ($A) {
             $this->setVars($A);
+        }
 
         $dt = $this->dt;
         if (empty($dt))
@@ -214,33 +234,49 @@ class Donation
             $this->contrib_name = COM_getDisplayName($this->uid);
         }
 
-        $don_id = $this->don_id;
-        if ($this->isNew || $don_id == 0) {
-            $sql = "INSERT INTO {$_TABLES['don_donations']} (
-                    uid, contrib_name, dt, amount, comment, camp_id, txn_id
-                ) VALUES (
-                    '". $this->uid . "',
-                    '". $this->contrib_name . "',
-                    $dt,
-                    " . $this->amount . ",
-                    '" . $this->comment . "',
-                    '" . DB_escapeString($this->camp_id) . "',
-                    '" . DB_escapeString($this->txn_id) . "'
-                )";
-        } else {
-            $sql = "UPDATE {$_TABLES['don_donations']}
-            SET
-                camp_id='" . DB_escapeString($this->camp_id) . "',
-                uid='" . $this->uid . "',
-                contrib_name='" . $this->contrib_name . "',
-                comment='" . DB_escapeString($this->comment) . "',
-                dt=$dt,
-                txn_id = '" . DB_escapeString($this->txn_id) . "',
-                amount=" . $this->amount . "
-            WHERE don_id='" . $don_id . "'";
+
+        $values = array(
+            'camp_id' => $this->camp_id,
+            'uid' => $this->uid,
+            'contrib_name' => $this->contrib_name,
+            'comment' => $this->comment,
+            'dt' => $dt,
+            'txn_id' => $this->txn_id,
+            'amount' => $this->amount,
+        );
+        $types = array(
+            Database::STRING,
+            Database::INTEGER,
+            Database::STRING,
+            Database::STRING,
+            Database::STRING,
+            Database::STRING,
+            Database::STRING,
+        );
+
+        $db = Database::getInstance();
+        try {
+            if ($this->don_id == 0) {
+                $db->conn->insert(
+                    $_TABLES['don_donations'],
+                    $values,
+                    $types
+                );
+                $this->don_id = $db->conn->lastInsertId();
+            } else {
+                $types[] = Database::INTEGER;
+                $db->conn->update(
+                    $_TABLES['don_donations'],
+                    $values,
+                    array('don_id' => $this->don_id),
+                    $types
+                );
+            }
+            return true;
+        } catch (\Throwable $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            return false;
         }
-        //echo $sql;die;
-        DB_query($sql);
     }
 
 
@@ -250,26 +286,11 @@ class Donation
      * @param   string  $sel    Campaign ID to show as selected
      * @return  string          HTML for option statements
      */
-    public static function UserDropDown($sel=0)
+    public static function UserDropDown(int $sel=0) : string
     {
         global $_TABLES;
 
-        $retval = '';
-        $sel = (int)$sel;
-
-        // Retrieve the campaigns to which the current user has access
-        $sql = "SELECT uid, username
-                FROM {$_TABLES['users']} u ";
-        //echo $sql;
-        $result = DB_query($sql);
-
-        while ($row = DB_fetchArray($result, false)) {
-            $selected = $row['uid'] == $sel ? DON_SELECTED : '';
-            $retval .= "<option value=\"{$row['uid']} \"$selected\">" .
-                        htmlspecialchars($row['username']) .
-                        "</option>\n";
-        }
-        return $retval;
+        return COM_optionList($_TABLES['users'], 'uid,username', $sel, 1);
     }
 
 
@@ -279,17 +300,15 @@ class Donation
      * @param   string  $camp_id    Campaign ID
      * @return  float               Total received
      */
-    public static function totalReceived($camp_id)
+    public static function totalReceived(string $camp_id) : float
     {
         global $_TABLES;
 
-        $camp_id = DB_escapeString($camp_id);
-        $received = DB_getItem(
+        return (float)Database::getInstance()->getItem(
             $_TABLES['don_donations'],
             'SUM(amount)',
-            "camp_id = '$camp_id'"
+            array('camp_id' => $camp_id)
         );
-        return $received;
     }
 
 
@@ -568,16 +587,24 @@ class Donation
      *
      * @param   string  $old_id     Original campaign ID
      * @param   string  $new_id     New campaign ID
+     * @return  boolean     True on success, False on error
      */
-    public static function updateCampaignIDs($old_id, $new_id)
+    public static function updateCampaignIDs(string $old_id, string $new_id) : bool
     {
         global $_TABLES;
 
-        $sql = "UPDATE {$_TABLES['don_donations']}
-            SET camp_id = '" . DB_escapeString($new_id) . "'
-            WHERE camp_id = '" . DB_escapeString($old_id) . "'";
-        DB_query($sql);
+        try {
+            Database::getInstance()->conn->update(
+                $_TABLES['don_donations'],
+                array('camp_id' => $new_id),
+                array('camp_id' => $old_id),
+                array(Database::STRING, Database::STRING)
+            );
+            return true;
+        } catch (\Throwable $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            return false;
+        }
     }
 
 }
-

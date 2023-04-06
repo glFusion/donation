@@ -1,5 +1,10 @@
 # Donation plugin for glFusion
 
+## Version 0.2.0
+Release TBD
+- Fix getting item info for indexing.
+- DBAL implementation
+
 ## Version 0.1.2
 Release 2022-01-02
 - Fix error in setting new version (#1)

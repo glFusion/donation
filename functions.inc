@@ -17,15 +17,35 @@ if (!defined('GVERSION')) {
 
 spl_autoload_register(function ($class)
 {
-    if (strpos($class, 'Donation\\') === 0) {
-        $class = str_replace('Donation\\', '', $class);
-        $path = __DIR__ . '/classes/' . $class . '.class.php';
-        if (file_exists($path)) {
-            include $path;
-        }
+    // project-specific namespace prefix
+    $prefix = 'Donation\\';
+
+    // does the class use the namespace prefix?
+    $len = strlen($prefix);
+    if (strncmp($prefix, $class, $len) !== 0) {
+        // no, move to the next registered autoloader
+        return;
+    }
+
+    // base directory for the namespace prefix
+    $base_dir = __DIR__ . '/classes/';
+
+    // get the relative class name
+    $relative_class = substr($class, $len);
+
+    // replace the namespace prefix with the base directory, replace namespace
+    // separators with directory separators in the relative class name, append
+    // with .php
+    $file = $base_dir . str_replace('\\', '/', $relative_class) . '.class.php';
+
+    // if the file exists, require it
+    if (file_exists($file)) {
+        require $file;
     }
 });
 use Donation\Config;
+use glFusion\Database\Database;
+use glFusion\Log\Log;
 
 /** Additional config items and table definitions are added here */
 require_once __DIR__ . '/donation.php';
@@ -258,43 +278,22 @@ function plugin_geticon_donation()
  */
 function plugin_enablestatechange_donation($enabled)
 {
-    global $_TABLES, $_PLUGINS;
+    global $_TABLES;
 
     $enabled = $enabled ? 1 : 0;
 
-    // If trying to enable the plugin but lgLib is not available,
-    // take no action and return
-    if ($enabled && !in_array('lglib', $_PLUGINS)) {
-        // Re-disable the plugin
-        DB_change($_TABLES['plugins'], 'pi_enabled', 0, 'pi_name', 'donation');
-        $enabled = 0;
-    }
-
     if (!$enabled) {
         $blockfns = array('phpblock_donation_');
-        foreach ($blockfns as $blockfn) {
-            DB_query("UPDATE {$_TABLES['blocks']}
-                SET is_enabled=$enabled
-                WHERE phpblockfn LIKE '{$blockfn}%'");
+        try {
+            Database::getInstance()->conn->executeStatement(
+                "UPDATE {$_TABLES['blocks']} SET is_enabled = ?
+                WHERE phpblockfn LIKE ?",
+                array($enabled, 'phpblock_donation_%'),
+                array(Database::INTEGER, Database::STRING)
+            );
+        } catch (\Throwable $e) {
+            Log::write('system', Log::ERROR, __FUNCTION__ . ': ' . $e->getMessage());
         }
-    }
-}
-
-
-/**
- * Receives notification of anothe plugin's deletion.
- *
- * @param   mixed   $id     Item ID
- * @param   string  $type   Plugin Name
- */
-function plugin_itemdeleted_donation($id, $type)
-{
-    global $_TABLES;
-
-    // If the lgLib plugin is disabled or removed, disable thie plugin
-    if ($type == 'lglib' && $id == '*') {
-        plugin_enablestatechange_donation(false);
-        DB_change($_TABLES['plugins'], 'pi_enabled', 0, 'pi_name', 'donation');
     }
 }
 
@@ -310,7 +309,7 @@ function plugin_getconfigelementhelp_donation($option, $doclang='english')
 {
     global $_CONF;
 
-    $doc_url = LGLIB_getDocURL('config.html', Config::PI_NAME, $doclang);
+    $doc_url = DON_getDocUrl('config', $doclang);
     if (empty($doc_url))
         return false;
 
@@ -441,42 +440,6 @@ function plugin_profileblocksdisplay_donation($uid)
 
 
 /**
- * Create a plugin search object to search this plugin.
- *
- * @param   string  $query      User-supplied query string
- * @param   string  $datestart  Starting date for search
- * @param   string  $dateend    Ending date for search
- * @param   string  $topic      Topic selected for search
- * @param   string  $keyType    Type selected during search
- * @param   string  $author     Limit results to this author (not used)
- * @return  object              Search object to be processed by Search class
- */
-function plugin_dopluginsearch_donation(
-    $query, $datestart, $dateend, $topic, $keyType, $author
-)
-{
-    global $_CONF, $_TABLES, $LANG_DON;
-
-    if (empty($keyType)) {
-        $type = 'all';
-    }
-
-    // Encode query for inclusion in result's url
-    $query = DB_escapeString(trim($query));
-    $sql = Donation\Campaign::getSearchSql($query);
-    $search = new \SearchCriteria(Config::PI_NAME, $LANG_DON['donations']);
-    $columns = array(
-        'name',
-        'shortdscp',
-        'dscp',
-    );
-    list($sql, $ftsql) = $search->buildSearchSQL($keyType, $query, $columns, $sql);
-    $search->setSQL($sql);
-    return $search;
-}
-
-
-/**
  * Provides the getItemInfo function for campaigns.
  *
  * @param   string  $id         Product ID
@@ -513,31 +476,41 @@ function plugin_getiteminfo_donation($id, $what, $uid=0, $options=array())
             $fields[] = 'shortdscp';
             $fields[] = 'dscp';
             break;
+        case 'status':
+            $fields[] = 'enabled';
+            break;
         case 'date':
             $fields[] = 'start_ts';
             break;
         }
     }
+
     if (count($fields) == 0) {
         return $retval;
     }
     $fields = array_unique($fields);
     $fields = implode(',', $fields);
     $retval = array();
-    $sql = "SELECT $fields
-            FROM {$_TABLES['don_campaigns']} ";
+    $qb = Database::getInstance()->conn->createQueryBuilder();
+    $qb->select($fields)
+       ->from($_TABLES['don_campaigns']);
     if ($id == '*') {
-        if ( $buildingSearchIndex ) {
-            $where = ' WHERE beg_ts < UNIX_TIMESTAMP() AND end_ts > UNIX_TIMESTAMP() ';
-        } else {
-            $where = ' WHERE 1=1 ';
-        }
+        $qb->where('1=1');
     } else {
-        $where = " WHERE (camp_id = '" . DB_escapeString($id) . "')";
+        $qb->where('camp_id = :camp_id')
+           ->setParameter('camp_id', $id, Database::STRING);
     }
-    //echo $sql;die;
-    $res = DB_query($sql . $where);
-    while ($A = DB_fetchArray($res, false)) {
+    if ( $buildingSearchIndex ) {
+        $qb->andWhere('start_ts < UNIX_TIMESTAMP()')
+           ->andWhere('end_ts > UNIX_TIMESTAMP()');
+    }
+    try {
+        $stmt = $qb->execute();
+    } catch (\Throwable $e) {
+        Log::write('system', Log::ERROR, __FUNCTION__ . ': ' . $e->getMessage());
+        return NULL;
+    }
+    while ($A = $stmt->fetchAssociative()) {
         foreach ($properties as $p) {
             switch ($p) {
             case 'id':
@@ -555,8 +528,8 @@ function plugin_getiteminfo_donation($id, $what, $uid=0, $options=array())
                 $props[$p] = $A['start_ts'];
                 break;
             case 'searchidx':
-                $props[$p] = $A['name'] . ' ' . $A['shortdscp'] . ' ' .
-                        $A['dscp'];
+                $props[$p] = $A['name'] . ' ' . strip_tags($A['shortdscp']) . ' ' .
+                        strip_tags($A['dscp']);
                 break;
             case 'url':
                 $props[$p] = COM_buildUrl(
@@ -564,11 +537,35 @@ function plugin_getiteminfo_donation($id, $what, $uid=0, $options=array())
                     '/index.php?mode=detail&id=' . urlencode($A['camp_id'])
                 );
                 break;
+            case 'owner_id':
+            case 'author':
+                $props[$p] = 2;         // not supported, just use root
+                break;
+            case 'group_id':
+                $props[$p] = 2;         // all users
+                break;
+            case 'perms':
+                $props[$p] = array(
+                    'owner_id' => 2,    // admin
+                    'group_id' => 1,    // root group
+                    'perm_owner' => 3,
+                    'perm_group' => 3,
+                    'perm_members' => 2,
+                    'perm_anon' => 2,
+                );
+                break;
+            case 'status':
+                $props[$p] = (int)$A['enabled'];
+                break;
+            case 'is_event':
+                return array();     // not supported
+                break;
             default:
                 $props[$p] = isset($A[$p]) ? $A[$p] : NULL;
                 break;
             }
         }
+
         $mapped = array();
         foreach ($props as $key => $value) {
             if ($id == '*') {
@@ -601,6 +598,17 @@ function plugin_getiteminfo_donation($id, $what, $uid=0, $options=array())
 
 
 /**
+ * Run scheduled tasks.
+ * - Delete old carts that aren't assigned to any user.
+ * - Call PLG_itemDeleted to notify plugins that an item is not available
+ */
+function plugin_runScheduledTask_donation()
+{
+    Donation\Campaign::Expire();
+}
+
+
+/**
  * Support merging local accounts into remote accounts.
  *
  * @param   integer $origUID    Original (remote) user ID
@@ -610,11 +618,16 @@ function plugin_user_move_donation($origUID, $destUID)
 {
     global $_TABLES;
 
-    $origUID = (int)$origUID;
-    $destUID = (int)$destUID;
-
-    DB_query("UPDATE {$_TABLES['donation_donations']}
-            SET uid = $destUID WHERE uid = $origUID", 1);
+    try {
+        Database::getInstance()->conn->update(
+            $_TABLES['donation_donations'],
+            array('uid' => $destUID),
+            array('uid' => $origUID),
+            array(Database::INTEGER, Database::INTEGER)
+        );
+    } catch (\Throwable $e) {
+        Log::write('system', Log::ERROR, __FUNCTION__ . ': ' . $e->getMessage());
+    }
 }
 
 
@@ -633,3 +646,36 @@ function DON_shop_enabled()
     return $enabled;
 }
 
+
+/**
+ * Get the link to a documentation file.
+ * Returns the URL to the file, or to the directory if no file requested.
+ *
+ * @see     plugin_getconfigelementhelp_lglib()
+ * @param   string  $file       HTML file
+ * @param   string  $pi_name    Name of plugin, default "lglib"
+ * @param   string  $doclang    Documentation language, default English
+ * @return  s tring              URL to document directory or file
+ */
+function DON_getDocUrl(string $file='', string $doclang='english') : string
+{
+    global $_CONF;
+
+    $pi_name = Config::PI_NAME;
+    $doc_path = "{$_CONF['path_html']}$pi_name/docs/$doclang/";
+    $doc_url = '';
+
+    if ($file != '') {
+        if (!is_file($doc_path . $file)) {
+            $doclang = 'english';
+        }
+        $doc_url = "{$_CONF['site_url']}/$pi_name/docs/$doclang/$file";
+    } else {
+        // just getting the config document directory
+        if (!is_dir($doc_path)) {
+            $doclang = 'english';
+        }
+        $doc_url = "{$_CONF['site_url']}/$pi_name/docs/$doclang/";
+    }
+    return $doc_url;
+}

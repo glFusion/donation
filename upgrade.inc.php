@@ -3,9 +3,9 @@
  * Upgrade routines for the Donation plugin.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2009-2020 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2023 Lee Garner <lee@leegarner.com>
  * @package     donation
- * @version     v0.0.3
+ * @version     v0.2.0
  * @license     http://opensource.org/licenses/gpl-2.0.php 
  *              GNU Public License v2 or later
  * @filesource
@@ -13,6 +13,8 @@
 
 // Required to get the config values
 global $_CONF, $_UPGRADE_SQL;
+use glFusion\Database\Database;
+use glFusion\Log\Log;
 use Donation\Config;
 
 /** Include the table creation strings */
@@ -108,7 +110,7 @@ function donation_do_upgrade($dvlp=false)
  * @param   boolean $ignore_errors  True to ignore errors for dvlupdate
  * @return  boolean     True on success, False on failure
  */
-function donation_do_upgrade_sql($version='', $ignore_errors=false)
+function donation_do_upgrade_sql(string $version, bool $ignore_errors=false) : bool
 {
     global $_TABLES, $_UPGRADE_SQL;
 
@@ -118,13 +120,17 @@ function donation_do_upgrade_sql($version='', $ignore_errors=false)
     }
 
     // Execute SQL now to perform the upgrade
-    COM_ErrorLog("--Updating Donation SQL to version $version");
+    Log::write('system', Log::INFO, ("--Updating Donation SQL to version $version");
+    $db = Database::getInstance();
     foreach($_UPGRADE_SQL[$version] as $sql) {
-        COM_errorLOG("Donation Plugin $version update: Executing SQL => $sql");
-        DB_query($sql, '1');
-        if (DB_error()) {
-            COM_errorLog("SQL Error during Donation Plugin update",1);
-            if (!$ignore_errors) return false;
+        Log::write('system', Log::INFO, ("Donation Plugin $version update: Executing SQL => $sql");
+        try {
+            $db->conn->executeStatement($sql);
+        } catch (\Throwable $e) {
+            Log::write('system', Log::ERROR, __FUNCTION__ . ': ' . $e->getMessage());
+            if (!$ignore_errors) {
+                return false;
+            }
         }
     }
     return true;
@@ -139,27 +145,33 @@ function donation_do_upgrade_sql($version='', $ignore_errors=false)
  * @param   string  $ver    New version to set
  * @return  boolean         True on success, False on failure
  */
-function donation_do_set_version($ver)
+function donation_do_set_version(string $ver) : bool
 {
     global $_TABLES, $_PLUGIN_INFO;
 
-    // now update the current version number.
-    $sql = "UPDATE {$_TABLES['plugins']} SET
-            pi_version = '$ver',
-            pi_gl_version = '" . Config::get('gl_version') . "',
-            pi_homepage = '" . Config::get('url') . "'
-        WHERE pi_name = '" . Config::PI_NAME . "'";
-
-    $res = DB_query($sql, 1);
-    if (DB_error()) {
-        COM_errorLog("Error updating the " . Config::get('pi_display_name') . " Plugin version",1);
-        return false;
-    } else {
-        COM_errorLog(Config::get('pi_display_name') . " version set to $ver");
-        // Set in-memory config vars to avoid tripping PP_isMinVersion();
+    try {
+        Database::getInstance()->conn->update(
+            $_TABLES['plugins'],
+            array(
+                'pi_version' => $ver,
+                'pi_gl_version' => Config::get('gl_version'),
+                'pi_homepage' => Config::get('url'),
+            ),
+            array('pi_name' => Config::PI_NAME),
+            array(
+                Database::STRING,
+                Database::STRING,
+                Database::STRING,
+                Database::STRING,
+            )
+        );
+        Log:;write('system', Log::INFO, Config::get('pi_display_name') . " version set to $ver");
         Config::set('pi_version', $ver);
         $_PLUGIN_INFO[Config::PI_NAME]['pi_version'] = $ver;
         return true;
+    } catch (\Throwable $e) {
+        Log::write('system', Log::ERROR, __FUNCTION__ . ': ' . $e->getMessage());
+        return false;
     }
 }
 
@@ -171,12 +183,19 @@ function donation_do_set_version($ver)
  * @param   string  $col_name   Column name to check
  * @return  boolean     True if the column exists, False if not
  */
-function _DON_tableHasColumn($table, $col_name)
+function _DON_tableHasColumn(string $table, string $col_name) : bool
 {
     global $_TABLES;
 
-    $col_name = DB_escapeString($col_name);
-    $res = DB_query("SHOW COLUMNS FROM {$_TABLES[$table]} LIKE '$col_name'");
-    return DB_numRows($res) == 0 ? false : true;
+    try {
+        $stmt = Database::getInstance()->conn->executeQuery(
+            "SHOW COLUMNS FROM {$_TABLES[$table]} LIKE ?",
+            array($col_name),
+            array(Database::STRING),
+        );
+        return $stmt->rowCount();
+    } catch (\Throwable $e) {
+        Log::write('system', Log::ERROR, __FUNCTION__ . ': ' . $e->getMessage());
+        return true;    // true to avoid taking action in error
+    }
 }
-

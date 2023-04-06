@@ -3,9 +3,9 @@
  * Administrative entry point for the Donation plugin.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2009-2021 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2023 Lee Garner <lee@leegarner.com>
  * @package     donation
- * @version     v0.2.0
+ * @version     v0.3.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -14,6 +14,8 @@
 /** Import core glFusion functions */
 require_once('../../../lib-common.php');
 use Donation\Config;
+use Donation\Models\Request;
+
 
 /**
  * MAIN
@@ -41,57 +43,50 @@ $expected = array(
     // Views to display
     'campaigns', 'editcampaign', 'editdonation', 'donations', 'campaigns',
 );
-foreach($expected as $provided) {
-    if (isset($_POST[$provided])) {
-        $action = $provided;
-        $actionval = $_POST[$provided];
-        break;
-    } elseif (isset($_GET[$provided])) {
-        $action = $provided;
-        $actionval = $_GET[$provided];
-        break;
-    }
-}
+$Request = Request::getInstance();
+list($action, $actionval) = $Request->getAction($expected, 'campaigns');
 
 // Get the campaign and donation IDs, if any
-$camp_id = isset($_REQUEST['camp_id']) ?
-        COM_sanitizeID($_REQUEST['camp_id'], false) : '';
-$don_id = isset($_REQUEST['don_id']) ? (int)$_REQUEST['don_id'] : 0;
+$camp_id = $Request->getString('camp_id');
+$don_id = $Request->getInt('don_id');
 $content = '';      // initialize variable for page content
 
 switch ($action) {
 case 'savecampaign':
-    $old_camp_id = isset($_POST['old_camp_id']) ? $_POST['old_camp_id'] : '';
+    $old_camp_id = $Request->getString('old_camp_id');
     $C = Donation\Campaign::getInstance($old_camp_id);
-    $C->Save($_POST);
-    COM_refresh(Config::get('admin_url') . '/index.php?campaigns');
+    $C->Save($Request);
+    echo COM_refresh(Config::get('admin_url') . '/index.php?campaigns');
     break;
 
 case 'deletecampaign':
-    Donation\Campaign::Delete($camp_id);
-    COM_refresh(Config::get('admin_url') . '/index.php?campaigns');
+    $C = new Donation\Campaign($camp_id);
+    if ($C->getID() == $camp_id) {
+        $C->Delete();
+    }
+    echo COM_refresh(Config::get('admin_url') . '/index.php?campaigns');
     break;
 
 case 'savedonation':
     $D = new Donation\Donation($don_id);
-    $D->Save($_POST);
-    COM_refresh(Config::get('admin_url') . '/index.php?donations&camp_id=' . $camp_id);
+    $D->Save($Request);
+    echo COM_refresh(Config::get('admin_url') . '/index.php?donations&camp_id=' . $camp_id);
     break;
 
 case 'deletedonation':
     $D = new Donation\Donation($don_id);
-    // Set camp_id to stay on the donations page for the campaign
-    $camp_id = $D->getCampaiginID();
-    Donation\Donation::Delete($don_id);
-    COM_refresh(Config::get('admin_url') . '/index.php?donations');
+    $D->Delete();
+    echo COM_refresh(Config::get('admin_url') . '/index.php?donations');
     break;
 
 case 'delbutton_x':     // deleting multiple items
     if (isset($_GET['donations'])) {
-        Donation\Donation::deleteMulti($_POST['delitem']);
-        COM_refresh(Config::get('admin_url') . '/index.php?donations=x&camp_id=' . $_GET['camp_id']);
+        Donation\Donation::deleteMulti($Request->getArray('delitem'));
+        COM_refresh(
+            Config::get('admin_url') . '/index.php?donations=x&camp_id=' . $Request->getString('camp_id')
+        );
     } elseif (isset($_GET['campaigns'])) {
-        $type = 'campaigns';
+        $view = 'campaigns';
     }
     break;
 
@@ -129,5 +124,3 @@ $display .= Donation\Menu::Admin($view);
 $display .= $content;
 $display .= COM_siteFooter();
 echo $display;
-
-?>

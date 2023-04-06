@@ -5,12 +5,16 @@
  * @author      Lee Garner <lee@leegarner.com>
  * @copyright   Copyright (c) 2009-2022 Lee Garner <lee@leegarner.com>
  * @package     donation
- * @version     v0.1.2
+ * @version     v0.2.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
  */
 namespace Donation;
+use glFusion\Database\Database;
+use glFusion\Log\Log;
+use Donation\Models\DataArray;
+
 
 /**
  * Class to manage donation campaigns.
@@ -64,7 +68,7 @@ class Campaign
 
     /** Full text description.
      * @var string */
-    private $dscp;
+    private $dscp = '';
 
     /** Donation goal for the campaign.
      * @var float */
@@ -103,7 +107,7 @@ class Campaign
         global $_USER, $_TABLES;
 
         if (is_array($id)) {
-            $this->setVars($id);
+            $this->setVars(new DataArray($id));
             $this->isNew = 0;
         } else {
             $this->camp_id = COM_sanitizeID($id, false);
@@ -126,17 +130,24 @@ class Campaign
     {
         global $_TABLES;
 
-        $id = COM_sanitizeID($id, false);
+        try {
         $sql = "SELECT c.*, (
                 SELECT SUM(amount) FROM {$_TABLES['don_donations']} d
                 WHERE d.camp_id = c.camp_id
             ) as received
             FROM {$_TABLES['don_campaigns']} c
-            WHERE c.camp_id='$id'";
-        $res = DB_query($sql, 1);
-        $A = DB_fetchArray($res, false);
+            WHERE c.camp_id = ?";
+            $A = Database::getInstance()->conn->executeQuery(
+                $sql,
+                array($id),
+                array(Database::STRING)
+            )->fetchAssociative();
+        } catch (\Throwable $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . "; " . $e->getMessage());
+            $A = false;
+        }
         if (!empty($A)) {
-            $this->setVars($A);
+            $this->setVars(new DataArray($A));
             $this->isNew = false;
         } else {
             $this->setStart();
@@ -176,14 +187,18 @@ class Campaign
             WHERE c.enabled = 1
             AND c.end_ts > UNIX_TIMESTAMP()
             AND c.start_ts < UNIX_TIMESTAMP()";
-        $res = DB_query($sql);
-        if (!$res) {
-            return $retval;
+        try {
+            $stmt = Database::getInstance()->conn->executeQuery($sql);
+        } catch (\Throwable $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            $stmt = false;
         }
-        while ($A = DB_fetchArray($res, false)) {
-            // Check that the goal isn't reached
-            if (!$A['hardgoal'] || $A['received'] < $A['goal']) {
-                $retval[$A['camp_id']] = new self($A);
+        if ($stmt) {
+            while ($A = $stmt->fetchAssociative()) {
+                // Check that the goal isn't reached
+                if (!$A['hardgoal'] || $A['received'] < $A['goal']) {
+                    $retval[$A['camp_id']] = new self($A);
+                }
             }
         }
         return $retval;
@@ -212,14 +227,22 @@ class Campaign
             FROM {$_TABLES['don_donations']} d
             LEFT JOIN {$_TABLES['don_campaigns']} c
             ON d.camp_id = c.camp_id
-            WHERE d.uid = $uid
+            WHERE d.uid = ? 
             GROUP BY c.camp_id";
-        $res = DB_query($sql);
-        if (!$res) {
-            return $retval;
+        try {
+            $stmt = Database::getInstance()->conn->executeQuery(
+                $sql,
+                array($uid),
+                array(Database::INTEGER)
+            );
+        } catch (\Throwable $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            $stmt = false;
         }
-        while ($A = DB_fetchArray($res, false)) {
-            $retval[$A['camp_id']] = new self($A);
+        if ($stmt) {
+            while ($A = $stmt->fetchAssociative()) {
+                $retval[$A['camp_id']] = new self($A);
+            }
         }
         return $retval;
     }
@@ -253,28 +276,22 @@ class Campaign
      * @param   array   $A      Array of values
      * @param   boolean $fromDB True if reading from DB, false for a form
      */
-    public function setVars($A, $fromDB=true)
+    public function setVars(DataArray $A, bool $fromDB=true) : self
     {
-        global $_CONF;
-
-        if (!is_array($A)) {
-            return;
-        }
-
-        $this->camp_id = $A['camp_id'];
-        //$this->startdt = $A['startdt'];
-        //$this->enddt = $A['enddt'];
-        $this->name = $A['name'];
-        $this->shortdscp = $A['shortdscp'];
-        $this->dscp = $A['dscp'];
-        $this->enabled = isset($A['enabled']) ? (int)$A['enabled'] : 0;
-        $this->hardgoal = isset($A['hardgoal']) ? (int)$A['hardgoal'] : 0;
-        $this->blk_show_pct = isset($A['blk_show_pct']) ? (int)$A['blk_show_pct'] : 0;
-        $this->setGoal($A['goal']);
+        $this->camp_id = $A->getString('camp_id');
+        $this->name = $A->getString('name');
+        $this->shortdscp = $A->getString('shortdscp');
+        $this->dscp = $A->getString('dscp');
+        $this->enabled = $A->getInt('enabled');
+        $this->hardgoal = $A->getInt('hardgoal');
+        $this->blk_show_pct = $A->getInt('blk_show_pct');
+        $this->setGoal($A->getfloat('goal'));
         if (isset($A['received'])) {
-            $this->received = (float)$A['received'];
+            // This might not be provided, so don't override it if not.
+            $this->received = $A->getFloat('received');
         }
 
+        // Dates come in differntly whether read from the DB or submitted via form.
         if ($fromDB) {
             $this->setStart($A['start_ts']);
             $this->setEnd($A['end_ts']);
@@ -286,6 +303,7 @@ class Campaign
             $this->setStart($A['start_date'] . ' ' . $A['start_time']);
             $this->setEnd($A['end_date'] . ' ' . $A['end_time']);
         }
+        return $this;
     }
 
 
@@ -296,39 +314,53 @@ class Campaign
      * @param   string  $id         Campaign ID
      * @return  integer             New value, old value on error
      */
-    public static function toggleEnabled($oldval, $id='')
+    public static function toggleEnabled(int $oldval, ?string $id=NULL) : int
     {
         global $_TABLES;
 
         $newval = $oldval == 1 ? 0 : 1;
-        $id = DB_escapeString($id);
-        DB_change($_TABLES['don_campaigns'],
-                'enabled', $newval,
-                'camp_id', $id);
-        return DB_error() ? $oldval : $newval;
+        try {
+            Database::getInstance()->conn->update(
+                $_TABLES['don_campaigns'],
+                array('enabled' => $newval),
+                array('camp_id' => $id),
+                array(Database::INTEGER, Database::STRING)
+            );
+            if ($newval == 0) {
+                PLG_itemDeleted($id, 'donation');
+            } else {
+                PLG_itemSaved($id, 'donation');
+            }
+            Cache::clear();
+            return $newval;
+        } catch (\Throwable $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            return $oldval;
+        }
     }
 
 
     /**
-     * Delete a campaign.
-     * Can be called as Campaign::Delete($id).
+     * Delete this campaign.
      *
-     * @param   string  $id ID of campaign to delete, this object if empty
+     * @return  boolean     True on success, False on error
      */
-    public function Delete($id='')
+    public function Delete() : bool
     {
         global $_TABLES;
 
-        if ($id == '') {
-            if (is_object($this)) {
-                $id = $this->camp_id;
-            } else {
-                return;
-            }
-        }
-
         if (!self::isUsed($id)) {
-            DB_delete($_TABLES['don_campaigns'], 'camp_id', trim($id));
+            try {
+                Database::getInstance()->conn->delete(
+                    $_TABLES['don_campaigns'],
+                    array('camp_id' => $this->camp_id),
+                    array(Database::STRING)
+                );
+                PLG_itemDeleted($id, 'donation');
+                Cache::clear();
+           } catch (\Throwable $e) {
+                Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+           }
         }
     }
 
@@ -337,15 +369,19 @@ class Campaign
      * Determine if this campaign has any donations belonging to it.
      * Can also be called as self::isUsed($id).
      *
-     * @param   string  $id ID of campaign to check, this object if empty.
+     * @param   string  $id ID of campaign to check
      * @return  boolean     True if this has baners, False if unused
      */
-    public static function isUsed($id='')
+    public static function isUsed(string $id) : bool
     {
         global $_TABLES;
 
-        if (DB_count($_TABLES['don_donations'], 'camp_id',
-            DB_escapeString($id)) > 0) {
+        if (Database::getInstance()->getCount(
+            $_TABLES['don_donations'],
+            array('camp_id'),
+            array($id),
+            array(Database::STRING)
+        ) > 0) {
             return true;
         } else {
             return false;
@@ -425,9 +461,8 @@ class Campaign
             'chk_hardgoal'  => $this->getHardgoal() ? DON_CHECKED : '',
             'chk_blk_show_pct'  => $this->getBlkShowPct() ? DON_CHECKED : '',
             'goal'          => $this->goal,
-            'doc_url'       => LGLIB_getDocURL(
-                'campaignform.html',
-                Config::PI_NAME,
+            'doc_url'       => DON_getDocURL(
+                'campaignform',
                 $_CONF['language']
             ),
         ) );
@@ -439,16 +474,19 @@ class Campaign
     /**
      * Save this campaign.
      *
-     * @param   array   $A  Array of values from $_POST (optional)
+     * @param   DataArray   $A  Array of values from $_POST (optional)
+     * @return  boolean     True on success, False on error
      */
-    public function Save($A='')
+    public function Save(?DataArray $A=NULL) : bool
     {
         global $_TABLES, $LANG_DON;
 
-        if (is_array($A)) {
+        $db = Database::getInstance();
+
+        if ($A) {
             $this->setVars($A, false);
         }
-        $old_camp_id = $A['old_camp_id'];
+        $old_camp_id = $A->getString('old_camp_id', $this->camp_id);
         if ($this->camp_id == '') {
             $this->camp_id = COM_makeSid();
         }
@@ -457,47 +495,68 @@ class Campaign
         // for new records), check that the new ID isn't already in use.
         if (
             $old_camp_id != $this->camp_id &&
-            DB_count(
+            $db->getCount(
                 $_TABLES['don_campaigns'],
-                'camp_id',
-                $this->camp_id
+                array('camp_id'),
+                array($this->camp_id),
+                array(Database::STRING)
             ) > 0
         ) {
             return $LANG_DON['duplicate_camp_id'];
         }
 
         $update_don_ids = false;
-        if ($this->isNew) {
-            $sql1 = "INSERT INTO {$_TABLES['don_campaigns']} SET
-                    camp_id = '" . DB_escapeString($this->camp_id) . "',";
-            $sql3 = '';
-        } else {
-            $sql1 = "UPDATE {$_TABLES['don_campaigns']} SET";
-            if ($old_camp_id != $this->camp_id) {
-                $sql1 .= " camp_id = '" . DB_escapeString($this->camp_id) . "',";
-                $update_don_ids = true;
+        $values = array(
+            'name' => $this->name,
+            'shortdscp' => $this->shortdscp,
+            'dscp' => $this->dscp,
+            'start_ts' => $this->start->toUnix(),
+            'end_ts' => $this->end->toUnix(),
+            'goal' => $this->getGoal(),
+            'hardgoal' => $this->getHardgoal(),
+            'blk_show_pct' => $this->getBlkShowPct(),
+            'enabled' => $this->isEnabled(),
+        );
+        $types = array(
+            Database::STRING,
+            Database::STRING,
+            Database::STRING,
+            Database::INTEGER,
+            Database::INTEGER,
+            Database::STRING,
+            Database::STRING,
+            Database::INTEGER,
+            Database::INTEGER,
+            Database::STRING,       // camp_id
+        );
+        try {
+            if ($this->isNew) {
+                $values['camp_id'] = $this->camp_id;
+                $db->conn->insert(
+                    $_TABLES['don_campaigns'],
+                    $values,
+                    $types
+                );
+            } else {
+                $db->conn->update(
+                    $_TABLES['don_campaigns'],
+                    $values,
+                    array('camp_id' => $this->camp_id),
+                    $types
+                );
+                if ($old_camp_id != $this->camp_id) {
+                    $update_don_ids = true;
+                }
             }
-            $sql3 = "WHERE camp_id='" . DB_escapeString($old_camp_id) . "'";
+        } catch (\Throwable $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            return false;
         }
-        $sql = $sql1 .
-                " name = '" . DB_escapeString($this->name) . "',
-                shortdscp = '" . DB_escapeString($this->shortdscp) . "',
-                dscp = '" . DB_escapeString($this->dscp) . "',
-                start_ts = " . $this->start->toUnix() . ",
-                end_ts = " . $this->end->toUnix() . ",
-                goal = {$this->goal},
-                hardgoal = {$this->getHardgoal()},
-                blk_show_pct = {$this->getBlkShowPct()},
-                enabled = {$this->isEnabled()} " .
-                $sql3;
-        //echo $sql;die;
-        DB_query($sql);
-        if (!DB_error()) {
-            if ($update_don_ids) {
+        if ($update_don_ids) {
                 Donation::updateCampaignIDs($old_camp_id, $this->camp_id);
-            }
-            PLG_itemSaved($this->camp_id, Config::PI_NAME);
         }
+        PLG_itemSaved($this->camp_id, Config::PI_NAME);
+        return true;
     }
 
 
@@ -561,7 +620,7 @@ class Campaign
      * @param   integer $access Access level required
      * @return  string          HTML for option statements
      */
-    public static function DropDown($sel='', $access=3)
+    public static function DropDown($sel='', $access=3) : string
     {
         global $_TABLES;
 
@@ -570,19 +629,25 @@ class Campaign
         $access = (int)$access;
 
         // Retrieve the campaigns to which the current user has access
-        $sql = "SELECT c.camp_id, c.name
-                FROM {$_TABLES['don_campaigns']} c ";
+        try {
+            $stmt = Database::getInstance()->conn->executeQuery(
+                "SELECT c.camp_id, c.name
+                FROM {$_TABLES['don_campaigns']} c "
                 //COM_getPermSQL('AND', 0, $access, 'c') .
-        //echo $sql;
-        $result = DB_query($sql);
-
-        while ($row = DB_fetchArray($result)) {
-            $selected = $row['camp_id'] == $sel ? DON_SELECTED : '';
-            $retval .= "<option value=\"" .
+            );
+        } catch (\Throwable $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            $stmt = false;
+        }
+        if ($stmt) {
+            while ($row = $stmt->fetchAssociative()) {
+                $selected = $row['camp_id'] == $sel ? DON_SELECTED : '';
+                $retval .= "<option value=\"" .
                         htmlspecialchars($row['camp_id']) .
                         "\"$selected>" .
                         htmlspecialchars($row['name']) .
                         "</option>\n";
+            }
         }
         return $retval;
     }
@@ -714,13 +779,12 @@ class Campaign
     /**
      * Set the goal as a floating-point number.
      *
-     * @uses    self::fixFloat()
-     * @param   mixed   $val    Value to set
+     * @param   float   $val    Value to set
      * @return  object  $this
      */
-    private function setGoal($val)
+    private function setGoal(?float $val=NULL) : self
     {
-        $this->goal = self::fixFloat($val);
+        $this->goal = (float)$val;
         return $this;
     }
 
@@ -818,7 +882,7 @@ class Campaign
      *
      * @return  float       Goal amount
      */
-    public function getGoal()
+    public function getGoal() : float
     {
         return (float)$this->goal;
     }
@@ -1002,18 +1066,42 @@ class Campaign
 
 
     /**
-     * Sanitize a floating point number from a string.
-     *
-     * @param   string  $val    Value as entered
-     * @return  float       Sanitized floating-point value
+     * Disable expired campaigns and inform other plugins to delete them.
      */
-    private static function fixFloat($val)
+    public static function Expire() : void
     {
-        return filter_var(
-            $val,
-            FILTER_SANITIZE_NUMBER_FLOAT,
-            FILTER_FLAG_ALLOW_FRACTION
-        );
-    }
-}
+        global $_TABLES;
 
+        // Treat disabled and expired campaigns as "deleted" to get them out of
+        // search results, etc.
+        $db = Database::getInstance();
+        try {
+            $stmt = $db->conn->executeQuery(
+                "SELECT camp_id FROM {$_TABLES['don_campaigns']}
+                  WHERE enabled = 1 AND end_ts < UNIX_TIMESTAMP()"
+            );
+        } catch (\Throwable $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            $stmt = false;
+        }
+        if ($stmt) {
+            $ids = array();
+            while ($A = $stmt->fetchAssociative()) {
+                PLG_itemDeleted($A['camp_id'], 'donation');
+                $ids[] = $A['camp_id'];
+            }
+            try {
+                $db->conn->executeStatement(
+                    "UPDATE {$_TABLES['don_campaigns']}
+                    SET enabled = 0 WHERE camp_id IN ?",
+                    array($ids),
+                    array(Database::PARAM_STR_ARRAY)
+                );
+            } catch (\Throwable $e) {
+                Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            }
+            Cache::clear();
+        }
+    }
+
+}

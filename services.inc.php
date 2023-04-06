@@ -3,7 +3,7 @@
  * Shop integration functions for the Donation plugin.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2009-2021 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2023 Lee Garner <lee@leegarner.com>
  * @package     donation
  * @version     v0.2.0
  * @since       v0.0.2
@@ -11,6 +11,7 @@
  *              GNU Public License v2 or later
  * @filesource
  */
+use glFusion\Database\Database;
 use Donation\Config;
 
 /**
@@ -164,10 +165,10 @@ function service_handlePurchase_donation($args, &$output, &$svc_msg)
     if (is_numeric($ipn_data['uid'])) {
         $uid = (int)$ipn_data['uid'];
     } else {
-        $uid = (int)DB_getItem(
+        $uid = (int)Database::getInstance()->getItem(
             $_TABLES['users'],
             'uid',
-            "email = '{$ipn_data['payer_email']}'"
+            array('email' => $ipn_data['payer_email'])
         );
         if ($uid < 1) $uid = 1;     // set to anonymous if not found
     }
