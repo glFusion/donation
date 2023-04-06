@@ -249,28 +249,6 @@ class Campaign
 
 
     /**
-     * Get the search SQL.
-     *
-     * @param   string  $query      Query string
-     * @return  string      SQL query
-     */
-    public static function getSearchSql($query)
-    {
-        global $_TABLES;
-
-        $htmlquery = urlencode($query);
-        return "SELECT
-                camp_id, name as title, dscp as description,
-                start_ts as date,
-                CONCAT('/" . Config::PI_NAME . "/index.php?mode=detail&id=',camp_id,'&query=$htmlquery') as url
-            FROM {$_TABLES['don_campaigns']}
-            WHERE enabled = 1
-            AND start_ts < UNIX_TIMESTAMP()
-            AND end_ts > UNIX_TIMESTAMP()";
-    }
-
-
-    /**
      * Set all the variables in this object from values provided.
      *
      * @param   array   $A      Array of values
