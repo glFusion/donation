@@ -565,7 +565,7 @@ class Campaign
                 $vars['cmd'] = '_donations';
             }
             $status = PLG_callFunctionForOnePlugin(
-                'service_shop_genButton',
+                'service_genButton_shop',
                 array(
                     1 => $vars,
                     2 => &$output,
