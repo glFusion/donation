@@ -586,12 +586,13 @@ class Campaign
                 // Set the Shop command if configured.
                 $vars['cmd'] = '_donations';
             }
-            $status = LGLIB_invokeService(
-                'shop',
-                'genButton',
-                $vars,
-                $output,
-                $svc_msg
+            $status = PLG_callFunctionForOnePlugin(
+                'service_shop_genButton',
+                array(
+                    1 => $vars,
+                    2 => &$output,
+                    3 => &$svc_msg,
+                )
             );
             if ($status == PLG_RET_OK && is_array($output) && !empty($output)) {
                 $cnt = 0;       // count buttons supplied

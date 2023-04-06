@@ -21,32 +21,12 @@ if (!in_array('donation', $_PLUGINS)) {
     exit;
 }
 
-// Retrieve and sanitize input variables.  Typically _GET, but may be _POSTed.
 COM_setArgNames(array('mode', 'id', 'page', 'query'));
-
-// Get any message ID
-if (isset($_REQUEST['msg'])) {
-    $msg = COM_applyFilter($_REQUEST['msg']);
-} else {
-    $msg = '';
-}
-
-if (isset($_REQUEST['mode'])) {
-    $mode = COM_applyFilter($_REQUEST['mode']);
-} else {
-    $mode = COM_getArgument('mode');
-}
-if (isset($_REQUEST['id'])) {
-    $id = COM_sanitizeID($_REQUEST['id']);
-} else {
-    $id = COM_applyFilter(COM_getArgument('id'));
-}
-if (isset($_REQUEST['query'])) {
-    $query = $_REQUEST['query'];
-} else {
-    $query = COM_getArgument('query');
-}
-$page = COM_getArgument('page');
+$Request = Donation\Models\Request::getInstance();
+$mode = COM_applyFilter($Request->getString('mode', COM_getArgument('mode')));
+$id = COM_sanitizeID($Request->getString('id', COM_getArgument('id')));
+$query = $Request->getString('query', COM_getArgument('query'));
+$page = $Request->getInt('page', (int)COM_getArgument('page'));
 
 // Assume that the 'mode' is also (or only) the desired page to display
 if (empty($mode)) $id='';
@@ -120,8 +100,10 @@ default:
 }   // switch ($page)
 
 echo COM_siteHeader('menu', $pageTitle);
-if ($msg != '')
+$msg = $Request->getInt('msg');
+if ($msg > 0) {
     echo  COM_showMessage($msg, Donation\Config::PI_NAME);
+}
 echo $content;
 echo COM_siteFooter(true);
 
@@ -162,26 +144,15 @@ function DONATION_CampaignList()
             $pct_recvd = 100;
         }
 
-
-        $status = LGLIB_invokeService(
-            'shop', 'formatAmount',
+        $status = PLG_callFunctionForOnePlugin(
+            'service_formatAmount_shop',
             array(
-                'amount' => $received,
-            ),
-            $output,
-            $svc_msg
-        );
-        if ($status == PLG_RET_OK) {
-            $received = $output;
-        }
-
-        $status = LGLIB_invokeService(
-            'shop', 'formatAmount',
-            array(
-                'amount' => $goal,
-            ),
-            $output,
-            $svc_msg
+                1 => array(
+                    'amount' => $goal,
+                ),
+                2 => &$output,
+                3 => &$svc_msg,
+            )
         );
         if ($status == PLG_RET_OK) {
             $goal = $output;
@@ -206,4 +177,3 @@ function DONATION_CampaignList()
     $T->parse('output','camplist');
     return $T->finish($T->get_var('output'));
 }
-

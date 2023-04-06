@@ -5,7 +5,7 @@
  * @author      Lee Garner <lee@leegarner.com>
  * @copyright   Copyright (c) 2009-2022 Lee Garner <lee@leegarner.com>
  * @package     donation
- * @version     v0.1.2
+ * @version     v0.1.3
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -17,7 +17,7 @@ global $_TABLES;
 global $_DB_table_prefix;
 
 // Static configuration items
-Donation\Config::set('pi_version', '0.1.2');
+Donation\Config::set('pi_version', '0.1.3');
 Donation\Config::set('gl_version', '1.7.8');
 
 $DON_prefix = $_DB_table_prefix . Donation\Config::PI_NAME . '_';

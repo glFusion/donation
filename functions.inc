@@ -651,9 +651,7 @@ function DON_shop_enabled()
  * Get the link to a documentation file.
  * Returns the URL to the file, or to the directory if no file requested.
  *
- * @see     plugin_getconfigelementhelp_lglib()
  * @param   string  $file       HTML file
- * @param   string  $pi_name    Name of plugin, default "lglib"
  * @param   string  $doclang    Documentation language, default English
  * @return  s tring              URL to document directory or file
  */

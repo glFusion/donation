@@ -546,13 +546,16 @@ class Donation
             break;
 
         case 'txn_id':
-            $status = LGLIB_invokeService(
-                'shop', 'getUrl',
+            $status = PLG_callFunctionForOnePlugin((
+                'service_getUrl_shop',
                 array(
-                    'type'  => 'ipn',
-                    'id'    => $fieldvalue,
-                ),
-                $output, $svc_msg
+                    1 => array(
+                        'type'  => 'ipn',
+                        'id'    => $fieldvalue,
+                    ),
+                    2 => &$output,
+                    3 => %$svc_msg,
+                )
             );
             if ($status == PLG_RET_OK) {
                 $retval = COM_createLink($fieldvalue, $output);

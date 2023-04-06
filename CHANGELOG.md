@@ -3,7 +3,8 @@
 ## Version 0.2.0
 Release TBD
 - Fix getting item info for indexing.
-- DBAL implementation
+- DBAL implementation.
+- Remove dependency on lgLib plugin.
 
 ## Version 0.1.2
 Release 2022-01-02
