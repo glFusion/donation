@@ -546,7 +546,7 @@ class Donation
             break;
 
         case 'txn_id':
-            $status = PLG_callFunctionForOnePlugin((
+            $status = PLG_callFunctionForOnePlugin(
                 'service_getUrl_shop',
                 array(
                     1 => array(
@@ -554,7 +554,7 @@ class Donation
                         'id'    => $fieldvalue,
                     ),
                     2 => &$output,
-                    3 => %$svc_msg,
+                    3 => &$svc_msg,
                 )
             );
             if ($status == PLG_RET_OK) {
